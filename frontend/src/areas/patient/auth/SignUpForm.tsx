@@ -10,9 +10,9 @@ import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 import { toAsciiDigits } from "@/lib/digits";
 
-import { FormAlert, Heading, SegmentedChoice, SubmitBar, TextField } from "./fields";
+import { FormAlert, Heading, SegmentedChoice, SubmitBar, TextField } from "@/components/form/fields";
 import { pendingFrom, usePendingCode } from "./pending-code";
-import { useForgetOnLeave } from "./use-forget-on-leave";
+import { useForgetOnLeave } from "@/hooks/use-forget-on-leave";
 import { useRedirectWhenSignedIn } from "./use-redirect-when-signed-in";
 import { useSubmit } from "./use-submit";
 import { VerifyStep } from "./VerifyStep";

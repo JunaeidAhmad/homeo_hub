@@ -7,3 +7,4 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 python manage.py migrate --no-input
 python manage.py seed_locations # reference data; safe to repeat on every deploy
+python manage.py seed_roles     # staff roles and their permissions

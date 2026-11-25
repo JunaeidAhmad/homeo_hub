@@ -45,7 +45,7 @@ redis-cli ping >/dev/null || { echo "Redis is not answering on localhost:6379 (s
 [ -d backend/.venv ] || python3.12 -m venv backend/.venv
 backend/.venv/bin/pip install -q --upgrade pip
 backend/.venv/bin/pip install -q -r backend/requirements-dev.txt
-(cd backend && .venv/bin/python manage.py migrate && .venv/bin/python manage.py seed_locations)
+(cd backend && .venv/bin/python manage.py migrate && .venv/bin/python manage.py seed_locations && .venv/bin/python manage.py seed_roles)
 
 npm install
 (cd frontend && npm install)

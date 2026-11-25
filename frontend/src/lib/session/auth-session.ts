@@ -2,38 +2,53 @@ import { createApiClient, type ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 import type { Locale } from "@/i18n/config";
 
-export type Patient = components["schemas"]["Patient"];
+type ApiProblem = components["schemas"]["Error"];
 export type SignedInSession = components["schemas"]["Session"];
 
 /** How requests reach the API; tests swap in a pretend network. */
 export type Transport = { baseUrl: string; fetch: (request: Request) => Promise<Response> };
 
-export type SessionState =
-  | { status: "loading"; patient: null }
-  | { status: "signedOut"; patient: null }
-  | { status: "signedIn"; patient: Patient }
+export type SessionState<Account> =
+  | { status: "loading"; account: null }
+  | { status: "signedOut"; account: null }
+  | { status: "signedIn"; account: Account }
   /** The API could not be asked. `hasSession`: we hold a token but not the account. */
-  | { status: "unavailable"; patient: null; hasSession: boolean };
+  | { status: "unavailable"; account: null; hasSession: boolean };
+
+/** What differs between kinds of user: their endpoints. */
+export type SessionKind<Account> = {
+  /** Name of the lock that makes this browser's tabs refresh one at a time. */
+  lock: string;
+  refresh: (api: ApiClient) => Promise<{
+    data?: SignedInSession;
+    error?: ApiProblem;
+    response: Response;
+  }>;
+  logout: (api: ApiClient) => Promise<{ response: Response }>;
+  loadAccount: (api: ApiClient) => Promise<{ data?: Account; response: Response }>;
+};
+
+/** Cookie endpoints require this header (a page on another site cannot send it). */
+export const WEB_CLIENT = { params: { header: { "X-Client": "web" as const } } };
 
 type Refreshed = "ok" | "ended" | "unavailable";
 
-const LOADING: SessionState = { status: "loading", patient: null };
-const SIGNED_OUT: SessionState = { status: "signedOut", patient: null };
+const LOADING = { status: "loading", account: null } as const;
+const SIGNED_OUT = { status: "signedOut", account: null } as const;
 /** Refresh this long before the access token actually expires. */
 const EARLY_MS = 30_000;
-const CLIENT = { params: { header: { "X-Client": "web" as const } } };
 
 /**
- * The patient's sign-in on this browser. The access token is kept only in memory; the
+ * One person's sign-in on this browser. The access token is kept only in memory; the
  * refresh token is an httpOnly cookie, which is how a reload stays signed in.
  */
-export class PatientSession {
+export class AuthSession<Account> {
   /** For calls made before signing in (sign-up, codes, password reset). */
   readonly publicApi: ApiClient;
   /** Adds the access token and renews it when needed. */
   readonly api: ApiClient;
 
-  private state: SessionState = LOADING;
+  private state: SessionState<Account> = LOADING;
   private token: { value: string; renewAt: number } | null = null;
   private refreshing: Promise<Refreshed> | null = null;
   private started = false;
@@ -43,6 +58,7 @@ export class PatientSession {
   private readonly listeners = new Set<() => void>();
 
   constructor(
+    private readonly kind: SessionKind<Account>,
     language: Locale,
     private readonly transport: Transport,
   ) {
@@ -63,7 +79,7 @@ export class PatientSession {
 
   getState = () => this.state;
 
-  getServerState = () => LOADING;
+  getServerState = (): SessionState<Account> => LOADING;
 
   /** Pick up an existing session (once per page load). */
   async start(): Promise<void> {
@@ -72,9 +88,9 @@ export class PatientSession {
     const epoch = this.epoch;
     const outcome = await this.refresh();
     if (epoch !== this.epoch) return; // signed in or out while we were asking
-    if (outcome === "ok") await this.loadPatient();
+    if (outcome === "ok") await this.loadAccount();
     else if (outcome === "ended") this.set(SIGNED_OUT);
-    else this.set({ status: "unavailable", patient: null, hasSession: false });
+    else this.set({ status: "unavailable", account: null, hasSession: false });
   }
 
   /** Ask again after the API could not be reached. */
@@ -88,7 +104,7 @@ export class PatientSession {
   async complete(session: SignedInSession): Promise<void> {
     this.epoch += 1;
     this.keep(session);
-    await this.loadPatient();
+    await this.loadAccount();
   }
 
   /** False if the API could not be told, in which case we are still signed in. */
@@ -97,7 +113,7 @@ export class PatientSession {
     try {
       await this.refreshing; // one already on its way would set the cookie again
       return await this.locked(async () => {
-        const { response } = await this.publicApi.POST("/api/v1/auth/logout/", CLIENT);
+        const { response } = await this.kind.logout(this.publicApi);
         if (response.ok) this.end();
         return response.ok;
       });
@@ -108,7 +124,7 @@ export class PatientSession {
     }
   }
 
-  private set(state: SessionState) {
+  private set(state: SessionState<Account>) {
     this.state = state;
     this.listeners.forEach((listener) => listener());
   }
@@ -126,12 +142,12 @@ export class PatientSession {
     };
   }
 
-  private async loadPatient() {
+  private async loadAccount() {
     const unknown = () =>
-      this.set({ status: "unavailable", patient: null, hasSession: this.token !== null });
+      this.set({ status: "unavailable", account: null, hasSession: this.token !== null });
     try {
-      const { data, response } = await this.api.GET("/api/v1/me/");
-      if (data) this.set({ status: "signedIn", patient: data });
+      const { data, response } = await this.kind.loadAccount(this.api);
+      if (data) this.set({ status: "signedIn", account: data });
       else if (response.status === 401) this.end();
       else unknown();
     } catch {
@@ -150,12 +166,12 @@ export class PatientSession {
 
   private locked<T>(work: () => Promise<T>): Promise<T> {
     const locks = typeof navigator === "undefined" ? undefined : navigator.locks;
-    return locks ? (locks.request("hh-patient-session", work) as Promise<T>) : work();
+    return locks ? (locks.request(this.kind.lock, work) as Promise<T>) : work();
   }
 
   private async requestRefresh(mayRetry: boolean): Promise<Refreshed> {
     try {
-      const { data, error, response } = await this.publicApi.POST("/api/v1/auth/refresh/", CLIENT);
+      const { data, error, response } = await this.kind.refresh(this.publicApi);
       if (data) {
         this.keep(data);
         return "ok";

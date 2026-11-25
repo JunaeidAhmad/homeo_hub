@@ -37,13 +37,13 @@ def test_ending_a_session_during_a_refresh_leaves_no_live_token(monkeypatch, loc
     mid_refresh, carry_on = Event(), Event()
     create_link = tokens._new_link
 
-    def paused_link(*args):
+    def paused_link(*args, **kwargs):
         mid_refresh.set()  # the old token is marked used; the new one does not exist yet
         carry_on.wait(5)
-        return create_link(*args)
+        return create_link(*args, **kwargs)
 
     monkeypatch.setattr(tokens, "_new_link", paused_link)
-    refresh = in_thread(lambda: tokens.rotate(session.refresh_token))
+    refresh = in_thread(lambda: tokens.rotate(session.refresh_token, "patient"))
     assert mid_refresh.wait(5)
 
     if how == "sign out":

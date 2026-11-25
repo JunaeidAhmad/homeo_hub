@@ -8,7 +8,7 @@ import hashlib
 import secrets
 import uuid
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import jwt
 from django.conf import settings
@@ -21,8 +21,10 @@ from .models import RefreshToken
 from .principals import load_principal
 
 ACCESS_LIFETIME = timedelta(minutes=15)
-# Unused sessions end after this long; each refresh starts the clock again.
-REFRESH_LIFETIME = {"patient": timedelta(days=30)}
+REFRESH_LIFETIME = {"patient": timedelta(days=30), "staff": timedelta(hours=12)}
+# For these, the lifetime runs from sign-in and refreshing never extends it. For the
+# others each refresh starts the clock again.
+ENDS_AFTER_SIGN_IN = {"staff"}
 # Two tabs can present the same token at nearly the same moment.
 CONCURRENT_USE_GRACE = timedelta(seconds=10)
 ALGORITHM = "HS256"
@@ -45,6 +47,7 @@ class Session:
     user_type: str
     access_token: str
     refresh_token: str
+    refresh_expires_at: datetime
 
     @property
     def expires_in(self) -> int:
@@ -52,22 +55,25 @@ class Session:
 
     @property
     def refresh_max_age(self) -> int:
-        return int(REFRESH_LIFETIME[self.user_type].total_seconds())
+        return max(0, round((self.refresh_expires_at - timezone.now()).total_seconds()))
 
 
 def _digest(raw: str) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
-def _new_link(family: uuid.UUID, user_type: str, subject_id: str) -> Session:
+def _new_link(
+    family: uuid.UUID, user_type: str, subject_id: str, expires_at: datetime | None = None
+) -> Session:
     now = timezone.now()
+    expires_at = expires_at or now + REFRESH_LIFETIME[user_type]
     raw = secrets.token_urlsafe(32)
     RefreshToken.objects.create(
         family=family,
         user_type=user_type,
         subject_id=subject_id,
         token_hash=_digest(raw),
-        expires_at=now + REFRESH_LIFETIME[user_type],
+        expires_at=expires_at,
     )
     access = jwt.encode(
         {
@@ -81,7 +87,12 @@ def _new_link(family: uuid.UUID, user_type: str, subject_id: str) -> Session:
         settings.SECRET_KEY,
         algorithm=ALGORITHM,
     )
-    return Session(user_type=user_type, access_token=access, refresh_token=raw)
+    return Session(
+        user_type=user_type,
+        access_token=access,
+        refresh_token=raw,
+        refresh_expires_at=expires_at,
+    )
 
 
 def _lock_sessions_of(user_type: str, subject_id: str) -> None:
@@ -99,8 +110,8 @@ def open_session(user_type: str, subject_id: str) -> Session:
     return _new_link(uuid.uuid4(), user_type, subject_id)
 
 
-def rotate(raw: str) -> Session:
-    """Exchange a refresh token for a new session link."""
+def rotate(raw: str, user_type: str) -> Session:
+    """Exchange a ``user_type`` refresh token for a new session link."""
     error: ApiError | None = None
     session: Session | None = None
     with transaction.atomic():
@@ -110,7 +121,7 @@ def rotate(raw: str) -> Session:
             _lock_sessions_of(found.user_type, found.subject_id)
             link = RefreshToken.objects.select_for_update().get(pk=found.pk)
         now = timezone.now()
-        if link is None or link.revoked_at or link.expires_at <= now:
+        if link is None or link.user_type != user_type or link.revoked_at or link.expires_at <= now:
             error = SessionExpired()
         elif link.rotated_at and now - link.rotated_at <= CONCURRENT_USE_GRACE:
             error = RefreshInProgress()
@@ -120,7 +131,12 @@ def rotate(raw: str) -> Session:
         else:
             link.rotated_at = now
             link.save(update_fields=["rotated_at"])
-            session = _new_link(link.family, link.user_type, link.subject_id)
+            session = _new_link(
+                link.family,
+                link.user_type,
+                link.subject_id,
+                expires_at=link.expires_at if link.user_type in ENDS_AFTER_SIGN_IN else None,
+            )
     if error:
         raise error  # after the transaction, so a revocation is kept
     assert session is not None

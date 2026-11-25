@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.locations",
     "apps.accounts",
     "apps.patients",
+    "apps.staff",
 ]
 
 MIDDLEWARE = [
@@ -117,7 +118,7 @@ PASSWORD_HASHERS = [
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-        "OPTIONS": {"user_attributes": ["full_name", "phone"]},
+        "OPTIONS": {"user_attributes": ["full_name", "phone", "username", "first_name"]},
     },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
@@ -154,6 +155,7 @@ REST_FRAMEWORK = {
         "public_read": env.str("THROTTLE_PUBLIC_READ", default="300/min"),
         "login_phone": "5/min",
         "login_ip": "30/min",
+        "login_username": "5/min",
         "otp_ip": "20/hour",
     },
     # How many reverse proxies sit in front of the API: only the addresses they add to
@@ -169,7 +171,10 @@ REST_FRAMEWORK = {
 
 # --- Accounts ----------------------------------------------------------------
 # How to find a signed-in person of each user type (see apps/accounts/principals.py).
-PRINCIPAL_LOADERS = {"patient": "apps.patients.services.load_principal"}
+PRINCIPAL_LOADERS = {
+    "patient": "apps.patients.services.load_principal",
+    "staff": "apps.staff.services.load_principal",
+}
 # Class that sends text messages. Only development uses the console one (it logs codes).
 SMS_PROVIDER = env.str("SMS_PROVIDER", default="") or "apps.accounts.sms.UnconfiguredSmsProvider"
 # A cost ceiling across all numbers, whatever the per-number limits allow.
@@ -185,7 +190,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
-    "ENUM_NAME_OVERRIDES": {"CheckResultEnum": "apps.health.serializers.CHECK_RESULT"},
+    "ENUM_NAME_OVERRIDES": {
+        "CheckResultEnum": "apps.health.serializers.CHECK_RESULT",
+        "RoleEnum": "apps.staff.serializers.ROLE_CHOICES",
+        "PermissionEnum": "apps.staff.serializers.PERMISSION_CHOICES",
+    },
 }
 
 LOGGING = {

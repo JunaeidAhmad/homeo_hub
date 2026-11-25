@@ -7,7 +7,7 @@ import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
 import { CodeField, isCompleteCode } from "./CodeField";
-import { FormAlert, Heading, SubmitBar } from "./fields";
+import { FormAlert, Heading, SubmitBar } from "@/components/form/fields";
 import type { PendingCode } from "./pending-code";
 import { ResendCode } from "./ResendCode";
 import { SentNotice } from "./SentNotice";

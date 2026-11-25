@@ -82,6 +82,23 @@ CI (`api-client` workflow) fails if the committed client is out of date.
 - Patients have their own table (`apps/patients`), separate from staff users. Gate patient actions with
   `IsPatient` or `IsVerifiedPatient`. Errors are `{"error": {"code", "message", "details", "request_id"}}`.
 
+## Staff accounts and roles
+
+Staff sign in at `/admin` with a username and password. Create the first super admin from the API's machine
+(it asks for the password); prefix with `USE_NEON=true` to create it in Neon:
+
+```bash
+cd backend && .venv/bin/python manage.py create_staff yourname --name "Your Name"
+```
+
+- Roles are Django groups; what each may do is the table in `backend/apps/staff/roles.py`.
+  `manage.py seed_roles` applies it (setup and every deploy run it). A super admin creates staff, changes
+  roles and deactivates accounts at `/admin/staff`.
+- Every view under `/api/v1/admin/` extends `AdminView` and declares `required_permissions` per method; anything
+  undeclared is refused. The admin menu hides sections from roles without them, but the API is what enforces it.
+- A staff session ends 12 hours after sign-in. Staff and patients have separate cookies. Two-factor sign-in is
+  ticket 22.
+
 ## Lists and keyword search
 
 Every list endpoint follows one convention (`backend/common/search.py`, `common/pagination.py`):

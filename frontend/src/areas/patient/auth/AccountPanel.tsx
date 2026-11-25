@@ -8,7 +8,7 @@ import { numberFormat } from "@/i18n/format";
 import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
-import { FormAlert } from "./fields";
+import { FormAlert } from "@/components/form/fields";
 
 const PRIMARY =
   "flex min-h-[54px] items-center justify-center rounded-control bg-primary px-5 text-[17px] font-bold text-surface";

@@ -22,10 +22,13 @@ const MENU_ICON = "M4 6h16M4 12h16M4 18h16";
 export function SideNavShell({
   areaName,
   items,
+  footer,
   children,
 }: {
   areaName: string;
   items: SideNavItem[];
+  /** Shown under the navigation, e.g. who is signed in. */
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -95,6 +98,7 @@ export function SideNavShell({
               );
             })}
           </ul>
+          {footer}
         </nav>
 
         <div className="hidden border-t border-line p-4 desktop:block">

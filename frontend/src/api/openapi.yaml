@@ -4,10 +4,260 @@ info:
   version: 1.0.0
   description: HomeoHub REST API (v1).
 paths:
+  /api/v1/admin/me/:
+    get:
+      operationId: admin_me
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminMe'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/roles/:
+    get:
+      operationId: admin_roles
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/staff/:
+    get:
+      operationId: admin_staff_list
+      description: Staff accounts, searchable by name or username.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStaffList'
+          description: ''
+    post:
+      operationId: admin_staff_create
+      description: Staff accounts, searchable by name or username.
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffCreateRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/staff/{id}/:
+    get:
+      operationId: admin_staff_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: admin_staff_update
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffUpdateRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Staff'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/auth/logout/:
     post:
       operationId: auth_logout
-      description: Base for endpoints used before signing in.
+      description: Acts on one kind of user's refresh cookie.
       parameters:
       - in: header
         name: X-Client
@@ -242,7 +492,96 @@ paths:
   /api/v1/auth/refresh/:
     post:
       operationId: auth_refresh
+      description: Acts on one kind of user's refresh cookie.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/staff/login/:
+    post:
+      operationId: auth_staff_login
       description: Base for endpoints used before signing in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffLogInRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/staff/logout/:
+    post:
+      operationId: auth_staff_logout
+      description: Acts on one kind of user's refresh cookie.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/staff/refresh/:
+    post:
+      operationId: auth_staff_refresh
+      description: Acts on one kind of user's refresh cookie.
       parameters:
       - in: header
         name: X-Client
@@ -369,6 +708,50 @@ paths:
           description: ''
 components:
   schemas:
+    AdminMe:
+      type: object
+      description: The signed-in staff member, with what they are allowed to do.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        full_name:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionEnum'
+          readOnly: true
+      required:
+      - full_name
+      - id
+      - is_active
+      - last_login
+      - permissions
+      - roles
+      - username
     CheckResultEnum:
       enum:
       - ok
@@ -498,6 +881,43 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Location'
+    PaginatedStaffList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Staff'
+    PatchedStaffUpdateRequest:
+      type: object
+      description: Send only what changes.
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
     Patient:
       type: object
       description: The signed-in patient's own account.
@@ -508,7 +928,7 @@ components:
           readOnly: true
         user_type:
           allOf:
-          - $ref: '#/components/schemas/UserTypeEnum'
+          - $ref: '#/components/schemas/PatientUserTypeEnum'
           readOnly: true
         phone:
           type: string
@@ -549,6 +969,41 @@ components:
       - phone_verified
       - preferred_language
       - user_type
+    PatientUserTypeEnum:
+      enum:
+      - patient
+      type: string
+      description: '* `patient` - patient'
+    PermissionEnum:
+      enum:
+      - manage_staff
+      - view_doctors
+      - manage_doctors
+      - view_cases
+      - assign_cases
+      - manage_remedies
+      - manage_illnesses
+      - view_patients
+      - view_orders
+      - manage_orders
+      - view_payments
+      - manage_payments
+      - manage_own_shop
+      type: string
+      description: |-
+        * `manage_staff` - manage_staff
+        * `view_doctors` - view_doctors
+        * `manage_doctors` - manage_doctors
+        * `view_cases` - view_cases
+        * `assign_cases` - assign_cases
+        * `manage_remedies` - manage_remedies
+        * `manage_illnesses` - manage_illnesses
+        * `view_patients` - view_patients
+        * `view_orders` - view_orders
+        * `manage_orders` - manage_orders
+        * `view_payments` - view_payments
+        * `manage_payments` - manage_payments
+        * `manage_own_shop` - manage_own_shop
     PreferredLanguageEnum:
       enum:
       - en
@@ -612,6 +1067,42 @@ components:
       - code
       - new_password
       - verification_id
+    Role:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/RoleEnum'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionEnum'
+      required:
+      - name
+      - permissions
+    RoleEnum:
+      enum:
+      - super_admin
+      - admin
+      - doctor_manager
+      - case_manager
+      - remedy_manager
+      - illness_manager
+      - fulfilment_manager
+      - finance
+      - support
+      - shop_owner
+      type: string
+      description: |-
+        * `super_admin` - super_admin
+        * `admin` - admin
+        * `doctor_manager` - doctor_manager
+        * `case_manager` - case_manager
+        * `remedy_manager` - remedy_manager
+        * `illness_manager` - illness_manager
+        * `fulfilment_manager` - fulfilment_manager
+        * `finance` - finance
+        * `support` - support
+        * `shop_owner` - shop_owner
     Session:
       type: object
       description: Signed in. Keep the access token in memory; the refresh token is
@@ -622,11 +1113,19 @@ components:
         expires_in:
           type: integer
         user_type:
-          $ref: '#/components/schemas/UserTypeEnum'
+          $ref: '#/components/schemas/SessionUserTypeEnum'
       required:
       - access_token
       - expires_in
       - user_type
+    SessionUserTypeEnum:
+      enum:
+      - patient
+      - staff
+      type: string
+      description: |-
+        * `patient` - patient
+        * `staff` - staff
     SignUpRequest:
       type: object
       properties:
@@ -659,11 +1158,84 @@ components:
       - location_id
       - password
       - phone
-    UserTypeEnum:
-      enum:
-      - patient
-      type: string
-      description: '* `patient` - patient'
+    Staff:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        full_name:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - full_name
+      - id
+      - is_active
+      - last_login
+      - roles
+      - username
+    StaffCreateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+          pattern: ^[A-Za-z0-9._-]{3,30}$
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleEnum'
+      required:
+      - full_name
+      - password
+      - roles
+      - username
+    StaffLogInRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - username
     Verification:
       type: object
       description: A code has been requested; send it back with ``verification_id``.

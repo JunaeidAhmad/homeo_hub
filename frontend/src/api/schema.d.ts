@@ -4,6 +4,96 @@
  */
 
 export interface paths {
+    "/api/v1/admin/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/roles/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_roles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Staff accounts, searchable by name or username. */
+        get: operations["admin_staff_list"];
+        put?: never;
+        /** @description Staff accounts, searchable by name or username. */
+        post: operations["admin_staff_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/staff/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_staff_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        patch: operations["admin_staff_update"];
+        trace?: never;
+    };
     "/api/v1/auth/logout/": {
         parameters: {
             query?: never;
@@ -13,7 +103,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Base for endpoints used before signing in. */
+        /** @description Acts on one kind of user's refresh cookie. */
         post: operations["auth_logout"];
         delete?: never;
         options?: never;
@@ -132,8 +222,59 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Base for endpoints used before signing in. */
+        /** @description Acts on one kind of user's refresh cookie. */
         post: operations["auth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/staff/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_staff_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/staff/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Acts on one kind of user's refresh cookie. */
+        post: operations["auth_staff_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/staff/refresh/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Acts on one kind of user's refresh cookie. */
+        post: operations["auth_staff_refresh"];
         delete?: never;
         options?: never;
         head?: never;
@@ -211,6 +352,22 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description The signed-in staff member, with what they are allowed to do. */
+        AdminMe: {
+            readonly id: number;
+            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
+            readonly username: string;
+            readonly full_name: string;
+            /**
+             * Active
+             * @description Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+             */
+            readonly is_active: boolean;
+            readonly roles: components["schemas"]["RoleEnum"][];
+            /** Format: date-time */
+            readonly last_login: string | null;
+            readonly permissions: components["schemas"]["PermissionEnum"][];
+        };
         /**
          * @description * `ok` - ok
          *     * `error` - error
@@ -276,11 +433,32 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Location"][];
         };
+        PaginatedStaffList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Staff"][];
+        };
+        /** @description Send only what changes. */
+        PatchedStaffUpdateRequest: {
+            full_name?: string;
+            roles?: components["schemas"]["RoleEnum"][];
+            is_active?: boolean;
+        };
         /** @description The signed-in patient's own account. */
         Patient: {
             /** Format: uuid */
             readonly id: string;
-            readonly user_type: components["schemas"]["UserTypeEnum"];
+            readonly user_type: components["schemas"]["PatientUserTypeEnum"];
             readonly phone: string;
             readonly phone_verified: boolean;
             readonly full_name: string;
@@ -291,6 +469,28 @@ export interface components {
             readonly location: components["schemas"]["Location"];
             readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
         };
+        /**
+         * @description * `patient` - patient
+         * @enum {string}
+         */
+        PatientUserTypeEnum: "patient";
+        /**
+         * @description * `manage_staff` - manage_staff
+         *     * `view_doctors` - view_doctors
+         *     * `manage_doctors` - manage_doctors
+         *     * `view_cases` - view_cases
+         *     * `assign_cases` - assign_cases
+         *     * `manage_remedies` - manage_remedies
+         *     * `manage_illnesses` - manage_illnesses
+         *     * `view_patients` - view_patients
+         *     * `view_orders` - view_orders
+         *     * `manage_orders` - manage_orders
+         *     * `view_payments` - view_payments
+         *     * `manage_payments` - manage_payments
+         *     * `manage_own_shop` - manage_own_shop
+         * @enum {string}
+         */
+        PermissionEnum: "manage_staff" | "view_doctors" | "manage_doctors" | "view_cases" | "assign_cases" | "manage_remedies" | "manage_illnesses" | "view_patients" | "view_orders" | "manage_orders" | "view_payments" | "manage_payments" | "manage_own_shop";
         /**
          * @description * `en` - English
          *     * `bn` - Bangla
@@ -321,12 +521,36 @@ export interface components {
             code: string;
             new_password: string;
         };
+        Role: {
+            name: components["schemas"]["RoleEnum"];
+            permissions: components["schemas"]["PermissionEnum"][];
+        };
+        /**
+         * @description * `super_admin` - super_admin
+         *     * `admin` - admin
+         *     * `doctor_manager` - doctor_manager
+         *     * `case_manager` - case_manager
+         *     * `remedy_manager` - remedy_manager
+         *     * `illness_manager` - illness_manager
+         *     * `fulfilment_manager` - fulfilment_manager
+         *     * `finance` - finance
+         *     * `support` - support
+         *     * `shop_owner` - shop_owner
+         * @enum {string}
+         */
+        RoleEnum: "super_admin" | "admin" | "doctor_manager" | "case_manager" | "remedy_manager" | "illness_manager" | "fulfilment_manager" | "finance" | "support" | "shop_owner";
         /** @description Signed in. Keep the access token in memory; the refresh token is set as a cookie. */
         Session: {
             access_token: string;
             expires_in: number;
-            user_type: components["schemas"]["UserTypeEnum"];
+            user_type: components["schemas"]["SessionUserTypeEnum"];
         };
+        /**
+         * @description * `patient` - patient
+         *     * `staff` - staff
+         * @enum {string}
+         */
+        SessionUserTypeEnum: "patient" | "staff";
         SignUpRequest: {
             phone: string;
             password: string;
@@ -336,11 +560,30 @@ export interface components {
             /** Format: uuid */
             location_id: string;
         };
-        /**
-         * @description * `patient` - patient
-         * @enum {string}
-         */
-        UserTypeEnum: "patient";
+        Staff: {
+            readonly id: number;
+            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
+            readonly username: string;
+            readonly full_name: string;
+            /**
+             * Active
+             * @description Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+             */
+            readonly is_active: boolean;
+            readonly roles: components["schemas"]["RoleEnum"][];
+            /** Format: date-time */
+            readonly last_login: string | null;
+        };
+        StaffCreateRequest: {
+            username: string;
+            full_name: string;
+            password: string;
+            roles: components["schemas"]["RoleEnum"][];
+        };
+        StaffLogInRequest: {
+            username: string;
+            password: string;
+        };
         /** @description A code has been requested; send it back with ``verification_id``. */
         Verification: {
             /** Format: uuid */
@@ -365,6 +608,269 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMe"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_roles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Role"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_staff_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStaffList"];
+                };
+            };
+        };
+    };
+    admin_staff_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Staff"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_staff_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Staff"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_staff_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedStaffUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Staff"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     auth_logout: {
         parameters: {
             query?: never;
@@ -639,6 +1145,104 @@ export interface operations {
         };
     };
     auth_refresh: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_staff_login: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffLogInRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_staff_logout: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_staff_refresh: {
         parameters: {
             query?: never;
             header: {

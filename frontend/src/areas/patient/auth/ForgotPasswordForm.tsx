@@ -8,11 +8,11 @@ import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
 import { CodeField, isCompleteCode } from "./CodeField";
-import { FormAlert, Heading, SubmitBar, TextField } from "./fields";
+import { FormAlert, Heading, SubmitBar, TextField } from "@/components/form/fields";
 import { pendingFrom, usePendingCode } from "./pending-code";
 import { ResendCode } from "./ResendCode";
 import { SentNotice } from "./SentNotice";
-import { useForgetOnLeave } from "./use-forget-on-leave";
+import { useForgetOnLeave } from "@/hooks/use-forget-on-leave";
 import { useSubmit } from "./use-submit";
 
 export function ForgotPasswordForm() {

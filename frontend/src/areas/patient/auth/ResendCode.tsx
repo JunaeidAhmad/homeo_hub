@@ -8,7 +8,7 @@ import { numberFormat } from "@/i18n/format";
 import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
-import { FormAlert } from "./fields";
+import { FormAlert } from "@/components/form/fields";
 import { pendingFrom, type PendingCode } from "./pending-code";
 import { useSubmit } from "./use-submit";
 

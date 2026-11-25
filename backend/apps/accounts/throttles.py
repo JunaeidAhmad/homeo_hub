@@ -43,3 +43,16 @@ class CodeAddressThrottle(_PerAddressThrottle):
     """Requests that may send a text, per address (each number also has its own limit)."""
 
     scope = "otp_ip"
+
+
+class LoginUsernameThrottle(SimpleRateThrottle):
+    """Staff sign-in tries per username."""
+
+    scope = "login_username"
+
+    def get_cache_key(self, request: Request, view) -> str | None:
+        username = request.data.get("username") if hasattr(request.data, "get") else None
+        if isinstance(username, bool) or not isinstance(username, str | int | float):
+            return None
+        username = str(username).strip().lower()[:150]
+        return self.cache_format % {"scope": self.scope, "ident": username} if username else None

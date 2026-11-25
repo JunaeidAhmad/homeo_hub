@@ -32,7 +32,7 @@ class SessionSerializer(serializers.Serializer):
 
     access_token = serializers.CharField()
     expires_in = serializers.IntegerField()
-    user_type = serializers.ChoiceField(choices=["patient"])
+    user_type = serializers.ChoiceField(choices=["patient", "staff"])
 
     @staticmethod
     def describe(session: Session) -> dict:

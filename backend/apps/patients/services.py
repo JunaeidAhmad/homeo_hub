@@ -10,6 +10,7 @@ from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
 from apps.accounts import otp, tokens
+from apps.accounts.errors import InvalidCredentials
 from apps.accounts.models import OtpChallenge
 from apps.locations.models import Location
 from common.errors import ApiError
@@ -25,12 +26,6 @@ class PhoneTaken(ApiError):
     status_code = 409
     error_code = "PHONE_TAKEN"
     default_detail = "There is already an account with this number."
-
-
-class InvalidCredentials(ApiError):
-    status_code = 401
-    error_code = "INVALID_CREDENTIALS"
-    default_detail = "The phone number or password is not right."
 
 
 def load_principal(subject_id: str) -> Patient | None:

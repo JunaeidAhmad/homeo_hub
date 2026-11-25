@@ -4,7 +4,7 @@ import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 import { toAsciiDigits } from "@/lib/digits";
 
-import { TextField } from "./fields";
+import { TextField } from "@/components/form/fields";
 
 export const isCompleteCode = (code: string) => /^\d{6}$/.test(code);
 
