@@ -1,0 +1,28 @@
+# Render blueprint for the Django API. The web app deploys to Vercel
+# (Root Directory: frontend). Database: Neon (DATABASE_URL). Redis: a Render
+# Key Value instance (REDIS_URL).
+services:
+  - type: web
+    name: homeohub-api
+    runtime: python
+    rootDir: backend
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+    healthCheckPath: /api/v1/health/live
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # Neon connection string, set in the dashboard
+      - key: REDIS_URL
+        sync: false # Render Key Value internal URL
+      - key: ALLOWED_HOSTS
+        value: homeohub-api.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false # Vercel domain(s), with scheme
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false

@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Placeholder palette; the full bilingual theme arrives with ticket 02. */
+:root {
+  --background: #eef2ed;
+  --foreground: #13241d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, sans-serif;
+}

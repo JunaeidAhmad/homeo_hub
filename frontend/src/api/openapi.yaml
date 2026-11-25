@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: HomeoHub API
+  version: 1.0.0
+  description: HomeoHub REST API (v1).
+paths:
+  /api/v1/health/live:
+    get:
+      operationId: health_live
+      description: The process is up. Never touches the database or Redis.
+      tags:
+      - health
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Live'
+          description: ''
+  /api/v1/health/ready:
+    get:
+      operationId: health_ready
+      description: 'The process can serve traffic: Postgres and Redis both answer.'
+      tags:
+      - health
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ready'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ready'
+          description: ''
+components:
+  schemas:
+    CheckResultEnum:
+      enum:
+      - ok
+      - error
+      type: string
+      description: |-
+        * `ok` - ok
+        * `error` - error
+    Live:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/LiveStatusEnum'
+      required:
+      - status
+    LiveStatusEnum:
+      enum:
+      - ok
+      type: string
+      description: '* `ok` - ok'
+    Ready:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ReadyStatusEnum'
+        checks:
+          $ref: '#/components/schemas/ReadyChecks'
+      required:
+      - checks
+      - status
+    ReadyChecks:
+      type: object
+      properties:
+        database:
+          $ref: '#/components/schemas/CheckResultEnum'
+        redis:
+          $ref: '#/components/schemas/CheckResultEnum'
+      required:
+      - database
+      - redis
+    ReadyStatusEnum:
+      enum:
+      - ok
+      - degraded
+      type: string
+      description: |-
+        * `ok` - ok
+        * `degraded` - degraded
