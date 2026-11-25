@@ -6,6 +6,25 @@ import {
   LOCALES,
 } from "@/i18n/config";
 import { resolveLocale } from "@/i18n/resolve-locale";
+import { serverApiBaseUrl } from "@/api/base-url";
+
+/**
+ * The API sees this server, not the visitor, so say who the visitor is and prove it with
+ * the shared secret (the API's rate limits rely on it). Anything the browser claimed in
+ * these headers is dropped. Vercel sets x-forwarded-for itself, so it can be trusted.
+ */
+function forwardedHeaders(request: NextRequest): Headers {
+  const headers = new Headers(request.headers);
+  headers.delete("x-proxy-secret");
+  headers.delete("x-client-address");
+  const secret = process.env.PROXY_SHARED_SECRET;
+  const visitor = headers.get("x-forwarded-for")?.split(",")[0].trim();
+  if (secret && visitor) {
+    headers.set("x-proxy-secret", secret);
+    headers.set("x-client-address", visitor);
+  }
+  return headers;
+}
 
 /**
  * Pages live under a hidden `[lang]` segment so both languages prerender
@@ -13,7 +32,22 @@ import { resolveLocale } from "@/i18n/resolve-locale";
  * The remembered language (cookie) decides which copy a request is served.
  */
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = new URL(request.url);
+
+  // The browser calls the API on this app's own address, which keeps the session cookie
+  // first-party (the API lives on another site). Django needs the trailing slash kept.
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.rewrite(new URL(`${serverApiBaseUrl()}${pathname}${search}`), {
+      request: { headers: forwardedHeaders(request) },
+    });
+  }
+
+  // Next's own trailing-slash redirect is off (for the API), so do it here for pages.
+  if (pathname !== "/" && pathname.endsWith("/")) {
+    const clean = new URL(request.url);
+    clean.pathname = pathname.replace(/\/+$/, "") || "/";
+    return NextResponse.redirect(clean, 308);
+  }
 
   const prefixed = LOCALES.find(
     (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
@@ -44,6 +78,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next internals and files with an extension (favicon, images).
-  matcher: ["/((?!_next/|.*\\..*).*)"],
+  // All API calls, and every page: not Next internals or files with an extension.
+  matcher: ["/api/:path*", "/((?!_next/|.*\\..*).*)"],
 };

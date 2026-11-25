@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { messagesFor, type Catalog } from "@/i18n/catalog";
 import { admin } from "@/i18n/messages/admin";
+import { auth } from "@/i18n/messages/auth";
 import { common } from "@/i18n/messages/common";
 import { doctor } from "@/i18n/messages/doctor";
 import { patient } from "@/i18n/messages/patient";
@@ -11,6 +12,7 @@ const catalogs: [string, Catalog][] = [
   ["patient", patient],
   ["doctor", doctor],
   ["admin", admin],
+  ["auth", auth],
 ];
 
 describe.each(catalogs)("%s messages", (_name, catalog) => {

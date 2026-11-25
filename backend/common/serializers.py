@@ -15,3 +15,16 @@ class LocalizedField(serializers.Field):
 
     def to_representation(self, instance: Any) -> str:
         return localized_text(instance, self.field_name or "")
+
+
+class ErrorBodySerializer(serializers.Serializer):
+    code = serializers.CharField()
+    message = serializers.CharField()
+    details = serializers.DictField()
+    request_id = serializers.CharField()
+
+
+class ErrorSerializer(serializers.Serializer):
+    """Every error response (see common/errors.py)."""
+
+    error = ErrorBodySerializer()

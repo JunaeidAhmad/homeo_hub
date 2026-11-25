@@ -14,19 +14,22 @@ import pytest
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 COMPLETE_ENV = {
-    "SECRET_KEY": "a-real-secret",
+    "SECRET_KEY": "a-real-secret-that-is-long-enough-to-sign-tokens",
     "DATABASE_URL": "postgres://u:p@db.example.com:5432/homeohub",
     "REDIS_URL": "redis://cache.example.com:6379/0",
     "ALLOWED_HOSTS": "api.example.com",
     "CORS_ALLOWED_ORIGINS": "https://app.example.com",
+    "PROXY_SHARED_SECRET": "shared-between-the-web-app-and-the-api",
 }
 
 
-def load_settings(module: str, env: dict[str, str], tmp_path: Path) -> subprocess.CompletedProcess:
+def load_settings(
+    module: str, env: dict[str, str], tmp_path: Path, then: str = ""
+) -> subprocess.CompletedProcess:
     empty_env_file = tmp_path / "empty.env"
     empty_env_file.write_text("")
     return subprocess.run(
-        [sys.executable, "-c", "import django; django.setup()"],
+        [sys.executable, "-c", f"import django; django.setup(); {then}"],
         cwd=BACKEND_DIR,
         env={
             "PATH": os.environ.get("PATH", ""),
@@ -58,3 +61,20 @@ def test_refuses_to_start_and_names_the_missing_secrets(module, tmp_path):
     assert "SECRET_KEY" in result.stderr
     assert "REDIS_URL" in result.stderr
     assert "DATABASE_URL" not in result.stderr.splitlines()[-1]
+
+
+def test_refuses_a_signing_key_too_short_to_be_safe(tmp_path):
+    env = {**COMPLETE_ENV, "SECRET_KEY": "short-secret"}
+
+    result = load_settings("config.settings.production", env, tmp_path)
+
+    assert result.returncode != 0
+    assert "SECRET_KEY" in result.stderr
+
+
+def test_production_never_logs_codes_or_sends_cookies_over_http_by_default(tmp_path):
+    show = "from django.conf import settings as s; print(s.SMS_PROVIDER, s.REFRESH_COOKIE_SECURE)"
+
+    result = load_settings("config.settings.production", COMPLETE_ENV, tmp_path, then=show)
+
+    assert result.stdout.split() == ["apps.accounts.sms.UnconfiguredSmsProvider", "True"]

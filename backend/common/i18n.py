@@ -11,9 +11,14 @@ from django.utils import translation
 DEFAULT_LANGUAGE = "en"
 
 
+def current_language() -> str:
+    """The language of this request: "bn" or "en"."""
+    return "bn" if translation.get_language() == "bn" else DEFAULT_LANGUAGE
+
+
 def localized_text(obj: Any, field: str) -> str:
     """The text of ``field`` in the request's language, English when Bangla is empty."""
-    if translation.get_language() == "bn":
+    if current_language() == "bn":
         bangla = getattr(obj, f"{field}_bn", None)
         if bangla and bangla.strip():
             return str(bangla)

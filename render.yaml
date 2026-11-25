@@ -26,3 +26,13 @@ services:
         sync: false # Vercel domain(s), with scheme
       - key: CSRF_TRUSTED_ORIGINS
         sync: false
+      # Copy this generated value into the web app on Vercel as PROXY_SHARED_SECRET, so
+      # rate limits see each visitor rather than the web app's server.
+      - key: PROXY_SHARED_SECRET
+        generateValue: true
+      - key: NUM_PROXIES
+        value: "1"
+      # Class that sends text messages (sign-up codes). Until a real gateway exists,
+      # leaving this empty means sign-up reports that texts cannot be sent.
+      - key: SMS_PROVIDER
+        sync: false

@@ -4,6 +4,268 @@ info:
   version: 1.0.0
   description: HomeoHub REST API (v1).
 paths:
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout
+      description: Base for endpoints used before signing in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/otp/resend/:
+    post:
+      operationId: auth_otp_resend
+      description: Base for endpoints used before signing in.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/otp/verify/:
+    post:
+      operationId: auth_otp_verify
+      description: The code from sign-up. Success verifies the phone and signs in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/password/forgot/:
+    post:
+      operationId: auth_password_forgot
+      description: Base for endpoints used before signing in.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/password/reset/:
+    post:
+      operationId: auth_password_reset
+      description: Base for endpoints used before signing in.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/patient/login/:
+    post:
+      operationId: auth_patient_login
+      description: Base for endpoints used before signing in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogInRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/patient/signup/:
+    post:
+      operationId: auth_patient_signup
+      description: Base for endpoints used before signing in.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: auth_refresh
+      description: Base for endpoints used before signing in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/health/live:
     get:
       operationId: health_live
@@ -85,6 +347,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedLocationList'
           description: ''
+  /api/v1/me/:
+    get:
+      operationId: me
+      tags:
+      - account
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     CheckResultEnum:
@@ -95,6 +377,50 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    Error:
+      type: object
+      description: Every error response (see common/errors.py).
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+      required:
+      - error
+    ErrorBody:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: {}
+        request_id:
+          type: string
+      required:
+      - code
+      - details
+      - message
+      - request_id
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+      required:
+      - phone
+    GenderEnum:
+      enum:
+      - FEMALE
+      - MALE
+      - OTHER
+      type: string
+      description: |-
+        * `FEMALE` - Female
+        * `MALE` - Male
+        * `OTHER` - Other
     Live:
       type: object
       properties:
@@ -134,6 +460,21 @@ components:
       - division
       - id
       - upazila
+    LogInRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - phone
     PaginatedLocationList:
       type: object
       required:
@@ -157,6 +498,65 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Location'
+    Patient:
+      type: object
+      description: The signed-in patient's own account.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user_type:
+          allOf:
+          - $ref: '#/components/schemas/UserTypeEnum'
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+        phone_verified:
+          type: boolean
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        gender:
+          allOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          readOnly: true
+        date_of_birth:
+          type: string
+          format: date
+          readOnly: true
+        age:
+          type: integer
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          readOnly: true
+        preferred_language:
+          allOf:
+          - $ref: '#/components/schemas/PreferredLanguageEnum'
+          readOnly: true
+      required:
+      - age
+      - date_of_birth
+      - full_name
+      - gender
+      - id
+      - location
+      - phone
+      - phone_verified
+      - preferred_language
+      - user_type
+    PreferredLanguageEnum:
+      enum:
+      - en
+      - bn
+      type: string
+      description: |-
+        * `en` - English
+        * `bn` - Bangla
     Ready:
       type: object
       properties:
@@ -185,3 +585,120 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    ResendRequest:
+      type: object
+      properties:
+        verification_id:
+          type: string
+          format: uuid
+      required:
+      - verification_id
+    ResetPasswordRequest:
+      type: object
+      properties:
+        verification_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - code
+      - new_password
+      - verification_id
+    Session:
+      type: object
+      description: Signed in. Keep the access token in memory; the refresh token is
+        set as a cookie.
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+        user_type:
+          $ref: '#/components/schemas/UserTypeEnum'
+      required:
+      - access_token
+      - expires_in
+      - user_type
+    SignUpRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        age:
+          type: integer
+          maximum: 120
+          minimum: 1
+        location_id:
+          type: string
+          format: uuid
+      required:
+      - age
+      - full_name
+      - gender
+      - location_id
+      - password
+      - phone
+    UserTypeEnum:
+      enum:
+      - patient
+      type: string
+      description: '* `patient` - patient'
+    Verification:
+      type: object
+      description: A code has been requested; send it back with ``verification_id``.
+      properties:
+        verification_id:
+          type: string
+          format: uuid
+        phone:
+          type: string
+        expires_in:
+          type: integer
+          description: Seconds until the code stops working.
+        resend_after:
+          type: integer
+          description: Seconds to wait before offering a resend.
+      required:
+      - expires_in
+      - phone
+      - resend_after
+      - verification_id
+    VerifyRequest:
+      type: object
+      properties:
+        verification_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+      required:
+      - code
+      - verification_id
+  securitySchemes:
+    accessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

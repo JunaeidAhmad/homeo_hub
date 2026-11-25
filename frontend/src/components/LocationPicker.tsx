@@ -47,10 +47,13 @@ function useAreaSearch(client: ApiClient, query: string) {
 export function LocationPicker({
   value,
   onChange,
+  error,
   client,
 }: {
   value: Location | null;
   onChange: (area: Location | null) => void;
+  /** A form's complaint about this field. */
+  error?: string;
   /** Defaults to a client in the page's language; tests pass their own. */
   client?: ApiClient;
 }) {
@@ -59,6 +62,7 @@ export function LocationPicker({
   const id = useId();
   const listId = `${id}-list`;
   const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(value?.display_name ?? "");
@@ -145,13 +149,16 @@ export function LocationPicker({
           aria-expanded={listVisible}
           aria-controls={listVisible ? listId : undefined}
           aria-autocomplete="list"
-          aria-describedby={hintId}
+          aria-describedby={error ? `${hintId} ${errorId}` : hintId}
+          aria-invalid={error ? true : undefined}
           aria-activedescendant={listVisible && active >= 0 ? `${id}-option-${active}` : undefined}
           autoComplete="off"
           value={text}
           onChange={(event) => edit(event.target.value)}
           onKeyDown={onKeyDown}
-          className="min-h-13 w-full rounded-control border border-line-strong bg-surface pr-12 pl-3.5 text-[17px]"
+          className={`min-h-13 w-full rounded-control border bg-surface pr-12 pl-3.5 text-[17px] ${
+            error ? "border-danger" : "border-line-strong"
+          }`}
         />
         {text && (
           <button
@@ -202,6 +209,11 @@ export function LocationPicker({
       <p id={hintId} className="text-sm text-ink-muted">
         {t("location.hint")}
       </p>
+      {error && (
+        <p id={errorId} className="text-sm font-medium text-danger">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

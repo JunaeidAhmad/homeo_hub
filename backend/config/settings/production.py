@@ -1,5 +1,7 @@
 """Production (Render + Neon). Refuses to start without its secrets."""
 
+from django.core.exceptions import ImproperlyConfigured
+
 from common.env import require
 
 from .base import *  # noqa: F403
@@ -11,8 +13,13 @@ REQUIRED_ENV = [
     "REDIS_URL",
     "ALLOWED_HOSTS",
     "CORS_ALLOWED_ORIGINS",
+    "PROXY_SHARED_SECRET",
 ]
 require(env, REQUIRED_ENV)
+if len(env.str("SECRET_KEY")) < 32:
+    raise ImproperlyConfigured(
+        "SECRET_KEY must be at least 32 characters (it signs sign-in tokens)"
+    )
 
 DEBUG = False
 # Always DATABASE_URL here: USE_NEON is a local-only switch.

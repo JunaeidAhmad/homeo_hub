@@ -4,6 +4,142 @@
  */
 
 export interface paths {
+    "/api/v1/auth/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_otp_resend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The code from sign-up. Success verifies the phone and signs in. */
+        post: operations["auth_otp_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/forgot/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_password_forgot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/reset/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_password_reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/patient/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_patient_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/patient/signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_patient_signup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -55,6 +191,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -65,6 +217,28 @@ export interface components {
          * @enum {string}
          */
         CheckResultEnum: "ok" | "error";
+        /** @description Every error response (see common/errors.py). */
+        Error: {
+            error: components["schemas"]["ErrorBody"];
+        };
+        ErrorBody: {
+            code: string;
+            message: string;
+            details: {
+                [key: string]: unknown;
+            };
+            request_id: string;
+        };
+        ForgotPasswordRequest: {
+            phone: string;
+        };
+        /**
+         * @description * `FEMALE` - Female
+         *     * `MALE` - Male
+         *     * `OTHER` - Other
+         * @enum {string}
+         */
+        GenderEnum: "FEMALE" | "MALE" | "OTHER";
         Live: {
             status: components["schemas"]["LiveStatusEnum"];
         };
@@ -83,6 +257,10 @@ export interface components {
             /** @description Upazila, district, division: one line for a picker to show. */
             readonly display_name: string;
         };
+        LogInRequest: {
+            phone: string;
+            password: string;
+        };
         PaginatedLocationList: {
             /** @example 123 */
             count: number;
@@ -98,6 +276,27 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Location"][];
         };
+        /** @description The signed-in patient's own account. */
+        Patient: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly user_type: components["schemas"]["UserTypeEnum"];
+            readonly phone: string;
+            readonly phone_verified: boolean;
+            readonly full_name: string;
+            readonly gender: components["schemas"]["GenderEnum"];
+            /** Format: date */
+            readonly date_of_birth: string;
+            readonly age: number;
+            readonly location: components["schemas"]["Location"];
+            readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
+        };
+        /**
+         * @description * `en` - English
+         *     * `bn` - Bangla
+         * @enum {string}
+         */
+        PreferredLanguageEnum: "en" | "bn";
         Ready: {
             status: components["schemas"]["ReadyStatusEnum"];
             checks: components["schemas"]["ReadyChecks"];
@@ -112,6 +311,51 @@ export interface components {
          * @enum {string}
          */
         ReadyStatusEnum: "ok" | "degraded";
+        ResendRequest: {
+            /** Format: uuid */
+            verification_id: string;
+        };
+        ResetPasswordRequest: {
+            /** Format: uuid */
+            verification_id: string;
+            code: string;
+            new_password: string;
+        };
+        /** @description Signed in. Keep the access token in memory; the refresh token is set as a cookie. */
+        Session: {
+            access_token: string;
+            expires_in: number;
+            user_type: components["schemas"]["UserTypeEnum"];
+        };
+        SignUpRequest: {
+            phone: string;
+            password: string;
+            full_name: string;
+            gender: components["schemas"]["GenderEnum"];
+            age: number;
+            /** Format: uuid */
+            location_id: string;
+        };
+        /**
+         * @description * `patient` - patient
+         * @enum {string}
+         */
+        UserTypeEnum: "patient";
+        /** @description A code has been requested; send it back with ``verification_id``. */
+        Verification: {
+            /** Format: uuid */
+            verification_id: string;
+            phone: string;
+            /** @description Seconds until the code stops working. */
+            expires_in: number;
+            /** @description Seconds to wait before offering a resend. */
+            resend_after: number;
+        };
+        VerifyRequest: {
+            /** Format: uuid */
+            verification_id: string;
+            code: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -121,6 +365,308 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    auth_logout: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_otp_resend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResendRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Verification"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_otp_verify: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_password_forgot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Verification"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_password_reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_patient_login: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogInRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_patient_signup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignUpRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Verification"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_refresh: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     health_live: {
         parameters: {
             query?: never;
@@ -193,6 +739,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedLocationList"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Patient"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

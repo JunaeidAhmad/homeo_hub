@@ -2,17 +2,17 @@ import createClient, { type ClientOptions } from "openapi-fetch";
 
 import type { Locale } from "@/i18n/config";
 
+import { serverApiBaseUrl } from "./base-url";
 import type { paths } from "./schema";
 
 export type ApiClient = ReturnType<typeof createClient<paths>>;
 
 /**
- * Base URL of the Django API (no trailing slash). Set NEXT_PUBLIC_API_BASE_URL on
- * Vercel: it is public because the browser calls the API as well as the server.
+ * Where to send API requests. In the browser: this app's own address, which src/proxy.ts
+ * forwards to the API (so the session cookie is first-party). On the server: directly.
  */
 export function apiBaseUrl(): string {
-  // Written out in full so Next can inline it into browser code.
-  return (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").replace(/\/+$/, "");
+  return typeof window === "undefined" ? serverApiBaseUrl() : window.location.origin;
 }
 
 /**

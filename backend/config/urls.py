@@ -8,3 +8,6 @@ urlpatterns = [
     # Developer-only Django admin; the product admin lives at /admin on the web app.
     path("django-admin/", admin.site.urls),
 ]
+
+handler404 = "common.errors.not_found"
+handler500 = "common.errors.server_error"

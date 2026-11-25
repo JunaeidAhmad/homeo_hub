@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { proxy } from "@/proxy";
 
@@ -17,7 +17,74 @@ const rewrittenTo = (response: Response) => {
   return target ? new URL(target).pathname : null;
 };
 
+afterEach(() => vi.unstubAllEnvs());
+
+describe("proxy: API calls", () => {
+  it("forwards /api to the API, keeping the trailing slash and query", () => {
+    vi.stubEnv("API_BASE_URL", "https://api.example.com/");
+
+    const response = visit("/api/v1/locations/?q=sav&page=2", { cookie: "hh_lang=bn" });
+
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://api.example.com/api/v1/locations/?q=sav&page=2",
+    );
+  });
+
+  it("never treats an API call as a page", () => {
+    vi.stubEnv("API_BASE_URL", "https://api.example.com");
+
+    const response = visit("/api/v1/auth/refresh/");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(response.headers.get("x-middleware-rewrite")).toBe(
+      "https://api.example.com/api/v1/auth/refresh/",
+    );
+  });
+});
+
+describe("proxy: telling the API who is visiting", () => {
+  const forwarded = (response: Response, header: string) =>
+    response.headers.get(`x-middleware-request-${header}`);
+
+  it("names the visitor and proves it is the web app", () => {
+    vi.stubEnv("PROXY_SHARED_SECRET", "proxy-secret");
+
+    const response = visit("/api/v1/me/", { "x-forwarded-for": "198.51.100.4, 10.0.0.1" });
+
+    expect(forwarded(response, "x-client-address")).toBe("198.51.100.4");
+    expect(forwarded(response, "x-proxy-secret")).toBe("proxy-secret");
+  });
+
+  it("never passes on what a browser claims about itself", () => {
+    vi.stubEnv("PROXY_SHARED_SECRET", "");
+
+    const response = visit("/api/v1/me/", {
+      "x-proxy-secret": "guess",
+      "x-client-address": "198.51.100.9",
+      accept: "application/json",
+    });
+
+    expect(forwarded(response, "x-proxy-secret")).toBeNull();
+    expect(forwarded(response, "x-client-address")).toBeNull();
+    expect(forwarded(response, "accept")).toBe("application/json");
+  });
+
+  it("does not send the secret back to the browser", () => {
+    vi.stubEnv("PROXY_SHARED_SECRET", "proxy-secret");
+
+    expect(visit("/care").headers.get("x-middleware-request-x-proxy-secret")).toBeNull();
+  });
+});
+
 describe("proxy", () => {
+  it("removes a trailing slash from page addresses", () => {
+    const response = visit("/care/");
+
+    expect(response.status).toBe(308);
+    expect(new URL(response.headers.get("location")!).pathname).toBe("/care");
+  });
+
   it("serves the remembered language without changing the visible URL", () => {
     expect(rewrittenTo(visit("/care", { cookie: "hh_lang=bn" }))).toBe(
       "/bn/care",

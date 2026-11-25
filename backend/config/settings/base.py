@@ -35,9 +35,12 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.health",
     "apps.locations",
+    "apps.accounts",
+    "apps.patients",
 ]
 
 MIDDLEWARE = [
+    "common.middleware.RequestIdMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -106,8 +109,16 @@ CACHES = {
     }
 }
 
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+]
+
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "OPTIONS": {"user_attributes": ["full_name", "phone"]},
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -141,15 +152,31 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_CLASSES": ["common.throttling.PublicReadThrottle"],
     "DEFAULT_THROTTLE_RATES": {
         "public_read": env.str("THROTTLE_PUBLIC_READ", default="300/min"),
+        "login_phone": "5/min",
+        "login_ip": "30/min",
+        "otp_ip": "20/hour",
     },
-    # How many reverse proxies sit in front of the API, used to find the visitor's
-    # address in X-Forwarded-For. Unset = use the whole header. See README "Deploy".
-    "NUM_PROXIES": env.int("NUM_PROXIES", default=None),
+    # How many reverse proxies sit in front of the API: only the addresses they add to
+    # X-Forwarded-For are believed (see common/client_address.py).
+    "NUM_PROXIES": env.int("NUM_PROXIES", default=1),
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PARSER_CLASSES": ["common.parsers.SafeJSONParser"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["apps.accounts.authentication.AccessTokenAuthentication"],
+    "EXCEPTION_HANDLER": "common.errors.exception_handler",
     # Endpoints are private unless a view opts out (health checks do).
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
 }
+
+# --- Accounts ----------------------------------------------------------------
+# How to find a signed-in person of each user type (see apps/accounts/principals.py).
+PRINCIPAL_LOADERS = {"patient": "apps.patients.services.load_principal"}
+# Class that sends text messages. Only development uses the console one (it logs codes).
+SMS_PROVIDER = env.str("SMS_PROVIDER", default="") or "apps.accounts.sms.UnconfiguredSmsProvider"
+# A cost ceiling across all numbers, whatever the per-number limits allow.
+OTP_MAX_SENDS_PER_HOUR = env.int("OTP_MAX_SENDS_PER_HOUR", default=500)
+REFRESH_COOKIE_SECURE = True
+# Shared with the web app, which sends it when naming the visitor it is forwarding for.
+PROXY_SHARED_SECRET = env.str("PROXY_SHARED_SECRET", default="")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "HomeoHub API",

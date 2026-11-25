@@ -15,7 +15,7 @@ select = ["E", "F", "W", "I", "B", "UP", "DJ", "S"]
 ignore = ["S101"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S603"]
+"tests/**" = ["S603", "S105", "S106"]  # test fixtures use fake passwords
 
 [tool.mypy]
 python_version = "3.12"

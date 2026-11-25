@@ -11,6 +11,8 @@ from redis.exceptions import RedisError
 from rest_framework.request import Request
 from rest_framework.throttling import AnonRateThrottle
 
+from common.client_address import client_address
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,6 +20,9 @@ class PublicReadThrottle(AnonRateThrottle):
     """Per-visitor limit on anonymous requests (the default for every view)."""
 
     scope = "public_read"
+
+    def get_ident(self, request: Request) -> str:
+        return client_address(request)
 
     def allow_request(self, request: Request, view) -> bool:
         try:
