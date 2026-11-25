@@ -66,6 +66,19 @@ npm run api:generate   # writes frontend/src/api/openapi.yaml and schema.d.ts â€
 
 CI (`api-client` workflow) fails if the committed client is out of date.
 
+## Languages (Bangla + English)
+
+- **Web:** pages live under a hidden `[lang]` segment so both languages prerender statically, but visitors see
+  clean URLs (`/`, `/doctor`, `/admin`). `frontend/src/proxy.ts` picks the language from the `hh_lang` cookie (the
+  remembered choice), then the browser's `Accept-Language`, then English. The language switch sets the cookie and
+  reloads. UI text lives in `frontend/src/i18n/messages/` (one catalog per area; Bangla must define every English key).
+- **API:** every web request carries `Accept-Language` (`createApiClient` requires a `language`). Django resolves
+  `bn` / `en` and answers with `Content-Language`. Translatable model fields come in `<field>_en` / `<field>_bn`
+  pairs; read them with `common.i18n.localized_text(obj, "field")`, which falls back to English when Bangla is empty.
+- **Areas:** patient (`/`), doctor (`/doctor`) and admin (`/admin`) are code-split by route. A lint rule stops one area
+  importing another, so a patient page never loads doctor or admin code; share code through `src/components` or `src/lib`.
+- **Mobile first:** write styles for a 390px phone, then add wide-screen rules with the `desktop:` variant (900px+).
+
 ## Settings
 
 `backend/config/settings/` has `base`, `local` (default for `manage.py`), `test` (pytest), `staging` and

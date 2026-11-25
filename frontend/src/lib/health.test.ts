@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { createApiClient } from "@/api/client";
+import type { Locale } from "@/i18n/config";
 import { getHealth } from "@/lib/health";
 
-function apiReturning(status: number, body: unknown) {
+function apiReturning(status: number, body: unknown, language: Locale = "en") {
   const requests: Request[] = [];
   const client = createApiClient({
+    language,
     baseUrl: "http://api.test",
     fetch: async (request: Request) => {
       requests.push(request);
@@ -34,6 +36,21 @@ describe("getHealth", () => {
     });
   });
 
+  it.each<Locale>(["en", "bn"])(
+    "asks the API to answer in %s",
+    async (language) => {
+      const { client, requests } = apiReturning(
+        200,
+        { status: "ok", checks: { database: "ok", redis: "ok" } },
+        language,
+      );
+
+      await getHealth(client);
+
+      expect(requests[0].headers.get("Accept-Language")).toBe(language);
+    },
+  );
+
   it("reports degraded with the failing checks when the API answers 503", async () => {
     const { client } = apiReturning(503, {
       status: "degraded",
@@ -48,6 +65,7 @@ describe("getHealth", () => {
 
   it("reports unreachable when the API cannot be contacted", async () => {
     const client = createApiClient({
+      language: "en",
       baseUrl: "http://api.test",
       fetch: async () => {
         throw new TypeError("fetch failed");

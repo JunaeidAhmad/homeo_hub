@@ -1,18 +1,55 @@
 @import "tailwindcss";
 
-/* Placeholder palette; the full bilingual theme arrives with ticket 02. */
-:root {
-  --background: #eef2ed;
-  --foreground: #13241d;
+/*
+ * "Dispensary label" design tokens (patient-site design canvas).
+ * Mobile-first: base styles are for a 390px phone; the `desktop:` variant
+ * adds the wide layout from 900px up.
+ */
+@theme {
+  --color-ground: #eef2ed; /* sage page ground */
+  --color-surface: #ffffff;
+  --color-mist: #e4ece6; /* tinted wells, bottle shelves */
+  --color-ink: #13241d;
+  --color-ink-soft: #3d4b45;
+  --color-ink-muted: #4a5852;
+  --color-line: #d3ddd6;
+  --color-line-strong: #b9c7c0;
+  --color-primary: #1e6b4e;
+  --color-primary-deep: #164e3a;
+  --color-amber: #8a4700; /* "needs you" and liquid remedies */
+  --color-amber-wash: #fbebd3;
+  --color-danger: #a12b2b;
+
+  --radius-panel: 14px;
+  --radius-control: 8px;
+
+  --breakpoint-desktop: 900px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Tiro Bangla for headings and remedy names, Anek Bangla for the interface. */
+  --font-display: var(--font-tiro-bangla), "Tiro Bangla", Georgia, serif;
+  --font-ui: var(--font-anek-bangla), "Anek Bangla", system-ui, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, sans-serif;
+@layer base {
+  body {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-ui);
+    font-stretch: 110%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

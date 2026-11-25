@@ -1,0 +1,23 @@
+import type { ReactNode } from "react";
+
+import { messagesFor } from "@/i18n/catalog";
+import { common } from "@/i18n/messages/common";
+import { patient } from "@/i18n/messages/patient";
+import { I18nProvider } from "@/i18n/provider";
+import { getLocale } from "@/i18n/server";
+
+export default async function PatientLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const locale = await getLocale();
+  return (
+    <I18nProvider
+      locale={locale}
+      messages={messagesFor(locale, common, patient)}
+    >
+      {children}
+    </I18nProvider>
+  );
+}

@@ -1,4 +1,4 @@
-import { createApiClient, type ApiClient } from "@/api/client";
+import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 
 type ReadyChecks = components["schemas"]["ReadyChecks"];
@@ -9,7 +9,7 @@ export type Health =
   | { state: "unreachable" };
 
 /** Ask the API whether it is ready to serve traffic. Never throws. */
-export async function getHealth(client: ApiClient = createApiClient()): Promise<Health> {
+export async function getHealth(client: ApiClient): Promise<Health> {
   try {
     const { data, error, response } = await client.GET("/api/v1/health/ready", {
       cache: "no-store",

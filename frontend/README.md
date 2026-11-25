@@ -9,4 +9,6 @@ npm run typecheck  # next typegen + tsc
 npm run lint
 ```
 
+Language, areas and the mobile-first rule are explained in the root README.
+
 `src/api/schema.d.ts` and `src/api/openapi.yaml` are generated — run `npm run api:generate`, don't edit them.

@@ -1,36 +1,53 @@
+"use client";
+
+import type { CommonMessages } from "@/i18n/messages/common";
+import { useMessages } from "@/i18n/provider";
 import type { Health } from "@/lib/health";
 
-const HEADLINE: Record<Health["state"], string> = {
-  ok: "API is ready",
-  degraded: "API is degraded",
-  unreachable: "API is unreachable",
-};
+const HEADLINE = {
+  ok: "health.ready",
+  degraded: "health.degraded",
+  unreachable: "health.unreachable",
+} as const satisfies Record<Health["state"], keyof CommonMessages>;
 
 const DOT: Record<Health["state"], string> = {
-  ok: "bg-[#1E6B4E]",
-  degraded: "bg-[#8A4700]",
-  unreachable: "bg-red-700",
+  ok: "bg-primary",
+  degraded: "bg-amber",
+  unreachable: "bg-danger",
 };
 
-const CHECK_LABELS = { database: "Database", redis: "Redis" } as const;
+const CHECKS = [
+  { name: "database", label: "health.database" },
+  { name: "redis", label: "health.redis" },
+] as const;
 
 export function HealthStatus({ health }: { health: Health }) {
+  const { t } = useMessages<CommonMessages>();
+
   return (
-    <section className="rounded-[14px] border border-[#13241D]/15 bg-white p-5">
+    <section className="rounded-panel border border-line bg-surface p-5">
       <p role="status" className="flex items-center gap-2 font-medium">
-        <span aria-hidden className={`size-2.5 rounded-full ${DOT[health.state]}`} />
-        {HEADLINE[health.state]}
+        <span
+          aria-hidden
+          className={`size-2.5 rounded-full ${DOT[health.state]}`}
+        />
+        {t(HEADLINE[health.state])}
       </p>
       {health.state !== "unreachable" && (
         <ul className="mt-3 space-y-1 text-sm">
-          {(Object.keys(CHECK_LABELS) as (keyof typeof CHECK_LABELS)[]).map((name) => (
-            <li key={name} className="flex justify-between gap-6">
-              <span>{CHECK_LABELS[name]}</span>
-              <span className={health.checks[name] === "ok" ? "text-[#1E6B4E]" : "text-[#8A4700]"}>
-                {health.checks[name]}
-              </span>
-            </li>
-          ))}
+          {CHECKS.map(({ name, label }) => {
+            const result = health.checks[name];
+            return (
+              <li key={name} className="flex justify-between gap-6">
+                <span>{t(label)}</span>
+                <span
+                  className={result === "ok" ? "text-primary" : "text-amber"}
+                >
+                  {t(result === "ok" ? "health.ok" : "health.error")}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>
