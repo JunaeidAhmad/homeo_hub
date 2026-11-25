@@ -35,3 +35,10 @@ export function messagesFor(locale: Locale, ...catalogs: Catalog[]): Messages {
   }
   return merged;
 }
+
+/** Fill `{name}` placeholders in a message: fill("Page {page}", { page: 2 }) → "Page 2". */
+export function fill(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in values ? String(values[name]) : match,
+  );
+}

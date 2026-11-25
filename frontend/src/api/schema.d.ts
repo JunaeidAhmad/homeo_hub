@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/locations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Bangladesh areas (division, district, upazila). Public: needed before sign-up. */
+        get: operations["locations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -56,6 +73,31 @@ export interface components {
          * @enum {string}
          */
         LiveStatusEnum: "ok";
+        /** @description An area with its names in the language the client asked for. */
+        Location: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly division: string;
+            readonly district: string;
+            readonly upazila: string;
+            /** @description Upazila, district, division: one line for a picker to show. */
+            readonly display_name: string;
+        };
+        PaginatedLocationList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Location"][];
+        };
         Ready: {
             status: components["schemas"]["ReadyStatusEnum"];
             checks: components["schemas"]["ReadyChecks"];
@@ -121,6 +163,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Ready"];
+                };
+            };
+        };
+    };
+    locations_list: {
+        parameters: {
+            query?: {
+                district?: string;
+                division?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLocationList"];
                 };
             };
         };

@@ -3,7 +3,7 @@
 Next.js (App Router, TypeScript). See the [root README](../README.md) for setup.
 
 ```bash
-npm run dev        # http://localhost:3000 (expects the API on API_BASE_URL)
+npm run dev        # http://localhost:3000 (expects the API on NEXT_PUBLIC_API_BASE_URL)
 npm test           # Vitest
 npm run typecheck  # next typegen + tsc
 npm run lint

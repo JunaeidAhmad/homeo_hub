@@ -66,6 +66,26 @@ npm run api:generate   # writes frontend/src/api/openapi.yaml and schema.d.ts �
 
 CI (`api-client` workflow) fails if the committed client is out of date.
 
+## Lists and keyword search
+
+Every list endpoint follows one convention (`backend/common/search.py`, `common/pagination.py`):
+
+```
+GET /api/v1/<things>/?q=&page=&page_size=&ordering=&<filters>
+```
+
+- `q`: keyword search over the view's `search_fields` with PostgreSQL full-text plus trigram matching, so typos,
+  half-typed words, Bangla and English all work. Results come best match first unless `ordering` is given.
+- `page` / `page_size`: 20 per page by default, at most 100. `ordering`: a field name, `-` for descending.
+- Bangla text is compared in one Unicode form (NFC), so differently typed letters such as য় still match.
+
+A new list view only declares `search_fields`, `ordering_fields` and (optionally) a `filterset_class`.
+In the web app use `useListQuery` + `SearchableTable` for admin lists and `LocationPicker` for choosing an area.
+
+**Area list:** `python manage.py seed_locations` loads Bangladesh's 8 divisions, 64 districts and 495 upazilas
+(names from [nuhil/bangladesh-geocode](https://github.com/nuhil/bangladesh-geocode), MIT, see
+`backend/apps/locations/data/NOTICE.md`). It is safe to repeat; setup and every deploy run it.
+
 ## Languages (Bangla + English)
 
 - **Web:** pages live under a hidden `[lang]` segment so both languages prerender statically, but visitors see
@@ -97,4 +117,4 @@ GitHub Actions, each workflow runs only when its folder changes:
 
 - **API → Render**: blueprint in [`render.yaml`](render.yaml). Set `DATABASE_URL` (Neon), `REDIS_URL`
   (Render Key Value) and `CORS_ALLOWED_ORIGINS` (the Vercel domain) in the dashboard.
-- **Web → Vercel**: import the repo with Root Directory `frontend`; set `API_BASE_URL` to the Render URL.
+- **Web → Vercel**: import the repo with Root Directory `frontend`; set `NEXT_PUBLIC_API_BASE_URL` to the Render URL.

@@ -28,10 +28,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "corsheaders",
+    "django_filters",
     "rest_framework",
     "drf_spectacular",
     "apps.health",
+    "apps.locations",
 ]
 
 MIDDLEWARE = [
@@ -118,6 +121,13 @@ CSRF_TRUSTED_ORIGINS: list[str] = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # The list convention every list endpoint follows (see common/search.py).
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "common.search.KeywordSearchFilter",
+        "common.search.RankedOrderingFilter",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardPagination",
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     # Endpoints are private unless a view opts out (health checks do).

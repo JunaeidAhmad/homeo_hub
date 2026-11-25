@@ -36,6 +36,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/Ready'
           description: ''
+  /api/v1/locations/:
+    get:
+      operationId: locations_list
+      description: 'Bangladesh areas (division, district, upazila). Public: needed
+        before sign-up.'
+      parameters:
+      - in: query
+        name: district
+        schema:
+          type: string
+      - in: query
+        name: division
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      tags:
+      - locations
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLocationList'
+          description: ''
 components:
   schemas:
     CheckResultEnum:
@@ -58,6 +107,56 @@ components:
       - ok
       type: string
       description: '* `ok` - ok'
+    Location:
+      type: object
+      description: An area with its names in the language the client asked for.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        division:
+          type: string
+          readOnly: true
+        district:
+          type: string
+          readOnly: true
+        upazila:
+          type: string
+          readOnly: true
+        display_name:
+          type: string
+          description: 'Upazila, district, division: one line for a picker to show.'
+          readOnly: true
+      required:
+      - display_name
+      - district
+      - division
+      - id
+      - upazila
+    PaginatedLocationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
     Ready:
       type: object
       properties:

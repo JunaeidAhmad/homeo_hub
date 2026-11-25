@@ -7,4 +7,5 @@ export const ADMIN_NAV: readonly {
   { href: "/admin", label: "admin.nav.overview" },
   { href: "/admin/doctors", label: "admin.nav.doctors" },
   { href: "/admin/orders", label: "admin.nav.orders" },
+  { href: "/admin/locations", label: "admin.nav.locations" },
 ];

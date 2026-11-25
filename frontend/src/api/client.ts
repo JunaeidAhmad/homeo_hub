@@ -6,12 +6,13 @@ import type { paths } from "./schema";
 
 export type ApiClient = ReturnType<typeof createClient<paths>>;
 
-/** Base URL of the Django API (no trailing slash). Set API_BASE_URL on Vercel. */
+/**
+ * Base URL of the Django API (no trailing slash). Set NEXT_PUBLIC_API_BASE_URL on
+ * Vercel: it is public because the browser calls the API as well as the server.
+ */
 export function apiBaseUrl(): string {
-  return (process.env.API_BASE_URL ?? "http://localhost:8000").replace(
-    /\/+$/,
-    "",
-  );
+  // Written out in full so Next can inline it into browser code.
+  return (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").replace(/\/+$/, "");
 }
 
 /**
