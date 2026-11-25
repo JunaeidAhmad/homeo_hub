@@ -48,6 +48,7 @@ export function LocationsTable({ client }: { client?: ApiClient }) {
       pageSize={list.pageSize}
       total={list.total}
       onPageChange={list.setPage}
+      onRetry={list.retry}
       status={list.status}
     />
   );

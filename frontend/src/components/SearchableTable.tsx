@@ -28,6 +28,7 @@ export function SearchableTable<T>({
   pageSize,
   total,
   onPageChange,
+  onRetry,
   status,
 }: {
   columns: Column<T>[];
@@ -39,6 +40,7 @@ export function SearchableTable<T>({
   pageSize: number;
   total: number;
   onPageChange: (page: number) => void;
+  onRetry: () => void;
   status: ListStatus;
 }) {
   const { t, locale } = useMessages<CommonMessages>();
@@ -61,20 +63,22 @@ export function SearchableTable<T>({
         />
       </div>
 
-      {status === "loading" && (
-        <p role="status" className="text-ink-muted">
-          {t("table.loading")}
-        </p>
-      )}
+      {/* Always present, so screen readers announce each change of message. */}
+      <p role="status" className="text-ink-muted empty:hidden">
+        {status === "loading" && t("table.loading")}
+        {status === "ready" && rows.length === 0 && t("table.empty")}
+      </p>
       {status === "error" && (
-        <p role="alert" className="text-danger">
-          {t("table.error")}
-        </p>
-      )}
-      {status === "ready" && rows.length === 0 && (
-        <p role="status" className="text-ink-muted">
-          {t("table.empty")}
-        </p>
+        <div role="alert" className="flex flex-wrap items-center gap-3 text-danger">
+          <span>{t("table.error")}</span>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold text-ink"
+          >
+            {t("table.retry")}
+          </button>
+        </div>
       )}
 
       {rows.length > 0 && (
@@ -119,9 +123,9 @@ export function SearchableTable<T>({
       <nav className="flex items-center justify-between gap-3" aria-label={t("table.pagination")}>
         <button
           type="button"
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-          className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold disabled:opacity-40"
+          aria-disabled={page <= 1}
+          onClick={() => !(page <= 1) && onPageChange(page - 1)}
+          className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold aria-disabled:opacity-40"
         >
           {t("table.previous")}
         </button>
@@ -132,9 +136,9 @@ export function SearchableTable<T>({
         </span>
         <button
           type="button"
-          disabled={page >= pages}
-          onClick={() => onPageChange(page + 1)}
-          className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold disabled:opacity-40"
+          aria-disabled={page >= pages}
+          onClick={() => !(page >= pages) && onPageChange(page + 1)}
+          className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold aria-disabled:opacity-40"
         >
           {t("table.next")}
         </button>

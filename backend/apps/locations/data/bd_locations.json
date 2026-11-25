@@ -1,5 +1,6 @@
 [
 {
+"code":"BD-0001",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barguna",
@@ -8,6 +9,7 @@
 "upazila_bn":"আমতলী"
 },
 {
+"code":"BD-0002",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barguna",
@@ -16,6 +18,7 @@
 "upazila_bn":"বামনা"
 },
 {
+"code":"BD-0003",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barguna",
@@ -24,6 +27,7 @@
 "upazila_bn":"বরগুনা সদর"
 },
 {
+"code":"BD-0004",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barguna",
@@ -32,6 +36,7 @@
 "upazila_bn":"বেতাগী"
 },
 {
+"code":"BD-0005",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barguna",
@@ -40,6 +45,7 @@
 "upazila_bn":"পাথরঘাটা"
 },
 {
+"code":"BD-0006",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barguna",
@@ -48,6 +54,7 @@
 "upazila_bn":"তালতলি"
 },
 {
+"code":"BD-0007",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -56,6 +63,7 @@
 "upazila_bn":"আগৈলঝাড়া"
 },
 {
+"code":"BD-0008",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -64,6 +72,7 @@
 "upazila_bn":"বাবুগঞ্জ"
 },
 {
+"code":"BD-0009",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -72,6 +81,7 @@
 "upazila_bn":"বাকেরগঞ্জ"
 },
 {
+"code":"BD-0010",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -80,6 +90,7 @@
 "upazila_bn":"বানারীপাড়া"
 },
 {
+"code":"BD-0011",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -88,6 +99,7 @@
 "upazila_bn":"বরিশাল সদর"
 },
 {
+"code":"BD-0012",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -96,6 +108,7 @@
 "upazila_bn":"গৌরনদী"
 },
 {
+"code":"BD-0013",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -104,6 +117,7 @@
 "upazila_bn":"হিজলা"
 },
 {
+"code":"BD-0014",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -112,6 +126,7 @@
 "upazila_bn":"মেহেন্দিগঞ্জ"
 },
 {
+"code":"BD-0015",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -120,6 +135,7 @@
 "upazila_bn":"মুলাদী"
 },
 {
+"code":"BD-0016",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Barishal",
@@ -128,6 +144,7 @@
 "upazila_bn":"উজিরপুর"
 },
 {
+"code":"BD-0017",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -136,6 +153,7 @@
 "upazila_bn":"ভোলা সদর"
 },
 {
+"code":"BD-0018",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -144,6 +162,7 @@
 "upazila_bn":"বোরহান উদ্দিন"
 },
 {
+"code":"BD-0019",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -152,6 +171,7 @@
 "upazila_bn":"চরফ্যাশন"
 },
 {
+"code":"BD-0020",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -160,6 +180,7 @@
 "upazila_bn":"দৌলতখান"
 },
 {
+"code":"BD-0021",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -168,6 +189,7 @@
 "upazila_bn":"লালমোহন"
 },
 {
+"code":"BD-0022",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -176,6 +198,7 @@
 "upazila_bn":"মনপুরা"
 },
 {
+"code":"BD-0023",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Bhola",
@@ -184,6 +207,7 @@
 "upazila_bn":"তজুমদ্দিন"
 },
 {
+"code":"BD-0024",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Jhalokati",
@@ -192,6 +216,7 @@
 "upazila_bn":"ঝালকাঠি সদর"
 },
 {
+"code":"BD-0025",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Jhalokati",
@@ -200,6 +225,7 @@
 "upazila_bn":"কাঠালিয়া"
 },
 {
+"code":"BD-0026",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Jhalokati",
@@ -208,6 +234,7 @@
 "upazila_bn":"নলছিটি"
 },
 {
+"code":"BD-0027",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Jhalokati",
@@ -216,6 +243,7 @@
 "upazila_bn":"রাজাপুর"
 },
 {
+"code":"BD-0028",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -224,6 +252,7 @@
 "upazila_bn":"বাউফল"
 },
 {
+"code":"BD-0029",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -232,6 +261,7 @@
 "upazila_bn":"দশমিনা"
 },
 {
+"code":"BD-0030",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -240,6 +270,7 @@
 "upazila_bn":"দুমকি"
 },
 {
+"code":"BD-0031",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -248,6 +279,7 @@
 "upazila_bn":"গলাচিপা"
 },
 {
+"code":"BD-0032",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -256,6 +288,7 @@
 "upazila_bn":"কলাপাড়া"
 },
 {
+"code":"BD-0033",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -264,6 +297,7 @@
 "upazila_bn":"মির্জাগঞ্জ"
 },
 {
+"code":"BD-0034",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -272,6 +306,7 @@
 "upazila_bn":"পটুয়াখালী সদর"
 },
 {
+"code":"BD-0035",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Patuakhali",
@@ -280,6 +315,7 @@
 "upazila_bn":"রাঙ্গাবালী"
 },
 {
+"code":"BD-0036",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -288,6 +324,7 @@
 "upazila_bn":"ভান্ডারিয়া"
 },
 {
+"code":"BD-0037",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -296,6 +333,7 @@
 "upazila_bn":"ইন্দুরকানী"
 },
 {
+"code":"BD-0038",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -304,6 +342,7 @@
 "upazila_bn":"কাউখালী"
 },
 {
+"code":"BD-0039",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -312,6 +351,7 @@
 "upazila_bn":"মঠবাড়ীয়া"
 },
 {
+"code":"BD-0040",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -320,6 +360,7 @@
 "upazila_bn":"নাজিরপুর"
 },
 {
+"code":"BD-0041",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -328,6 +369,7 @@
 "upazila_bn":"নেছারাবাদ"
 },
 {
+"code":"BD-0042",
 "division_en":"Barishal",
 "division_bn":"বরিশাল",
 "district_en":"Pirojpur",
@@ -336,6 +378,7 @@
 "upazila_bn":"পিরোজপুর সদর"
 },
 {
+"code":"BD-0043",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -344,6 +387,7 @@
 "upazila_bn":"আলীকদম"
 },
 {
+"code":"BD-0044",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -352,6 +396,7 @@
 "upazila_bn":"বান্দরবান সদর"
 },
 {
+"code":"BD-0045",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -360,6 +405,7 @@
 "upazila_bn":"লামা"
 },
 {
+"code":"BD-0046",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -368,6 +414,7 @@
 "upazila_bn":"নাইক্ষ্যংছড়ি"
 },
 {
+"code":"BD-0047",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -376,6 +423,7 @@
 "upazila_bn":"রোয়াংছড়ি"
 },
 {
+"code":"BD-0048",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -384,6 +432,7 @@
 "upazila_bn":"রুমা"
 },
 {
+"code":"BD-0049",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Bandarban",
@@ -392,6 +441,7 @@
 "upazila_bn":"থানচি"
 },
 {
+"code":"BD-0050",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -400,6 +450,7 @@
 "upazila_bn":"আখাউড়া"
 },
 {
+"code":"BD-0051",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -408,6 +459,7 @@
 "upazila_bn":"আশুগঞ্জ"
 },
 {
+"code":"BD-0052",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -416,6 +468,7 @@
 "upazila_bn":"বাঞ্ছারামপুর"
 },
 {
+"code":"BD-0053",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -424,6 +477,7 @@
 "upazila_bn":"বিজয়নগর"
 },
 {
+"code":"BD-0054",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -432,6 +486,7 @@
 "upazila_bn":"ব্রাহ্মণবাড়িয়া সদর"
 },
 {
+"code":"BD-0055",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -440,6 +495,7 @@
 "upazila_bn":"কসবা"
 },
 {
+"code":"BD-0056",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -448,6 +504,7 @@
 "upazila_bn":"নবীনগর"
 },
 {
+"code":"BD-0057",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -456,6 +513,7 @@
 "upazila_bn":"নাসিরনগর"
 },
 {
+"code":"BD-0058",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Brahmanbaria",
@@ -464,6 +522,7 @@
 "upazila_bn":"সরাইল"
 },
 {
+"code":"BD-0059",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -472,6 +531,7 @@
 "upazila_bn":"চাঁদপুর সদর"
 },
 {
+"code":"BD-0060",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -480,6 +540,7 @@
 "upazila_bn":"ফরিদগঞ্জ"
 },
 {
+"code":"BD-0061",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -488,6 +549,7 @@
 "upazila_bn":"হাইমচর"
 },
 {
+"code":"BD-0062",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -496,6 +558,7 @@
 "upazila_bn":"হাজীগঞ্জ"
 },
 {
+"code":"BD-0063",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -504,6 +567,7 @@
 "upazila_bn":"কচুয়া"
 },
 {
+"code":"BD-0064",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -512,6 +576,7 @@
 "upazila_bn":"মতলব দক্ষিণ"
 },
 {
+"code":"BD-0065",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -520,6 +585,7 @@
 "upazila_bn":"মতলব উত্তর"
 },
 {
+"code":"BD-0066",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chandpur",
@@ -528,6 +594,7 @@
 "upazila_bn":"শাহরাস্তি"
 },
 {
+"code":"BD-0067",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -536,6 +603,7 @@
 "upazila_bn":"আনোয়ারা"
 },
 {
+"code":"BD-0068",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -544,6 +612,7 @@
 "upazila_bn":"বাঁশখালী"
 },
 {
+"code":"BD-0069",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -552,6 +621,7 @@
 "upazila_bn":"বোয়ালখালী"
 },
 {
+"code":"BD-0070",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -560,6 +630,7 @@
 "upazila_bn":"চন্দনাইশ"
 },
 {
+"code":"BD-0071",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -568,6 +639,7 @@
 "upazila_bn":"ফটিকছড়ি"
 },
 {
+"code":"BD-0072",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -576,6 +648,7 @@
 "upazila_bn":"হাটহাজারী"
 },
 {
+"code":"BD-0073",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -584,6 +657,7 @@
 "upazila_bn":"কর্ণফুলী"
 },
 {
+"code":"BD-0074",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -592,6 +666,7 @@
 "upazila_bn":"লোহাগাড়া"
 },
 {
+"code":"BD-0075",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -600,6 +675,7 @@
 "upazila_bn":"মীরসরাই"
 },
 {
+"code":"BD-0076",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -608,6 +684,7 @@
 "upazila_bn":"পটিয়া"
 },
 {
+"code":"BD-0077",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -616,6 +693,7 @@
 "upazila_bn":"রাঙ্গুনিয়া"
 },
 {
+"code":"BD-0078",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -624,6 +702,7 @@
 "upazila_bn":"রাউজান"
 },
 {
+"code":"BD-0079",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -632,6 +711,7 @@
 "upazila_bn":"সন্দ্বীপ"
 },
 {
+"code":"BD-0080",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -640,6 +720,7 @@
 "upazila_bn":"সাতকানিয়া"
 },
 {
+"code":"BD-0081",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Chattogram",
@@ -648,6 +729,7 @@
 "upazila_bn":"সীতাকুন্ড"
 },
 {
+"code":"BD-0082",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -656,6 +738,7 @@
 "upazila_bn":"চকরিয়া"
 },
 {
+"code":"BD-0083",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -664,6 +747,7 @@
 "upazila_bn":"কক্সবাজার সদর"
 },
 {
+"code":"BD-0084",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -672,6 +756,7 @@
 "upazila_bn":"ঈদগাঁও"
 },
 {
+"code":"BD-0085",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -680,6 +765,7 @@
 "upazila_bn":"কুতুবদিয়া"
 },
 {
+"code":"BD-0086",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -688,6 +774,7 @@
 "upazila_bn":"মহেশখালী"
 },
 {
+"code":"BD-0087",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -696,6 +783,7 @@
 "upazila_bn":"পেকুয়া"
 },
 {
+"code":"BD-0088",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -704,6 +792,7 @@
 "upazila_bn":"রামু"
 },
 {
+"code":"BD-0089",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -712,6 +801,7 @@
 "upazila_bn":"টেকনাফ"
 },
 {
+"code":"BD-0090",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cox's Bazar",
@@ -720,6 +810,7 @@
 "upazila_bn":"উখিয়া"
 },
 {
+"code":"BD-0091",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -728,6 +819,7 @@
 "upazila_bn":"কুমিল্লা আদর্শ সদর"
 },
 {
+"code":"BD-0092",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -736,6 +828,7 @@
 "upazila_bn":"বরুড়া"
 },
 {
+"code":"BD-0093",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -744,6 +837,7 @@
 "upazila_bn":"ব্রাহ্মণপাড়া"
 },
 {
+"code":"BD-0094",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -752,6 +846,7 @@
 "upazila_bn":"বুড়িচং"
 },
 {
+"code":"BD-0095",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -760,6 +855,7 @@
 "upazila_bn":"চান্দিনা"
 },
 {
+"code":"BD-0096",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -768,6 +864,7 @@
 "upazila_bn":"চৌদ্দগ্রাম"
 },
 {
+"code":"BD-0097",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -776,6 +873,7 @@
 "upazila_bn":"দাউদকান্দি"
 },
 {
+"code":"BD-0098",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -784,6 +882,7 @@
 "upazila_bn":"দেবিদ্বার"
 },
 {
+"code":"BD-0099",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -792,6 +891,7 @@
 "upazila_bn":"হোমনা"
 },
 {
+"code":"BD-0100",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -800,6 +900,7 @@
 "upazila_bn":"লাকসাম"
 },
 {
+"code":"BD-0101",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -808,6 +909,7 @@
 "upazila_bn":"লালমাই"
 },
 {
+"code":"BD-0102",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -816,6 +918,7 @@
 "upazila_bn":"মনোহরগঞ্জ"
 },
 {
+"code":"BD-0103",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -824,6 +927,7 @@
 "upazila_bn":"মেঘনা"
 },
 {
+"code":"BD-0104",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -832,6 +936,7 @@
 "upazila_bn":"মুরাদনগর"
 },
 {
+"code":"BD-0105",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -840,6 +945,7 @@
 "upazila_bn":"নাঙ্গলকোট"
 },
 {
+"code":"BD-0106",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -848,6 +954,7 @@
 "upazila_bn":"সদর দক্ষিণ"
 },
 {
+"code":"BD-0107",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Cumilla",
@@ -856,6 +963,7 @@
 "upazila_bn":"তিতাস"
 },
 {
+"code":"BD-0108",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Feni",
@@ -864,6 +972,7 @@
 "upazila_bn":"ছাগলনাইয়া"
 },
 {
+"code":"BD-0109",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Feni",
@@ -872,6 +981,7 @@
 "upazila_bn":"দাগনভূঞা"
 },
 {
+"code":"BD-0110",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Feni",
@@ -880,6 +990,7 @@
 "upazila_bn":"ফেনী সদর"
 },
 {
+"code":"BD-0111",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Feni",
@@ -888,6 +999,7 @@
 "upazila_bn":"ফুলগাজী"
 },
 {
+"code":"BD-0112",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Feni",
@@ -896,6 +1008,7 @@
 "upazila_bn":"পরশুরাম"
 },
 {
+"code":"BD-0113",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Feni",
@@ -904,6 +1017,7 @@
 "upazila_bn":"সোনাগাজী"
 },
 {
+"code":"BD-0114",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -912,6 +1026,7 @@
 "upazila_bn":"দিঘীনালা"
 },
 {
+"code":"BD-0115",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -920,6 +1035,7 @@
 "upazila_bn":"গুইমারা"
 },
 {
+"code":"BD-0116",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -928,6 +1044,7 @@
 "upazila_bn":"খাগড়াছড়ি সদর"
 },
 {
+"code":"BD-0117",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -936,6 +1053,7 @@
 "upazila_bn":"লক্ষীছড়ি"
 },
 {
+"code":"BD-0118",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -944,6 +1062,7 @@
 "upazila_bn":"মহালছড়ি"
 },
 {
+"code":"BD-0119",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -952,6 +1071,7 @@
 "upazila_bn":"মানিকছড়ি"
 },
 {
+"code":"BD-0120",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -960,6 +1080,7 @@
 "upazila_bn":"মাটিরাঙ্গা"
 },
 {
+"code":"BD-0121",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -968,6 +1089,7 @@
 "upazila_bn":"পানছড়ি"
 },
 {
+"code":"BD-0122",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Khagrachhari",
@@ -976,6 +1098,7 @@
 "upazila_bn":"রামগড়"
 },
 {
+"code":"BD-0123",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Lakshmipur",
@@ -984,6 +1107,7 @@
 "upazila_bn":"কমলনগর"
 },
 {
+"code":"BD-0124",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Lakshmipur",
@@ -992,6 +1116,7 @@
 "upazila_bn":"লক্ষ্মীপুর সদর"
 },
 {
+"code":"BD-0125",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Lakshmipur",
@@ -1000,6 +1125,7 @@
 "upazila_bn":"রায়পুর"
 },
 {
+"code":"BD-0126",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Lakshmipur",
@@ -1008,6 +1134,7 @@
 "upazila_bn":"রামগঞ্জ"
 },
 {
+"code":"BD-0127",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Lakshmipur",
@@ -1016,6 +1143,7 @@
 "upazila_bn":"রামগতি"
 },
 {
+"code":"BD-0128",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1024,6 +1152,7 @@
 "upazila_bn":"বেগমগঞ্জ"
 },
 {
+"code":"BD-0129",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1032,6 +1161,7 @@
 "upazila_bn":"চাটখিল"
 },
 {
+"code":"BD-0130",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1040,6 +1170,7 @@
 "upazila_bn":"কোম্পানীগঞ্জ"
 },
 {
+"code":"BD-0131",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1048,6 +1179,7 @@
 "upazila_bn":"হাতিয়া"
 },
 {
+"code":"BD-0132",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1056,6 +1188,7 @@
 "upazila_bn":"কবিরহাট"
 },
 {
+"code":"BD-0133",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1064,6 +1197,7 @@
 "upazila_bn":"নোয়াখালী সদর"
 },
 {
+"code":"BD-0134",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1072,6 +1206,7 @@
 "upazila_bn":"সেনবাগ"
 },
 {
+"code":"BD-0135",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1080,6 +1215,7 @@
 "upazila_bn":"সোনাইমুড়ী"
 },
 {
+"code":"BD-0136",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Noakhali",
@@ -1088,6 +1224,7 @@
 "upazila_bn":"সুবর্ণচর"
 },
 {
+"code":"BD-0137",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1096,6 +1233,7 @@
 "upazila_bn":"বাঘাইছড়ি"
 },
 {
+"code":"BD-0138",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1104,6 +1242,7 @@
 "upazila_bn":"বরকল"
 },
 {
+"code":"BD-0139",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1112,6 +1251,7 @@
 "upazila_bn":"বিলাইছড়ি"
 },
 {
+"code":"BD-0140",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1120,6 +1260,7 @@
 "upazila_bn":"জুরাছড়ি"
 },
 {
+"code":"BD-0141",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1128,6 +1269,7 @@
 "upazila_bn":"কাপ্তাই"
 },
 {
+"code":"BD-0142",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1136,6 +1278,7 @@
 "upazila_bn":"কাউখালী"
 },
 {
+"code":"BD-0143",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1144,6 +1287,7 @@
 "upazila_bn":"লংগদু"
 },
 {
+"code":"BD-0144",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1152,6 +1296,7 @@
 "upazila_bn":"নানিয়ারচর"
 },
 {
+"code":"BD-0145",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1160,6 +1305,7 @@
 "upazila_bn":"রাজস্থলী"
 },
 {
+"code":"BD-0146",
 "division_en":"Chattogram",
 "division_bn":"চট্টগ্রাম",
 "district_en":"Rangamati",
@@ -1168,6 +1314,7 @@
 "upazila_bn":"রাঙ্গামাটি সদর"
 },
 {
+"code":"BD-0147",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Dhaka",
@@ -1176,6 +1323,7 @@
 "upazila_bn":"ধামরাই"
 },
 {
+"code":"BD-0148",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Dhaka",
@@ -1184,6 +1332,7 @@
 "upazila_bn":"দোহার"
 },
 {
+"code":"BD-0149",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Dhaka",
@@ -1192,6 +1341,7 @@
 "upazila_bn":"কেরাণীগঞ্জ"
 },
 {
+"code":"BD-0150",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Dhaka",
@@ -1200,6 +1350,7 @@
 "upazila_bn":"নবাবগঞ্জ"
 },
 {
+"code":"BD-0151",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Dhaka",
@@ -1208,6 +1359,7 @@
 "upazila_bn":"সাভার"
 },
 {
+"code":"BD-0152",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1216,6 +1368,7 @@
 "upazila_bn":"আলফাডাঙ্গা"
 },
 {
+"code":"BD-0153",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1224,6 +1377,7 @@
 "upazila_bn":"ভাঙ্গা"
 },
 {
+"code":"BD-0154",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1232,6 +1386,7 @@
 "upazila_bn":"বোয়ালমারী"
 },
 {
+"code":"BD-0155",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1240,6 +1395,7 @@
 "upazila_bn":"চরভদ্রাসন"
 },
 {
+"code":"BD-0156",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1248,6 +1404,7 @@
 "upazila_bn":"ফরিদপুর সদর"
 },
 {
+"code":"BD-0157",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1256,6 +1413,7 @@
 "upazila_bn":"মধুখালী"
 },
 {
+"code":"BD-0158",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1264,6 +1422,7 @@
 "upazila_bn":"নগরকান্দা"
 },
 {
+"code":"BD-0159",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1272,6 +1431,7 @@
 "upazila_bn":"সদরপুর"
 },
 {
+"code":"BD-0160",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Faridpur",
@@ -1280,6 +1440,7 @@
 "upazila_bn":"সালথা"
 },
 {
+"code":"BD-0161",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gazipur",
@@ -1288,6 +1449,7 @@
 "upazila_bn":"গাজীপুর সদর"
 },
 {
+"code":"BD-0162",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gazipur",
@@ -1296,6 +1458,7 @@
 "upazila_bn":"কালিয়াকৈর"
 },
 {
+"code":"BD-0163",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gazipur",
@@ -1304,6 +1467,7 @@
 "upazila_bn":"কালীগঞ্জ"
 },
 {
+"code":"BD-0164",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gazipur",
@@ -1312,6 +1476,7 @@
 "upazila_bn":"কাপাসিয়া"
 },
 {
+"code":"BD-0165",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gazipur",
@@ -1320,6 +1485,7 @@
 "upazila_bn":"শ্রীপুর"
 },
 {
+"code":"BD-0166",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gopalganj",
@@ -1328,6 +1494,7 @@
 "upazila_bn":"গোপালগঞ্জ সদর"
 },
 {
+"code":"BD-0167",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gopalganj",
@@ -1336,6 +1503,7 @@
 "upazila_bn":"কাশিয়ানী"
 },
 {
+"code":"BD-0168",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gopalganj",
@@ -1344,6 +1512,7 @@
 "upazila_bn":"কোটালীপাড়া"
 },
 {
+"code":"BD-0169",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gopalganj",
@@ -1352,6 +1521,7 @@
 "upazila_bn":"মুকসুদপুর"
 },
 {
+"code":"BD-0170",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Gopalganj",
@@ -1360,6 +1530,7 @@
 "upazila_bn":"টুংগীপাড়া"
 },
 {
+"code":"BD-0171",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1368,6 +1539,7 @@
 "upazila_bn":"অষ্টগ্রাম"
 },
 {
+"code":"BD-0172",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1376,6 +1548,7 @@
 "upazila_bn":"বাজিতপুর"
 },
 {
+"code":"BD-0173",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1384,6 +1557,7 @@
 "upazila_bn":"ভৈরব"
 },
 {
+"code":"BD-0174",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1392,6 +1566,7 @@
 "upazila_bn":"হোসেনপুর"
 },
 {
+"code":"BD-0175",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1400,6 +1575,7 @@
 "upazila_bn":"ইটনা"
 },
 {
+"code":"BD-0176",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1408,6 +1584,7 @@
 "upazila_bn":"করিমগঞ্জ"
 },
 {
+"code":"BD-0177",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1416,6 +1593,7 @@
 "upazila_bn":"কটিয়াদী"
 },
 {
+"code":"BD-0178",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1424,6 +1602,7 @@
 "upazila_bn":"কিশোরগঞ্জ সদর"
 },
 {
+"code":"BD-0179",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1432,6 +1611,7 @@
 "upazila_bn":"কুলিয়ারচর"
 },
 {
+"code":"BD-0180",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1440,6 +1620,7 @@
 "upazila_bn":"মিঠামইন"
 },
 {
+"code":"BD-0181",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1448,6 +1629,7 @@
 "upazila_bn":"নিকলী"
 },
 {
+"code":"BD-0182",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1456,6 +1638,7 @@
 "upazila_bn":"পাকুন্দিয়া"
 },
 {
+"code":"BD-0183",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Kishoreganj",
@@ -1464,6 +1647,7 @@
 "upazila_bn":"তাড়াইল"
 },
 {
+"code":"BD-0184",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Madaripur",
@@ -1472,6 +1656,7 @@
 "upazila_bn":"ডাসার"
 },
 {
+"code":"BD-0185",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Madaripur",
@@ -1480,6 +1665,7 @@
 "upazila_bn":"কালকিনি"
 },
 {
+"code":"BD-0186",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Madaripur",
@@ -1488,6 +1674,7 @@
 "upazila_bn":"মাদারীপুর সদর"
 },
 {
+"code":"BD-0187",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Madaripur",
@@ -1496,6 +1683,7 @@
 "upazila_bn":"রাজৈর"
 },
 {
+"code":"BD-0188",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Madaripur",
@@ -1504,6 +1692,7 @@
 "upazila_bn":"শিবচর"
 },
 {
+"code":"BD-0189",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1512,6 +1701,7 @@
 "upazila_bn":"দৌলতপুর"
 },
 {
+"code":"BD-0190",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1520,6 +1710,7 @@
 "upazila_bn":"ঘিওর"
 },
 {
+"code":"BD-0191",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1528,6 +1719,7 @@
 "upazila_bn":"হরিরামপুর"
 },
 {
+"code":"BD-0192",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1536,6 +1728,7 @@
 "upazila_bn":"মানিকগঞ্জ সদর"
 },
 {
+"code":"BD-0193",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1544,6 +1737,7 @@
 "upazila_bn":"সাটুরিয়া"
 },
 {
+"code":"BD-0194",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1552,6 +1746,7 @@
 "upazila_bn":"শিবালয়"
 },
 {
+"code":"BD-0195",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Manikganj",
@@ -1560,6 +1755,7 @@
 "upazila_bn":"সিংগাইর"
 },
 {
+"code":"BD-0196",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Munshiganj",
@@ -1568,6 +1764,7 @@
 "upazila_bn":"গজারিয়া"
 },
 {
+"code":"BD-0197",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Munshiganj",
@@ -1576,6 +1773,7 @@
 "upazila_bn":"লৌহজং"
 },
 {
+"code":"BD-0198",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Munshiganj",
@@ -1584,6 +1782,7 @@
 "upazila_bn":"মুন্সিগঞ্জ সদর"
 },
 {
+"code":"BD-0199",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Munshiganj",
@@ -1592,6 +1791,7 @@
 "upazila_bn":"সিরাজদিখান"
 },
 {
+"code":"BD-0200",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Munshiganj",
@@ -1600,6 +1800,7 @@
 "upazila_bn":"শ্রীনগর"
 },
 {
+"code":"BD-0201",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Munshiganj",
@@ -1608,6 +1809,7 @@
 "upazila_bn":"টংগীবাড়ি"
 },
 {
+"code":"BD-0202",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narayanganj",
@@ -1616,6 +1818,7 @@
 "upazila_bn":"আড়াইহাজার"
 },
 {
+"code":"BD-0203",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narayanganj",
@@ -1624,6 +1827,7 @@
 "upazila_bn":"বন্দর"
 },
 {
+"code":"BD-0204",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narayanganj",
@@ -1632,6 +1836,7 @@
 "upazila_bn":"নারায়নগঞ্জ সদর"
 },
 {
+"code":"BD-0205",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narayanganj",
@@ -1640,6 +1845,7 @@
 "upazila_bn":"রূপগঞ্জ"
 },
 {
+"code":"BD-0206",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narayanganj",
@@ -1648,6 +1854,7 @@
 "upazila_bn":"সোনারগাঁ"
 },
 {
+"code":"BD-0207",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narsingdi",
@@ -1656,6 +1863,7 @@
 "upazila_bn":"বেলাবো"
 },
 {
+"code":"BD-0208",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narsingdi",
@@ -1664,6 +1872,7 @@
 "upazila_bn":"মনোহরদী"
 },
 {
+"code":"BD-0209",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narsingdi",
@@ -1672,6 +1881,7 @@
 "upazila_bn":"নরসিংদী সদর"
 },
 {
+"code":"BD-0210",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narsingdi",
@@ -1680,6 +1890,7 @@
 "upazila_bn":"পলাশ"
 },
 {
+"code":"BD-0211",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narsingdi",
@@ -1688,6 +1899,7 @@
 "upazila_bn":"রায়পুরা"
 },
 {
+"code":"BD-0212",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Narsingdi",
@@ -1696,6 +1908,7 @@
 "upazila_bn":"শিবপুর"
 },
 {
+"code":"BD-0213",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Rajbari",
@@ -1704,6 +1917,7 @@
 "upazila_bn":"বালিয়াকান্দি"
 },
 {
+"code":"BD-0214",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Rajbari",
@@ -1712,6 +1926,7 @@
 "upazila_bn":"গোয়ালন্দ"
 },
 {
+"code":"BD-0215",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Rajbari",
@@ -1720,6 +1935,7 @@
 "upazila_bn":"কালুখালী"
 },
 {
+"code":"BD-0216",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Rajbari",
@@ -1728,6 +1944,7 @@
 "upazila_bn":"পাংশা"
 },
 {
+"code":"BD-0217",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Rajbari",
@@ -1736,6 +1953,7 @@
 "upazila_bn":"রাজবাড়ী সদর"
 },
 {
+"code":"BD-0218",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Shariatpur",
@@ -1744,6 +1962,7 @@
 "upazila_bn":"ভেদরগঞ্জ"
 },
 {
+"code":"BD-0219",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Shariatpur",
@@ -1752,6 +1971,7 @@
 "upazila_bn":"ডামুড্যা"
 },
 {
+"code":"BD-0220",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Shariatpur",
@@ -1760,6 +1980,7 @@
 "upazila_bn":"গোসাইরহাট"
 },
 {
+"code":"BD-0221",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Shariatpur",
@@ -1768,6 +1989,7 @@
 "upazila_bn":"নড়িয়া"
 },
 {
+"code":"BD-0222",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Shariatpur",
@@ -1776,6 +1998,7 @@
 "upazila_bn":"শরিয়তপুর সদর"
 },
 {
+"code":"BD-0223",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Shariatpur",
@@ -1784,6 +2007,7 @@
 "upazila_bn":"জাজিরা"
 },
 {
+"code":"BD-0224",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1792,6 +2016,7 @@
 "upazila_bn":"বাসাইল"
 },
 {
+"code":"BD-0225",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1800,6 +2025,7 @@
 "upazila_bn":"ভুয়াপুর"
 },
 {
+"code":"BD-0226",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1808,6 +2034,7 @@
 "upazila_bn":"দেলদুয়ার"
 },
 {
+"code":"BD-0227",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1816,6 +2043,7 @@
 "upazila_bn":"ধনবাড়ী"
 },
 {
+"code":"BD-0228",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1824,6 +2052,7 @@
 "upazila_bn":"ঘাটাইল"
 },
 {
+"code":"BD-0229",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1832,6 +2061,7 @@
 "upazila_bn":"গোপালপুর"
 },
 {
+"code":"BD-0230",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1840,6 +2070,7 @@
 "upazila_bn":"কালিহাতী"
 },
 {
+"code":"BD-0231",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1848,6 +2079,7 @@
 "upazila_bn":"মধুপুর"
 },
 {
+"code":"BD-0232",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1856,6 +2088,7 @@
 "upazila_bn":"মির্জাপুর"
 },
 {
+"code":"BD-0233",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1864,6 +2097,7 @@
 "upazila_bn":"নাগরপুর"
 },
 {
+"code":"BD-0234",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1872,6 +2106,7 @@
 "upazila_bn":"সখিপুর"
 },
 {
+"code":"BD-0235",
 "division_en":"Dhaka",
 "division_bn":"ঢাকা",
 "district_en":"Tangail",
@@ -1880,6 +2115,7 @@
 "upazila_bn":"টাঙ্গাইল সদর"
 },
 {
+"code":"BD-0236",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1888,6 +2124,7 @@
 "upazila_bn":"বাগেরহাট সদর"
 },
 {
+"code":"BD-0237",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1896,6 +2133,7 @@
 "upazila_bn":"চিতলমারী"
 },
 {
+"code":"BD-0238",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1904,6 +2142,7 @@
 "upazila_bn":"ফকিরহাট"
 },
 {
+"code":"BD-0239",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1912,6 +2151,7 @@
 "upazila_bn":"কচুয়া"
 },
 {
+"code":"BD-0240",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1920,6 +2160,7 @@
 "upazila_bn":"মোল্লাহাট"
 },
 {
+"code":"BD-0241",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1928,6 +2169,7 @@
 "upazila_bn":"মোংলা"
 },
 {
+"code":"BD-0242",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1936,6 +2178,7 @@
 "upazila_bn":"মোড়েলগঞ্জ"
 },
 {
+"code":"BD-0243",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1944,6 +2187,7 @@
 "upazila_bn":"রামপাল"
 },
 {
+"code":"BD-0244",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Bagerhat",
@@ -1952,6 +2196,7 @@
 "upazila_bn":"শরণখোলা"
 },
 {
+"code":"BD-0245",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Chuadanga",
@@ -1960,6 +2205,7 @@
 "upazila_bn":"আলমডাঙ্গা"
 },
 {
+"code":"BD-0246",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Chuadanga",
@@ -1968,6 +2214,7 @@
 "upazila_bn":"চুয়াডাঙ্গা সদর"
 },
 {
+"code":"BD-0247",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Chuadanga",
@@ -1976,6 +2223,7 @@
 "upazila_bn":"দামুড়হুদা"
 },
 {
+"code":"BD-0248",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Chuadanga",
@@ -1984,6 +2232,7 @@
 "upazila_bn":"জীবননগর"
 },
 {
+"code":"BD-0249",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -1992,6 +2241,7 @@
 "upazila_bn":"অভয়নগর"
 },
 {
+"code":"BD-0250",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2000,6 +2250,7 @@
 "upazila_bn":"বাঘারপাড়া"
 },
 {
+"code":"BD-0251",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2008,6 +2259,7 @@
 "upazila_bn":"চৌগাছা"
 },
 {
+"code":"BD-0252",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2016,6 +2268,7 @@
 "upazila_bn":"যশোর সদর"
 },
 {
+"code":"BD-0253",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2024,6 +2277,7 @@
 "upazila_bn":"ঝিকরগাছা"
 },
 {
+"code":"BD-0254",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2032,6 +2286,7 @@
 "upazila_bn":"কেশবপুর"
 },
 {
+"code":"BD-0255",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2040,6 +2295,7 @@
 "upazila_bn":"মণিরামপুর"
 },
 {
+"code":"BD-0256",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jashore",
@@ -2048,6 +2304,7 @@
 "upazila_bn":"শার্শা"
 },
 {
+"code":"BD-0257",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jhenaidah",
@@ -2056,6 +2313,7 @@
 "upazila_bn":"হরিণাকুন্ডু"
 },
 {
+"code":"BD-0258",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jhenaidah",
@@ -2064,6 +2322,7 @@
 "upazila_bn":"ঝিনাইদহ সদর"
 },
 {
+"code":"BD-0259",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jhenaidah",
@@ -2072,6 +2331,7 @@
 "upazila_bn":"কালীগঞ্জ"
 },
 {
+"code":"BD-0260",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jhenaidah",
@@ -2080,6 +2340,7 @@
 "upazila_bn":"কোটচাঁদপুর"
 },
 {
+"code":"BD-0261",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jhenaidah",
@@ -2088,6 +2349,7 @@
 "upazila_bn":"মহেশপুর"
 },
 {
+"code":"BD-0262",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Jhenaidah",
@@ -2096,6 +2358,7 @@
 "upazila_bn":"শৈলকুপা"
 },
 {
+"code":"BD-0263",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2104,6 +2367,7 @@
 "upazila_bn":"বটিয়াঘাটা"
 },
 {
+"code":"BD-0264",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2112,6 +2376,7 @@
 "upazila_bn":"দাকোপ"
 },
 {
+"code":"BD-0265",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2120,6 +2385,7 @@
 "upazila_bn":"দিঘলিয়া"
 },
 {
+"code":"BD-0266",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2128,6 +2394,7 @@
 "upazila_bn":"ডুমুরিয়া"
 },
 {
+"code":"BD-0267",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2136,6 +2403,7 @@
 "upazila_bn":"কয়রা"
 },
 {
+"code":"BD-0268",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2144,6 +2412,7 @@
 "upazila_bn":"পাইকগাছা"
 },
 {
+"code":"BD-0269",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2152,6 +2421,7 @@
 "upazila_bn":"ফুলতলা"
 },
 {
+"code":"BD-0270",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2160,6 +2430,7 @@
 "upazila_bn":"রূপসা"
 },
 {
+"code":"BD-0271",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Khulna",
@@ -2168,6 +2439,7 @@
 "upazila_bn":"তেরখাদা"
 },
 {
+"code":"BD-0272",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Kushtia",
@@ -2176,6 +2448,7 @@
 "upazila_bn":"ভেড়ামারা"
 },
 {
+"code":"BD-0273",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Kushtia",
@@ -2184,6 +2457,7 @@
 "upazila_bn":"দৌলতপুর"
 },
 {
+"code":"BD-0274",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Kushtia",
@@ -2192,6 +2466,7 @@
 "upazila_bn":"খোকসা"
 },
 {
+"code":"BD-0275",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Kushtia",
@@ -2200,6 +2475,7 @@
 "upazila_bn":"কুমারখালী"
 },
 {
+"code":"BD-0276",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Kushtia",
@@ -2208,6 +2484,7 @@
 "upazila_bn":"কুষ্টিয়া সদর"
 },
 {
+"code":"BD-0277",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Kushtia",
@@ -2216,6 +2493,7 @@
 "upazila_bn":"মিরপুর"
 },
 {
+"code":"BD-0278",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Magura",
@@ -2224,6 +2502,7 @@
 "upazila_bn":"মাগুরা সদর"
 },
 {
+"code":"BD-0279",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Magura",
@@ -2232,6 +2511,7 @@
 "upazila_bn":"মহম্মদপুর"
 },
 {
+"code":"BD-0280",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Magura",
@@ -2240,6 +2520,7 @@
 "upazila_bn":"শালিখা"
 },
 {
+"code":"BD-0281",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Magura",
@@ -2248,6 +2529,7 @@
 "upazila_bn":"শ্রীপুর"
 },
 {
+"code":"BD-0282",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Meherpur",
@@ -2256,6 +2538,7 @@
 "upazila_bn":"গাংনী"
 },
 {
+"code":"BD-0283",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Meherpur",
@@ -2264,6 +2547,7 @@
 "upazila_bn":"মেহেরপুর সদর"
 },
 {
+"code":"BD-0284",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Meherpur",
@@ -2272,6 +2556,7 @@
 "upazila_bn":"মুজিবনগর"
 },
 {
+"code":"BD-0285",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Narail",
@@ -2280,6 +2565,7 @@
 "upazila_bn":"কালিয়া"
 },
 {
+"code":"BD-0286",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Narail",
@@ -2288,6 +2574,7 @@
 "upazila_bn":"লোহাগড়া"
 },
 {
+"code":"BD-0287",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Narail",
@@ -2296,6 +2583,7 @@
 "upazila_bn":"নড়াইল সদর"
 },
 {
+"code":"BD-0288",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2304,6 +2592,7 @@
 "upazila_bn":"আশাশুনি"
 },
 {
+"code":"BD-0289",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2312,6 +2601,7 @@
 "upazila_bn":"দেবহাটা"
 },
 {
+"code":"BD-0290",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2320,6 +2610,7 @@
 "upazila_bn":"কলারোয়া"
 },
 {
+"code":"BD-0291",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2328,6 +2619,7 @@
 "upazila_bn":"কালিগঞ্জ"
 },
 {
+"code":"BD-0292",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2336,6 +2628,7 @@
 "upazila_bn":"সাতক্ষীরা সদর"
 },
 {
+"code":"BD-0293",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2344,6 +2637,7 @@
 "upazila_bn":"শ্যামনগর"
 },
 {
+"code":"BD-0294",
 "division_en":"Khulna",
 "division_bn":"খুলনা",
 "district_en":"Satkhira",
@@ -2352,6 +2646,7 @@
 "upazila_bn":"তালা"
 },
 {
+"code":"BD-0295",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2360,6 +2655,7 @@
 "upazila_bn":"বকশীগঞ্জ"
 },
 {
+"code":"BD-0296",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2368,6 +2664,7 @@
 "upazila_bn":"দেওয়ানগঞ্জ"
 },
 {
+"code":"BD-0297",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2376,6 +2673,7 @@
 "upazila_bn":"ইসলামপুর"
 },
 {
+"code":"BD-0298",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2384,6 +2682,7 @@
 "upazila_bn":"জামালপুর সদর"
 },
 {
+"code":"BD-0299",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2392,6 +2691,7 @@
 "upazila_bn":"মাদারগঞ্জ"
 },
 {
+"code":"BD-0300",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2400,6 +2700,7 @@
 "upazila_bn":"মেলান্দহ"
 },
 {
+"code":"BD-0301",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Jamalpur",
@@ -2408,6 +2709,7 @@
 "upazila_bn":"সরিষাবাড়ী"
 },
 {
+"code":"BD-0302",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2416,6 +2718,7 @@
 "upazila_bn":"ভালুকা"
 },
 {
+"code":"BD-0303",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2424,6 +2727,7 @@
 "upazila_bn":"ধোবাউড়া"
 },
 {
+"code":"BD-0304",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2432,6 +2736,7 @@
 "upazila_bn":"ফুলবাড়ীয়া"
 },
 {
+"code":"BD-0305",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2440,6 +2745,7 @@
 "upazila_bn":"ফুলপুর"
 },
 {
+"code":"BD-0306",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2448,6 +2754,7 @@
 "upazila_bn":"গফরগাঁও"
 },
 {
+"code":"BD-0307",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2456,6 +2763,7 @@
 "upazila_bn":"গৌরীপুর"
 },
 {
+"code":"BD-0308",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2464,6 +2772,7 @@
 "upazila_bn":"হালুয়াঘাট"
 },
 {
+"code":"BD-0309",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2472,6 +2781,7 @@
 "upazila_bn":"ঈশ্বরগঞ্জ"
 },
 {
+"code":"BD-0310",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2480,6 +2790,7 @@
 "upazila_bn":"মুক্তাগাছা"
 },
 {
+"code":"BD-0311",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2488,6 +2799,7 @@
 "upazila_bn":"ময়মনসিংহ সদর"
 },
 {
+"code":"BD-0312",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2496,6 +2808,7 @@
 "upazila_bn":"নান্দাইল"
 },
 {
+"code":"BD-0313",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2504,6 +2817,7 @@
 "upazila_bn":"তারাকান্দা"
 },
 {
+"code":"BD-0314",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Mymensingh",
@@ -2512,6 +2826,7 @@
 "upazila_bn":"ত্রিশাল"
 },
 {
+"code":"BD-0315",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2520,6 +2835,7 @@
 "upazila_bn":"আটপাড়া"
 },
 {
+"code":"BD-0316",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2528,6 +2844,7 @@
 "upazila_bn":"বারহাট্টা"
 },
 {
+"code":"BD-0317",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2536,6 +2853,7 @@
 "upazila_bn":"দুর্গাপুর"
 },
 {
+"code":"BD-0318",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2544,6 +2862,7 @@
 "upazila_bn":"কলমাকান্দা"
 },
 {
+"code":"BD-0319",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2552,6 +2871,7 @@
 "upazila_bn":"কেন্দুয়া"
 },
 {
+"code":"BD-0320",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2560,6 +2880,7 @@
 "upazila_bn":"খালিয়াজুরী"
 },
 {
+"code":"BD-0321",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2568,6 +2889,7 @@
 "upazila_bn":"মদন"
 },
 {
+"code":"BD-0322",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2576,6 +2898,7 @@
 "upazila_bn":"মোহনগঞ্জ"
 },
 {
+"code":"BD-0323",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2584,6 +2907,7 @@
 "upazila_bn":"নেত্রকোণা সদর"
 },
 {
+"code":"BD-0324",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Netrakona",
@@ -2592,6 +2916,7 @@
 "upazila_bn":"পূর্বধলা"
 },
 {
+"code":"BD-0325",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Sherpur",
@@ -2600,6 +2925,7 @@
 "upazila_bn":"ঝিনাইগাতী"
 },
 {
+"code":"BD-0326",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Sherpur",
@@ -2608,6 +2934,7 @@
 "upazila_bn":"নকলা"
 },
 {
+"code":"BD-0327",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Sherpur",
@@ -2616,6 +2943,7 @@
 "upazila_bn":"নালিতাবাড়ী"
 },
 {
+"code":"BD-0328",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Sherpur",
@@ -2624,6 +2952,7 @@
 "upazila_bn":"শেরপুর সদর"
 },
 {
+"code":"BD-0329",
 "division_en":"Mymensingh",
 "division_bn":"ময়মনসিংহ",
 "district_en":"Sherpur",
@@ -2632,6 +2961,7 @@
 "upazila_bn":"শ্রীবরদী"
 },
 {
+"code":"BD-0330",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2640,6 +2970,7 @@
 "upazila_bn":"আদমদিঘি"
 },
 {
+"code":"BD-0331",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2648,6 +2979,7 @@
 "upazila_bn":"বগুড়া সদর"
 },
 {
+"code":"BD-0332",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2656,6 +2988,7 @@
 "upazila_bn":"ধুনট"
 },
 {
+"code":"BD-0333",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2664,6 +2997,7 @@
 "upazila_bn":"দুপচাচিঁয়া"
 },
 {
+"code":"BD-0334",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2672,6 +3006,7 @@
 "upazila_bn":"গাবতলী"
 },
 {
+"code":"BD-0335",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2680,6 +3015,7 @@
 "upazila_bn":"কাহালু"
 },
 {
+"code":"BD-0336",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2688,6 +3024,7 @@
 "upazila_bn":"নন্দিগ্রাম"
 },
 {
+"code":"BD-0337",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2696,6 +3033,7 @@
 "upazila_bn":"সারিয়াকান্দি"
 },
 {
+"code":"BD-0338",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2704,6 +3042,7 @@
 "upazila_bn":"শাজাহানপুর"
 },
 {
+"code":"BD-0339",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2712,6 +3051,7 @@
 "upazila_bn":"শেরপুর"
 },
 {
+"code":"BD-0340",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2720,6 +3060,7 @@
 "upazila_bn":"শিবগঞ্জ"
 },
 {
+"code":"BD-0341",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Bogura",
@@ -2728,6 +3069,7 @@
 "upazila_bn":"সোনাতলা"
 },
 {
+"code":"BD-0342",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Chapainababganj",
@@ -2736,6 +3078,7 @@
 "upazila_bn":"ভোলাহাট"
 },
 {
+"code":"BD-0343",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Chapainababganj",
@@ -2744,6 +3087,7 @@
 "upazila_bn":"চাঁপাইনবাবগঞ্জ সদর"
 },
 {
+"code":"BD-0344",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Chapainababganj",
@@ -2752,6 +3096,7 @@
 "upazila_bn":"গোমস্তাপুর"
 },
 {
+"code":"BD-0345",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Chapainababganj",
@@ -2760,6 +3105,7 @@
 "upazila_bn":"নাচোল"
 },
 {
+"code":"BD-0346",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Chapainababganj",
@@ -2768,6 +3114,7 @@
 "upazila_bn":"শিবগঞ্জ"
 },
 {
+"code":"BD-0347",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Joypurhat",
@@ -2776,6 +3123,7 @@
 "upazila_bn":"আক্কেলপুর"
 },
 {
+"code":"BD-0348",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Joypurhat",
@@ -2784,6 +3132,7 @@
 "upazila_bn":"জয়পুরহাট সদর"
 },
 {
+"code":"BD-0349",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Joypurhat",
@@ -2792,6 +3141,7 @@
 "upazila_bn":"কালাই"
 },
 {
+"code":"BD-0350",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Joypurhat",
@@ -2800,6 +3150,7 @@
 "upazila_bn":"ক্ষেতলাল"
 },
 {
+"code":"BD-0351",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Joypurhat",
@@ -2808,6 +3159,7 @@
 "upazila_bn":"পাঁচবিবি"
 },
 {
+"code":"BD-0352",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2816,6 +3168,7 @@
 "upazila_bn":"আত্রাই"
 },
 {
+"code":"BD-0353",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2824,6 +3177,7 @@
 "upazila_bn":"বদলগাছী"
 },
 {
+"code":"BD-0354",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2832,6 +3186,7 @@
 "upazila_bn":"ধামইরহাট"
 },
 {
+"code":"BD-0355",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2840,6 +3195,7 @@
 "upazila_bn":"মহাদেবপুর"
 },
 {
+"code":"BD-0356",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2848,6 +3204,7 @@
 "upazila_bn":"মান্দা"
 },
 {
+"code":"BD-0357",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2856,6 +3213,7 @@
 "upazila_bn":"নওগাঁ সদর"
 },
 {
+"code":"BD-0358",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2864,6 +3222,7 @@
 "upazila_bn":"নিয়ামতপুর"
 },
 {
+"code":"BD-0359",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2872,6 +3231,7 @@
 "upazila_bn":"পত্নিতলা"
 },
 {
+"code":"BD-0360",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2880,6 +3240,7 @@
 "upazila_bn":"পোরশা"
 },
 {
+"code":"BD-0361",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2888,6 +3249,7 @@
 "upazila_bn":"রাণীনগর"
 },
 {
+"code":"BD-0362",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Naogaon",
@@ -2896,6 +3258,7 @@
 "upazila_bn":"সাপাহার"
 },
 {
+"code":"BD-0363",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2904,6 +3267,7 @@
 "upazila_bn":"বাগাতিপাড়া"
 },
 {
+"code":"BD-0364",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2912,6 +3276,7 @@
 "upazila_bn":"বড়াইগ্রাম"
 },
 {
+"code":"BD-0365",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2920,6 +3285,7 @@
 "upazila_bn":"গুরুদাসপুর"
 },
 {
+"code":"BD-0366",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2928,6 +3294,7 @@
 "upazila_bn":"লালপুর"
 },
 {
+"code":"BD-0367",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2936,6 +3303,7 @@
 "upazila_bn":"নলডাঙ্গা"
 },
 {
+"code":"BD-0368",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2944,6 +3312,7 @@
 "upazila_bn":"নাটোর সদর"
 },
 {
+"code":"BD-0369",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Natore",
@@ -2952,6 +3321,7 @@
 "upazila_bn":"সিংড়া"
 },
 {
+"code":"BD-0370",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -2960,6 +3330,7 @@
 "upazila_bn":"আটঘরিয়া"
 },
 {
+"code":"BD-0371",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -2968,6 +3339,7 @@
 "upazila_bn":"বেড়া"
 },
 {
+"code":"BD-0372",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -2976,6 +3348,7 @@
 "upazila_bn":"ভাঙ্গুড়া"
 },
 {
+"code":"BD-0373",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -2984,6 +3357,7 @@
 "upazila_bn":"চাটমোহর"
 },
 {
+"code":"BD-0374",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -2992,6 +3366,7 @@
 "upazila_bn":"ফরিদপুর"
 },
 {
+"code":"BD-0375",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -3000,6 +3375,7 @@
 "upazila_bn":"ঈশ্বরদী"
 },
 {
+"code":"BD-0376",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -3008,6 +3384,7 @@
 "upazila_bn":"পাবনা সদর"
 },
 {
+"code":"BD-0377",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -3016,6 +3393,7 @@
 "upazila_bn":"সাঁথিয়া"
 },
 {
+"code":"BD-0378",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Pabna",
@@ -3024,6 +3402,7 @@
 "upazila_bn":"সুজানগর"
 },
 {
+"code":"BD-0379",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3032,6 +3411,7 @@
 "upazila_bn":"বাঘা"
 },
 {
+"code":"BD-0380",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3040,6 +3420,7 @@
 "upazila_bn":"বাগমারা"
 },
 {
+"code":"BD-0381",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3048,6 +3429,7 @@
 "upazila_bn":"চারঘাট"
 },
 {
+"code":"BD-0382",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3056,6 +3438,7 @@
 "upazila_bn":"দুর্গাপুর"
 },
 {
+"code":"BD-0383",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3064,6 +3447,7 @@
 "upazila_bn":"গোদাগাড়ী"
 },
 {
+"code":"BD-0384",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3072,6 +3456,7 @@
 "upazila_bn":"মোহনপুর"
 },
 {
+"code":"BD-0385",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3080,6 +3465,7 @@
 "upazila_bn":"পবা"
 },
 {
+"code":"BD-0386",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3088,6 +3474,7 @@
 "upazila_bn":"পুঠিয়া"
 },
 {
+"code":"BD-0387",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Rajshahi",
@@ -3096,6 +3483,7 @@
 "upazila_bn":"তানোর"
 },
 {
+"code":"BD-0388",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3104,6 +3492,7 @@
 "upazila_bn":"বেলকুচি"
 },
 {
+"code":"BD-0389",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3112,6 +3501,7 @@
 "upazila_bn":"চৌহালি"
 },
 {
+"code":"BD-0390",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3120,6 +3510,7 @@
 "upazila_bn":"কামারখন্দ"
 },
 {
+"code":"BD-0391",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3128,6 +3519,7 @@
 "upazila_bn":"কাজীপুর"
 },
 {
+"code":"BD-0392",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3136,6 +3528,7 @@
 "upazila_bn":"রায়গঞ্জ"
 },
 {
+"code":"BD-0393",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3144,6 +3537,7 @@
 "upazila_bn":"শাহজাদপুর"
 },
 {
+"code":"BD-0394",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3152,6 +3546,7 @@
 "upazila_bn":"সিরাজগঞ্জ সদর"
 },
 {
+"code":"BD-0395",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3160,6 +3555,7 @@
 "upazila_bn":"তাড়াশ"
 },
 {
+"code":"BD-0396",
 "division_en":"Rajshahi",
 "division_bn":"রাজশাহী",
 "district_en":"Sirajganj",
@@ -3168,6 +3564,7 @@
 "upazila_bn":"উল্লাপাড়া"
 },
 {
+"code":"BD-0397",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3176,6 +3573,7 @@
 "upazila_bn":"বিরামপুর"
 },
 {
+"code":"BD-0398",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3184,6 +3582,7 @@
 "upazila_bn":"বীরগঞ্জ"
 },
 {
+"code":"BD-0399",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3192,6 +3591,7 @@
 "upazila_bn":"বিরল"
 },
 {
+"code":"BD-0400",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3200,6 +3600,7 @@
 "upazila_bn":"বোচাগঞ্জ"
 },
 {
+"code":"BD-0401",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3208,6 +3609,7 @@
 "upazila_bn":"চিরিরবন্দর"
 },
 {
+"code":"BD-0402",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3216,6 +3618,7 @@
 "upazila_bn":"দিনাজপুর সদর"
 },
 {
+"code":"BD-0403",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3224,6 +3627,7 @@
 "upazila_bn":"ফুলবাড়ী"
 },
 {
+"code":"BD-0404",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3232,6 +3636,7 @@
 "upazila_bn":"ঘোড়াঘাট"
 },
 {
+"code":"BD-0405",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3240,6 +3645,7 @@
 "upazila_bn":"হাকিমপুর"
 },
 {
+"code":"BD-0406",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3248,6 +3654,7 @@
 "upazila_bn":"কাহারোল"
 },
 {
+"code":"BD-0407",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3256,6 +3663,7 @@
 "upazila_bn":"খানসামা"
 },
 {
+"code":"BD-0408",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3264,6 +3672,7 @@
 "upazila_bn":"নবাবগঞ্জ"
 },
 {
+"code":"BD-0409",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Dinajpur",
@@ -3272,6 +3681,7 @@
 "upazila_bn":"পার্বতীপুর"
 },
 {
+"code":"BD-0410",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3280,6 +3690,7 @@
 "upazila_bn":"ফুলছড়ি"
 },
 {
+"code":"BD-0411",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3288,6 +3699,7 @@
 "upazila_bn":"গাইবান্ধা সদর"
 },
 {
+"code":"BD-0412",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3296,6 +3708,7 @@
 "upazila_bn":"গোবিন্দগঞ্জ"
 },
 {
+"code":"BD-0413",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3304,6 +3717,7 @@
 "upazila_bn":"পলাশবাড়ী"
 },
 {
+"code":"BD-0414",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3312,6 +3726,7 @@
 "upazila_bn":"সাদুল্লাপুর"
 },
 {
+"code":"BD-0415",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3320,6 +3735,7 @@
 "upazila_bn":"সাঘাটা"
 },
 {
+"code":"BD-0416",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Gaibandha",
@@ -3328,6 +3744,7 @@
 "upazila_bn":"সুন্দরগঞ্জ"
 },
 {
+"code":"BD-0417",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3336,6 +3753,7 @@
 "upazila_bn":"ভুরুঙ্গামারী"
 },
 {
+"code":"BD-0418",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3344,6 +3762,7 @@
 "upazila_bn":"চিলমারী"
 },
 {
+"code":"BD-0419",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3352,6 +3771,7 @@
 "upazila_bn":"কুড়িগ্রাম সদর"
 },
 {
+"code":"BD-0420",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3360,6 +3780,7 @@
 "upazila_bn":"নাগেশ্বরী"
 },
 {
+"code":"BD-0421",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3368,6 +3789,7 @@
 "upazila_bn":"ফুলবাড়ী"
 },
 {
+"code":"BD-0422",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3376,6 +3798,7 @@
 "upazila_bn":"রাজারহাট"
 },
 {
+"code":"BD-0423",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3384,6 +3807,7 @@
 "upazila_bn":"চর রাজিবপুর"
 },
 {
+"code":"BD-0424",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3392,6 +3816,7 @@
 "upazila_bn":"রৌমারী"
 },
 {
+"code":"BD-0425",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Kurigram",
@@ -3400,6 +3825,7 @@
 "upazila_bn":"উলিপুর"
 },
 {
+"code":"BD-0426",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Lalmonirhat",
@@ -3408,6 +3834,7 @@
 "upazila_bn":"আদিতমারী"
 },
 {
+"code":"BD-0427",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Lalmonirhat",
@@ -3416,6 +3843,7 @@
 "upazila_bn":"হাতীবান্ধা"
 },
 {
+"code":"BD-0428",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Lalmonirhat",
@@ -3424,6 +3852,7 @@
 "upazila_bn":"কালীগঞ্জ"
 },
 {
+"code":"BD-0429",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Lalmonirhat",
@@ -3432,6 +3861,7 @@
 "upazila_bn":"লালমনিরহাট সদর"
 },
 {
+"code":"BD-0430",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Lalmonirhat",
@@ -3440,6 +3870,7 @@
 "upazila_bn":"পাটগ্রাম"
 },
 {
+"code":"BD-0431",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Nilphamari",
@@ -3448,6 +3879,7 @@
 "upazila_bn":"ডিমলা"
 },
 {
+"code":"BD-0432",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Nilphamari",
@@ -3456,6 +3888,7 @@
 "upazila_bn":"ডোমার"
 },
 {
+"code":"BD-0433",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Nilphamari",
@@ -3464,6 +3897,7 @@
 "upazila_bn":"জলঢাকা"
 },
 {
+"code":"BD-0434",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Nilphamari",
@@ -3472,6 +3906,7 @@
 "upazila_bn":"কিশোরগঞ্জ"
 },
 {
+"code":"BD-0435",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Nilphamari",
@@ -3480,6 +3915,7 @@
 "upazila_bn":"নীলফামারী সদর"
 },
 {
+"code":"BD-0436",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Nilphamari",
@@ -3488,6 +3924,7 @@
 "upazila_bn":"সৈয়দপুর"
 },
 {
+"code":"BD-0437",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Panchagarh",
@@ -3496,6 +3933,7 @@
 "upazila_bn":"আটোয়ারী"
 },
 {
+"code":"BD-0438",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Panchagarh",
@@ -3504,6 +3942,7 @@
 "upazila_bn":"বোদা"
 },
 {
+"code":"BD-0439",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Panchagarh",
@@ -3512,6 +3951,7 @@
 "upazila_bn":"দেবীগঞ্জ"
 },
 {
+"code":"BD-0440",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Panchagarh",
@@ -3520,6 +3960,7 @@
 "upazila_bn":"পঞ্চগড় সদর"
 },
 {
+"code":"BD-0441",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Panchagarh",
@@ -3528,6 +3969,7 @@
 "upazila_bn":"তেতুলিয়া"
 },
 {
+"code":"BD-0442",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3536,6 +3978,7 @@
 "upazila_bn":"বদরগঞ্জ"
 },
 {
+"code":"BD-0443",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3544,6 +3987,7 @@
 "upazila_bn":"গংগাচড়া"
 },
 {
+"code":"BD-0444",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3552,6 +3996,7 @@
 "upazila_bn":"কাউনিয়া"
 },
 {
+"code":"BD-0445",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3560,6 +4005,7 @@
 "upazila_bn":"মিঠাপুকুর"
 },
 {
+"code":"BD-0446",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3568,6 +4014,7 @@
 "upazila_bn":"পীরগাছা"
 },
 {
+"code":"BD-0447",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3576,6 +4023,7 @@
 "upazila_bn":"পীরগঞ্জ"
 },
 {
+"code":"BD-0448",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3584,6 +4032,7 @@
 "upazila_bn":"রংপুর সদর"
 },
 {
+"code":"BD-0449",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Rangpur",
@@ -3592,6 +4041,7 @@
 "upazila_bn":"তারাগঞ্জ"
 },
 {
+"code":"BD-0450",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Thakurgaon",
@@ -3600,6 +4050,7 @@
 "upazila_bn":"বালিয়াডাঙ্গী"
 },
 {
+"code":"BD-0451",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Thakurgaon",
@@ -3608,6 +4059,7 @@
 "upazila_bn":"হরিপুর"
 },
 {
+"code":"BD-0452",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Thakurgaon",
@@ -3616,6 +4068,7 @@
 "upazila_bn":"পীরগঞ্জ"
 },
 {
+"code":"BD-0453",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Thakurgaon",
@@ -3624,6 +4077,7 @@
 "upazila_bn":"রাণীশংকৈল"
 },
 {
+"code":"BD-0454",
 "division_en":"Rangpur",
 "division_bn":"রংপুর",
 "district_en":"Thakurgaon",
@@ -3632,6 +4086,7 @@
 "upazila_bn":"ঠাকুরগাঁও সদর"
 },
 {
+"code":"BD-0455",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3640,6 +4095,7 @@
 "upazila_bn":"আজমিরীগঞ্জ"
 },
 {
+"code":"BD-0456",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3648,6 +4104,7 @@
 "upazila_bn":"বাহুবল"
 },
 {
+"code":"BD-0457",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3656,6 +4113,7 @@
 "upazila_bn":"বানিয়াচং"
 },
 {
+"code":"BD-0458",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3664,6 +4122,7 @@
 "upazila_bn":"চুনারুঘাট"
 },
 {
+"code":"BD-0459",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3672,6 +4131,7 @@
 "upazila_bn":"হবিগঞ্জ সদর"
 },
 {
+"code":"BD-0460",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3680,6 +4140,7 @@
 "upazila_bn":"লাখাই"
 },
 {
+"code":"BD-0461",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3688,6 +4149,7 @@
 "upazila_bn":"মাধবপুর"
 },
 {
+"code":"BD-0462",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3696,6 +4158,7 @@
 "upazila_bn":"নবীগঞ্জ"
 },
 {
+"code":"BD-0463",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Habiganj",
@@ -3704,6 +4167,7 @@
 "upazila_bn":"শায়েস্তাগঞ্জ"
 },
 {
+"code":"BD-0464",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3712,6 +4176,7 @@
 "upazila_bn":"বড়লেখা"
 },
 {
+"code":"BD-0465",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3720,6 +4185,7 @@
 "upazila_bn":"জুড়ী"
 },
 {
+"code":"BD-0466",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3728,6 +4194,7 @@
 "upazila_bn":"কমলগঞ্জ"
 },
 {
+"code":"BD-0467",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3736,6 +4203,7 @@
 "upazila_bn":"কুলাউড়া"
 },
 {
+"code":"BD-0468",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3744,6 +4212,7 @@
 "upazila_bn":"মৌলভীবাজার সদর"
 },
 {
+"code":"BD-0469",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3752,6 +4221,7 @@
 "upazila_bn":"রাজনগর"
 },
 {
+"code":"BD-0470",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Moulvibazar",
@@ -3760,6 +4230,7 @@
 "upazila_bn":"শ্রীমঙ্গল"
 },
 {
+"code":"BD-0471",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3768,6 +4239,7 @@
 "upazila_bn":"বিশ্বম্ভরপুর"
 },
 {
+"code":"BD-0472",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3776,6 +4248,7 @@
 "upazila_bn":"ছাতক"
 },
 {
+"code":"BD-0473",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3784,6 +4257,7 @@
 "upazila_bn":"দিরাই"
 },
 {
+"code":"BD-0474",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3792,6 +4266,7 @@
 "upazila_bn":"ধর্মপাশা"
 },
 {
+"code":"BD-0475",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3800,6 +4275,7 @@
 "upazila_bn":"দোয়ারাবাজার"
 },
 {
+"code":"BD-0476",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3808,6 +4284,7 @@
 "upazila_bn":"জগন্নাথপুর"
 },
 {
+"code":"BD-0477",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3816,6 +4293,7 @@
 "upazila_bn":"জামালগঞ্জ"
 },
 {
+"code":"BD-0478",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3824,6 +4302,7 @@
 "upazila_bn":"মধ্যনগর"
 },
 {
+"code":"BD-0479",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3832,6 +4311,7 @@
 "upazila_bn":"শাল্লা"
 },
 {
+"code":"BD-0480",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3840,6 +4320,7 @@
 "upazila_bn":"শান্তিগঞ্জ"
 },
 {
+"code":"BD-0481",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3848,6 +4329,7 @@
 "upazila_bn":"সুনামগঞ্জ সদর"
 },
 {
+"code":"BD-0482",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sunamganj",
@@ -3856,6 +4338,7 @@
 "upazila_bn":"তাহিরপুর"
 },
 {
+"code":"BD-0483",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3864,6 +4347,7 @@
 "upazila_bn":"বালাগঞ্জ"
 },
 {
+"code":"BD-0484",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3872,6 +4356,7 @@
 "upazila_bn":"বিয়ানীবাজার"
 },
 {
+"code":"BD-0485",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3880,6 +4365,7 @@
 "upazila_bn":"বিশ্বনাথ"
 },
 {
+"code":"BD-0486",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3888,6 +4374,7 @@
 "upazila_bn":"কোম্পানীগঞ্জ"
 },
 {
+"code":"BD-0487",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3896,6 +4383,7 @@
 "upazila_bn":"দক্ষিণ সুরমা"
 },
 {
+"code":"BD-0488",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3904,6 +4392,7 @@
 "upazila_bn":"ফেঞ্চুগঞ্জ"
 },
 {
+"code":"BD-0489",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3912,6 +4401,7 @@
 "upazila_bn":"গোলাপগঞ্জ"
 },
 {
+"code":"BD-0490",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3920,6 +4410,7 @@
 "upazila_bn":"গোয়াইনঘাট"
 },
 {
+"code":"BD-0491",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3928,6 +4419,7 @@
 "upazila_bn":"জৈন্তাপুর"
 },
 {
+"code":"BD-0492",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3936,6 +4428,7 @@
 "upazila_bn":"কানাইঘাট"
 },
 {
+"code":"BD-0493",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3944,6 +4437,7 @@
 "upazila_bn":"ওসমানী নগর"
 },
 {
+"code":"BD-0494",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",
@@ -3952,6 +4446,7 @@
 "upazila_bn":"সিলেট সদর"
 },
 {
+"code":"BD-0495",
 "division_en":"Sylhet",
 "division_bn":"সিলেট",
 "district_en":"Sylhet",

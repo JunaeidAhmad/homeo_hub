@@ -75,10 +75,18 @@ describe("admin LocationsTable", () => {
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["বিভাগ", "জেলা", "উপজেলা"]);
   });
 
-  it("reports a failed load", async () => {
-    const { client } = fakeApi(() => ({ status: 500, body: { detail: "boom" } }));
+  it("reports a failed load and loads again on request", async () => {
+    let failing = true;
+    const { client } = fakeApi((url) =>
+      failing ? { status: 500, body: { detail: "boom" } } : server(url),
+    );
     renderIn("en", <LocationsTable client={client} />);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load the list.");
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load the list. Try again.");
+    failing = false;
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByRole("table")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

@@ -79,6 +79,12 @@ GET /api/v1/<things>/?q=&page=&page_size=&ordering=&<filters>
 - `page` / `page_size`: 20 per page by default, at most 100. `ordering`: a field name, `-` for descending.
 - Bangla text is compared in one Unicode form (NFC), so differently typed letters such as য় still match.
 
+- Older English spellings (Comilla, Barisal, Jessore, Bogra, Chittagong) find the renamed areas, both in `q` and
+  in the filters (`backend/apps/locations/spellings.py`).
+- Anonymous requests are rate-limited per visitor (`THROTTLE_PUBLIC_READ`, default `300/min`). If Redis is down,
+  public reads keep working.
+- Search has no index yet; see the measured limits at the top of `common/search.py`.
+
 A new list view only declares `search_fields`, `ordering_fields` and (optionally) a `filterset_class`.
 In the web app use `useListQuery` + `SearchableTable` for admin lists and `LocationPicker` for choosing an area.
 
@@ -117,4 +123,7 @@ GitHub Actions, each workflow runs only when its folder changes:
 
 - **API → Render**: blueprint in [`render.yaml`](render.yaml). Set `DATABASE_URL` (Neon), `REDIS_URL`
   (Render Key Value) and `CORS_ALLOWED_ORIGINS` (the Vercel domain) in the dashboard.
+- **Check `NUM_PROXIES` after the first deploy.** Rate limits identify visitors from `X-Forwarded-For`. Set
+  `NUM_PROXIES` to the number of proxies in front of the API once you have seen what Render sends; unset, the whole
+  header is used (visitors are told apart, but a client calling the API directly could fake it).
 - **Web → Vercel**: import the repo with Root Directory `frontend`; set `NEXT_PUBLIC_API_BASE_URL` to the Render URL.

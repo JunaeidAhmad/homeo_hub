@@ -13,6 +13,7 @@ class LiveView(APIView):
 
     authentication_classes = []
     permission_classes = []
+    throttle_classes = []  # monitors poll this often
 
     @extend_schema(operation_id="health_live", responses=LiveSerializer, tags=["health"])
     def get(self, request: Request) -> Response:
@@ -24,6 +25,7 @@ class ReadyView(APIView):
 
     authentication_classes = []
     permission_classes = []
+    throttle_classes = []  # monitors poll this often
 
     @extend_schema(
         operation_id="health_ready",

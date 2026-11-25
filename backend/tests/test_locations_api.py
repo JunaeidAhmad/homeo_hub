@@ -245,3 +245,38 @@ def test_a_very_long_query_is_handled_without_error(client):
 def test_a_query_containing_a_nul_byte_is_not_a_server_error(client):
     # PostgreSQL text cannot hold NUL; it must be dropped, not crash the request.
     assert client.get(URL, {"q": "sa\x00var"}).status_code == 200
+
+
+# --- older English spellings ----------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("old", "current"),
+    [
+        ("Comilla", "Cumilla"),
+        ("Barisal", "Barishal"),
+        ("Jessore", "Jashore"),
+        ("Bogra", "Bogura"),
+        ("Chittagong", "Chattogram"),
+    ],
+)
+def test_searching_an_old_spelling_finds_the_renamed_area(client, old, current):
+    top = fetch(client, q=old)["results"][0]
+
+    assert current in top["display_name"]
+
+
+@pytest.mark.parametrize(
+    ("param", "old", "current"),
+    [
+        ("division", "Chittagong", "Chattogram"),
+        ("division", "barisal", "Barishal"),
+        ("district", "Comilla", "Cumilla"),
+        ("district", "BOGRA", "Bogura"),
+    ],
+)
+def test_filters_accept_old_spellings(client, param, old, current):
+    expected = fetch(client, **{param: current})["count"]
+
+    assert expected > 0
+    assert fetch(client, **{param: old})["count"] == expected

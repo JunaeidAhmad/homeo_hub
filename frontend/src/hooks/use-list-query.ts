@@ -26,7 +26,10 @@ export function useListQuery<T>(
   const page = chosen.searched === searched ? chosen.page : 1;
   const setPage = (next: number) => setChosen({ page: next, searched });
 
-  const key = `${searched}|${page}`;
+  const [attempt, setAttempt] = useState(0);
+  const retry = () => setAttempt((n) => n + 1);
+
+  const key = `${searched}|${page}|${attempt}`;
   const [result, setResult] = useState<{ key: string; data: ListPage<T> | null } | null>(null);
 
   useEffect(() => {
@@ -45,6 +48,7 @@ export function useListQuery<T>(
     setQuery,
     page,
     setPage,
+    retry,
     pageSize,
     // While the next page loads, keep showing the last one.
     rows: result?.data?.results ?? [],

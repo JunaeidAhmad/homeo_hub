@@ -59,3 +59,54 @@ def test_the_bundled_area_file_has_no_duplicate_areas():
     keys = [(r["division_en"], r["district_en"], r["upazila_en"]) for r in rows]
 
     assert len(keys) == len(set(keys)) == 495
+
+
+def area_row(code: str, upazila: str, district: str = "Barisal") -> dict:
+    return {
+        "code": code,
+        "division_en": "Barisal",
+        "division_bn": "বরিশাল",
+        "district_en": district,
+        "district_bn": "বরিশাল",
+        "upazila_en": upazila,
+        "upazila_bn": "বাকেরগঞ্জ",
+    }
+
+
+def seed_rows(tmp_path, rows: list[dict]) -> None:
+    file = tmp_path / "areas.json"
+    file.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
+    call_command("seed_locations", file=file)
+
+
+@pytest.mark.django_db
+def test_respelling_an_area_renames_it_instead_of_adding_a_second_one(tmp_path):
+    seed_rows(tmp_path, [area_row("T-1", "Bakerganj", district="Barisal")])
+    original = Location.objects.get()
+
+    seed_rows(tmp_path, [area_row("T-1", "Bakerganj", district="Barishal")])
+
+    renamed = Location.objects.get()  # still exactly one row
+    assert renamed.pk == original.pk
+    assert renamed.district_en == "Barishal"
+
+
+@pytest.mark.django_db
+def test_an_area_seeded_before_codes_existed_keeps_its_identity(tmp_path):
+    row = area_row("T-1", "Bakerganj")
+    before = Location.objects.create(**{k: v for k, v in row.items() if k != "code"})
+
+    seed_rows(tmp_path, [row])
+
+    after = Location.objects.get()
+    assert after.pk == before.pk
+    assert after.code == "T-1"
+
+
+def test_every_bundled_area_has_its_own_code():
+    from apps.locations.management.commands.seed_locations import DEFAULT_FILE
+
+    codes = [row["code"] for row in json.loads(DEFAULT_FILE.read_text(encoding="utf-8"))]
+
+    assert all(codes)
+    assert len(set(codes)) == 495

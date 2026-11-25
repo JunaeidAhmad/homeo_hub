@@ -94,7 +94,17 @@ def selected_database_url() -> str:
 DATABASE_URL = selected_database_url()
 DATABASES = {"default": database_config(DATABASE_URL)} if DATABASE_URL else {}
 
-REDIS_URL = env.str("REDIS_URL", default="")
+# Production and staging require this to be set explicitly (see production.py).
+REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
+
+# Cache: rate-limit counters (and later, other short-lived data).
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {"socket_connect_timeout": 2, "socket_timeout": 2},
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -128,6 +138,13 @@ REST_FRAMEWORK = {
         "common.search.RankedOrderingFilter",
     ],
     "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardPagination",
+    "DEFAULT_THROTTLE_CLASSES": ["common.throttling.PublicReadThrottle"],
+    "DEFAULT_THROTTLE_RATES": {
+        "public_read": env.str("THROTTLE_PUBLIC_READ", default="300/min"),
+    },
+    # How many reverse proxies sit in front of the API, used to find the visitor's
+    # address in X-Forwarded-For. Unset = use the whole header. See README "Deploy".
+    "NUM_PROXIES": env.int("NUM_PROXIES", default=None),
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_AUTHENTICATION_CLASSES": [],
     # Endpoints are private unless a view opts out (health checks do).

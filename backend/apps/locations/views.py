@@ -17,7 +17,7 @@ class LocationListView(ListAPIView):
     permission_classes = [AllowAny]
 
     filterset_class = LocationFilter
-    search_fields = [
+    ordering_fields = [
         "division_en",
         "division_bn",
         "district_en",
@@ -25,5 +25,5 @@ class LocationListView(ListAPIView):
         "upazila_en",
         "upazila_bn",
     ]
-    ordering_fields = search_fields
+    search_fields = [*ordering_fields, "old_spellings"]
     ordering = ["division_en", "district_en", "upazila_en"]

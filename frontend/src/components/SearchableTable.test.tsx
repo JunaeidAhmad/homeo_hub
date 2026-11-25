@@ -17,7 +17,7 @@ const rows: Row[] = [
 ];
 
 function setup(props: Partial<React.ComponentProps<typeof SearchableTable<Row>>> = {}, locale: "en" | "bn" = "en") {
-  const handlers = { onQueryChange: vi.fn(), onPageChange: vi.fn() };
+  const handlers = { onQueryChange: vi.fn(), onPageChange: vi.fn(), onRetry: vi.fn() };
   renderIn(
     locale,
     <SearchableTable<Row>
@@ -67,15 +67,24 @@ describe("SearchableTable", () => {
     expect(onPageChange.mock.calls).toEqual([[3], [1]]);
   });
 
-  it("disables Previous on the first page and Next on the last", () => {
-    setup({ total: 50, page: 1 });
-    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+  it("marks Previous unavailable on the first page, without losing keyboard focus", async () => {
+    const { onPageChange } = setup({ total: 50, page: 1 });
+    const previous = screen.getByRole("button", { name: "Previous" });
+    expect(previous).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("button", { name: "Next" })).toHaveAttribute("aria-disabled", "false");
+
+    await userEvent.click(previous);
+
+    expect(onPageChange).not.toHaveBeenCalled();
+    expect(previous).toHaveFocus(); // a natively disabled button would drop focus
   });
 
-  it("disables Next on the last page", () => {
-    setup({ total: 50, page: 3 });
-    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+  it("marks Next unavailable on the last page", async () => {
+    const { onPageChange } = setup({ total: 50, page: 3 });
+
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(onPageChange).not.toHaveBeenCalled();
   });
 
   it("says so when nothing matches", () => {
@@ -89,9 +98,13 @@ describe("SearchableTable", () => {
     expect(screen.getByText("Loading…")).toBeInTheDocument();
   });
 
-  it("shows an error it can be retried from", () => {
-    setup({ status: "error", rows: [] });
-    expect(screen.getByRole("alert")).toHaveTextContent("Couldn't load the list. Try again.");
+  it("shows an error it can be retried from", async () => {
+    const { onRetry } = setup({ status: "error", rows: [] });
+    expect(screen.getByRole("alert")).toHaveTextContent("Couldn't load the list.");
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(onRetry).toHaveBeenCalledOnce();
   });
 
   it("shows Bangla labels and Bangla digits", () => {

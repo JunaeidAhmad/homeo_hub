@@ -13,5 +13,6 @@ DATABASES = {
         env.str("DATABASE_URL", default="postgres://postgres@localhost:5432/homeohub")
     )
 }
-REDIS_URL = env.str("REDIS_URL", default="redis://localhost:6379/0")
+# In-memory cache: tests stay isolated from whatever is in the developer's Redis.
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

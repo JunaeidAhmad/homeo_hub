@@ -8,6 +8,12 @@
   then by how closely the words match. ``ordering`` replaces that ranking.
 * ``page`` / ``page_size``: see ``common.pagination``.
 * ``ordering`` (``-`` for descending) accepts the view's ``ordering_fields``.
+
+Performance: each search scans the table. Measured locally (6 fields): about 35 ms at
+500 rows, 200 ms at 10,000, 1 s at 50,000. Before a list grows past ~10,000 rows, add
+GIN ``gin_trgm_ops`` indexes and filter with the index-capable ``%>`` operator
+(``__trigram_word_similar``), setting ``pg_trgm.word_similarity_threshold`` to
+``MIN_SIMILARITY`` inside the same transaction (about 2 ms at 10,000 rows when tried).
 """
 
 import unicodedata
