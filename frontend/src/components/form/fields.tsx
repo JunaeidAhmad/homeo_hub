@@ -1,4 +1,9 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from "react";
+import {
+  useId,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type TextareaHTMLAttributes,
+} from "react";
 
 const BOX = "min-h-13 w-full rounded-control border bg-surface px-3.5 text-[17px]";
 
@@ -45,6 +50,45 @@ export function TextField({
           {...input}
         />
       </div>
+      {error && <FieldError id={errorId}>{error}</FieldError>}
+    </div>
+  );
+}
+
+export function TextAreaField({
+  label,
+  hint,
+  error,
+  ...area
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  label: string;
+  hint?: string;
+  error?: string;
+}) {
+  const id = useId();
+  const hintId = hint ? `${id}-hint` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-[15px] font-semibold">
+        {label}
+      </label>
+      {hint && (
+        <p id={hintId} className="text-sm text-ink-muted">
+          {hint}
+        </p>
+      )}
+      <textarea
+        id={id}
+        rows={4}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={[hintId, errorId].filter(Boolean).join(" ") || undefined}
+        className={`w-full rounded-control border bg-surface px-3.5 py-2.5 text-base leading-relaxed ${
+          error ? "border-danger" : "border-line-strong"
+        }`}
+        {...area}
+      />
       {error && <FieldError id={errorId}>{error}</FieldError>}
     </div>
   );

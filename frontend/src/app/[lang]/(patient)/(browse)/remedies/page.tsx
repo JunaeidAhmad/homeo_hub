@@ -1,6 +1,16 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
+import { RemedyList } from "@/areas/patient/remedies/RemedyList";
+import { common } from "@/i18n/messages/common";
 import { patient } from "@/i18n/messages/patient";
+import { getTranslator } from "@/i18n/server";
 
-export default function Page() {
-  return <PlaceholderPage area={patient} titleKey="patient.remedies.title" />;
+export default async function Page() {
+  const { t } = await getTranslator(common, patient);
+  return (
+    <section className="flex flex-col gap-5">
+      <h1 className="font-display text-[34px] leading-tight font-normal desktop:text-[44px]">
+        {t("patient.remedies.title")}
+      </h1>
+      <RemedyList />
+    </section>
+  );
 }

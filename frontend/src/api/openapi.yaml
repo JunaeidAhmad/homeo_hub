@@ -35,6 +35,251 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/admin/remedies/:
+    get:
+      operationId: admin_remedies_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - ARCHIVED
+          - DRAFT
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminRemedyList'
+          description: ''
+    post:
+      operationId: admin_remedies_create
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRemedyRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRemedy'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/remedies/{id}/:
+    get:
+      operationId: admin_remedies_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRemedy'
+          description: ''
+    patch:
+      operationId: admin_remedies_update
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminRemedyRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRemedy'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/remedies/{id}/picture/:
+    put:
+      operationId: admin_remedies_picture_set
+      description: |-
+        Send the picture as multipart form data. (Safe from other sites: signing in here
+        uses a header token, never a cookie.)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PictureUploadRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRemedy'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: admin_remedies_picture_remove
+      description: |-
+        Send the picture as multipart form data. (Safe from other sites: signing in here
+        uses a header token, never a cookie.)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRemedy'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/roles/:
     get:
       operationId: admin_roles
@@ -706,6 +951,73 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/remedies/:
+    get:
+      operationId: remedies_list
+      description: Active remedies. Public.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      tags:
+      - remedies
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRemedyCardList'
+          description: ''
+  /api/v1/remedies/{slug}/:
+    get:
+      operationId: remedies_read
+      description: One active remedy. Public.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - remedies
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemedyDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     AdminMe:
@@ -752,6 +1064,125 @@ components:
       - permissions
       - roles
       - username
+    AdminRemedy:
+      type: object
+      description: Everything about a remedy, both languages, for the editor.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/RemedyStatusEnum'
+        description_en:
+          type: string
+          maxLength: 5000
+        description_bn:
+          type: string
+          maxLength: 5000
+        indication_en:
+          type: string
+          maxLength: 5000
+        indication_bn:
+          type: string
+          maxLength: 5000
+        advice_do_en:
+          type: string
+          maxLength: 5000
+        advice_do_bn:
+          type: string
+          maxLength: 5000
+        advice_dont_en:
+          type: string
+          maxLength: 5000
+        advice_dont_bn:
+          type: string
+          maxLength: 5000
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - advice_do_en
+      - advice_dont_en
+      - description_en
+      - id
+      - indication_en
+      - name
+      - picture_url
+      - updated_at
+    AdminRemedyRequest:
+      type: object
+      description: Everything about a remedy, both languages, for the editor.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/RemedyStatusEnum'
+        description_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        description_bn:
+          type: string
+          maxLength: 5000
+        indication_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        indication_bn:
+          type: string
+          maxLength: 5000
+        advice_do_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        advice_do_bn:
+          type: string
+          maxLength: 5000
+        advice_dont_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        advice_dont_bn:
+          type: string
+          maxLength: 5000
+      required:
+      - advice_do_en
+      - advice_dont_en
+      - description_en
+      - indication_en
+      - name
     CheckResultEnum:
       enum:
       - ok
@@ -858,6 +1289,29 @@ components:
       required:
       - password
       - phone
+    PaginatedAdminRemedyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminRemedy'
     PaginatedLocationList:
       type: object
       required:
@@ -881,6 +1335,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Location'
+    PaginatedRemedyCardList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemedyCard'
     PaginatedStaffList:
       type: object
       required:
@@ -904,6 +1381,54 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Staff'
+    PatchedAdminRemedyRequest:
+      type: object
+      description: Everything about a remedy, both languages, for the editor.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        status:
+          $ref: '#/components/schemas/RemedyStatusEnum'
+        description_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        description_bn:
+          type: string
+          maxLength: 5000
+        indication_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        indication_bn:
+          type: string
+          maxLength: 5000
+        advice_do_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        advice_do_bn:
+          type: string
+          maxLength: 5000
+        advice_dont_en:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        advice_dont_bn:
+          type: string
+          maxLength: 5000
     PatchedStaffUpdateRequest:
       type: object
       description: Send only what changes.
@@ -1004,6 +1529,14 @@ components:
         * `view_payments` - view_payments
         * `manage_payments` - manage_payments
         * `manage_own_shop` - manage_own_shop
+    PictureUploadRequest:
+      type: object
+      properties:
+        picture:
+          type: string
+          format: binary
+      required:
+      - picture
     PreferredLanguageEnum:
       enum:
       - en
@@ -1040,6 +1573,96 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    RemedyCard:
+      type: object
+      description: A remedy in a list, in the language asked for.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        indication:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - indication
+      - name
+      - picture_url
+      - slug
+    RemedyDetail:
+      type: object
+      description: A remedy in a list, in the language asked for.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        indication:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        advice_do:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        advice_dont:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - advice_do
+      - advice_dont
+      - description
+      - id
+      - indication
+      - name
+      - picture_url
+      - slug
+    RemedyStatusEnum:
+      enum:
+      - DRAFT
+      - ACTIVE
+      - ARCHIVED
+      type: string
+      description: |-
+        * `DRAFT` - Draft
+        * `ACTIVE` - Active
+        * `ARCHIVED` - Archived
     ResendRequest:
       type: object
       properties:

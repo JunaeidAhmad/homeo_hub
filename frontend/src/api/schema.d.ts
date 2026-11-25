@@ -26,6 +26,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/remedies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_remedies_list"];
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        post: operations["admin_remedies_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/remedies/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_remedies_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        patch: operations["admin_remedies_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/remedies/{id}/picture/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description Send the picture as multipart form data. (Safe from other sites: signing in here
+         *     uses a header token, never a cookie.)
+         */
+        put: operations["admin_remedies_picture_set"];
+        post?: never;
+        /**
+         * @description Send the picture as multipart form data. (Safe from other sites: signing in here
+         *     uses a header token, never a cookie.)
+         */
+        delete: operations["admin_remedies_picture_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/roles/": {
         parameters: {
             query?: never;
@@ -348,6 +428,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/remedies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Active remedies. Public. */
+        get: operations["remedies_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/remedies/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One active remedy. Public. */
+        get: operations["remedies_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -367,6 +481,42 @@ export interface components {
             /** Format: date-time */
             readonly last_login: string | null;
             readonly permissions: components["schemas"]["PermissionEnum"][];
+        };
+        /** @description Everything about a remedy, both languages, for the editor. */
+        AdminRemedy: {
+            /** Format: uuid */
+            readonly id: string;
+            name: string;
+            name_bn?: string;
+            slug?: string;
+            status?: components["schemas"]["RemedyStatusEnum"];
+            description_en: string;
+            description_bn?: string;
+            indication_en: string;
+            indication_bn?: string;
+            advice_do_en: string;
+            advice_do_bn?: string;
+            advice_dont_en: string;
+            advice_dont_bn?: string;
+            /** Format: uri */
+            readonly picture_url: string | null;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Everything about a remedy, both languages, for the editor. */
+        AdminRemedyRequest: {
+            name: string;
+            name_bn?: string;
+            slug?: string;
+            status?: components["schemas"]["RemedyStatusEnum"];
+            description_en: string;
+            description_bn?: string;
+            indication_en: string;
+            indication_bn?: string;
+            advice_do_en: string;
+            advice_do_bn?: string;
+            advice_dont_en: string;
+            advice_dont_bn?: string;
         };
         /**
          * @description * `ok` - ok
@@ -418,6 +568,21 @@ export interface components {
             phone: string;
             password: string;
         };
+        PaginatedAdminRemedyList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminRemedy"][];
+        };
         PaginatedLocationList: {
             /** @example 123 */
             count: number;
@@ -433,6 +598,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Location"][];
         };
+        PaginatedRemedyCardList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["RemedyCard"][];
+        };
         PaginatedStaffList: {
             /** @example 123 */
             count: number;
@@ -447,6 +627,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Staff"][];
+        };
+        /** @description Everything about a remedy, both languages, for the editor. */
+        PatchedAdminRemedyRequest: {
+            name?: string;
+            name_bn?: string;
+            slug?: string;
+            status?: components["schemas"]["RemedyStatusEnum"];
+            description_en?: string;
+            description_bn?: string;
+            indication_en?: string;
+            indication_bn?: string;
+            advice_do_en?: string;
+            advice_do_bn?: string;
+            advice_dont_en?: string;
+            advice_dont_bn?: string;
         };
         /** @description Send only what changes. */
         PatchedStaffUpdateRequest: {
@@ -491,6 +686,10 @@ export interface components {
          * @enum {string}
          */
         PermissionEnum: "manage_staff" | "view_doctors" | "manage_doctors" | "view_cases" | "assign_cases" | "manage_remedies" | "manage_illnesses" | "view_patients" | "view_orders" | "manage_orders" | "view_payments" | "manage_payments" | "manage_own_shop";
+        PictureUploadRequest: {
+            /** Format: binary */
+            picture: string;
+        };
         /**
          * @description * `en` - English
          *     * `bn` - Bangla
@@ -511,6 +710,38 @@ export interface components {
          * @enum {string}
          */
         ReadyStatusEnum: "ok" | "degraded";
+        /** @description A remedy in a list, in the language asked for. */
+        RemedyCard: {
+            /** Format: uuid */
+            readonly id: string;
+            name: string;
+            name_bn?: string;
+            slug: string;
+            /** Format: uri */
+            readonly picture_url: string | null;
+            readonly indication: string;
+        };
+        /** @description A remedy in a list, in the language asked for. */
+        RemedyDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            name: string;
+            name_bn?: string;
+            slug: string;
+            /** Format: uri */
+            readonly picture_url: string | null;
+            readonly indication: string;
+            readonly description: string;
+            readonly advice_do: string[];
+            readonly advice_dont: string[];
+        };
+        /**
+         * @description * `DRAFT` - Draft
+         *     * `ACTIVE` - Active
+         *     * `ARCHIVED` - Archived
+         * @enum {string}
+         */
+        RemedyStatusEnum: "DRAFT" | "ACTIVE" | "ARCHIVED";
         ResendRequest: {
             /** Format: uuid */
             verification_id: string;
@@ -623,6 +854,230 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminMe"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_remedies_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+                status?: "ACTIVE" | "ARCHIVED" | "DRAFT";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminRemedyList"];
+                };
+            };
+        };
+    };
+    admin_remedies_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminRemedyRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRemedy"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_remedies_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRemedy"];
+                };
+            };
+        };
+    };
+    admin_remedies_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminRemedyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRemedy"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_remedies_picture_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PictureUploadRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRemedy"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_remedies_picture_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRemedy"];
                 };
             };
             401: {
@@ -1365,6 +1820,63 @@ export interface operations {
                 };
             };
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    remedies_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedRemedyCardList"];
+                };
+            };
+        };
+    };
+    remedies_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemedyDetail"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

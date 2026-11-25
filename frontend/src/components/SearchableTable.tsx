@@ -2,8 +2,9 @@
 
 import { useId, type ReactNode } from "react";
 
+import { Pager } from "@/components/Pager";
+
 import type { ListStatus } from "@/hooks/use-list-query";
-import { fill } from "@/i18n/catalog";
 import type { CommonMessages } from "@/i18n/messages/common";
 import { useMessages } from "@/i18n/provider";
 
@@ -43,10 +44,8 @@ export function SearchableTable<T>({
   onRetry: () => void;
   status: ListStatus;
 }) {
-  const { t, locale } = useMessages<CommonMessages>();
+  const { t } = useMessages<CommonMessages>();
   const searchId = useId();
-  const number = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US");
-  const pages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
     <div className="flex flex-col gap-4">
@@ -120,29 +119,7 @@ export function SearchableTable<T>({
         </table>
       )}
 
-      <nav className="flex items-center justify-between gap-3" aria-label={t("table.pagination")}>
-        <button
-          type="button"
-          aria-disabled={page <= 1}
-          onClick={() => !(page <= 1) && onPageChange(page - 1)}
-          className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold aria-disabled:opacity-40"
-        >
-          {t("table.previous")}
-        </button>
-        <span aria-live="polite" className="text-center text-sm text-ink-muted">
-          <span>{fill(t("table.page"), { page: number.format(page), pages: number.format(pages) })}</span>
-          <br />
-          <span>{fill(t("table.total"), { count: number.format(total) })}</span>
-        </span>
-        <button
-          type="button"
-          aria-disabled={page >= pages}
-          onClick={() => !(page >= pages) && onPageChange(page + 1)}
-          className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold aria-disabled:opacity-40"
-        >
-          {t("table.next")}
-        </button>
-      </nav>
+      <Pager page={page} pageSize={pageSize} total={total} onPageChange={onPageChange} />
     </div>
   );
 }

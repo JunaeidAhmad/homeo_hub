@@ -19,6 +19,8 @@
   --color-amber: #8a4700; /* "needs you" and liquid remedies */
   --color-amber-wash: #fbebd3;
   --color-danger: #a12b2b;
+  --color-glass: #f6f9f7; /* clear vial glass */
+  --color-glass-line: #afc0b5;
 
   --radius-panel: 14px;
   --radius-control: 8px;

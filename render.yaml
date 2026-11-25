@@ -32,6 +32,19 @@ services:
         generateValue: true
       - key: NUM_PROXIES
         value: "1"
+      # S3-compatible bucket for uploaded pictures; uploads are refused until set.
+      - key: STORAGE_BUCKET
+        sync: false
+      - key: STORAGE_ENDPOINT_URL
+        sync: false
+      - key: STORAGE_REGION
+        sync: false
+      - key: STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: STORAGE_PUBLIC_DOMAIN
+        sync: false
       # Class that sends text messages (sign-up codes). Until a real gateway exists,
       # leaving this empty means sign-up reports that texts cannot be sent.
       - key: SMS_PROVIDER

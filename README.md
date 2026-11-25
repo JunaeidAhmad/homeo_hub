@@ -99,6 +99,17 @@ cd backend && .venv/bin/python manage.py create_staff yourname --name "Your Name
 - A staff session ends 12 hours after sign-in. Staff and patients have separate cookies. Two-factor sign-in is
   ticket 22.
 
+## Remedies and pictures
+
+Staff with the *remedy manager* role (or admin) maintain remedies at `/admin/remedies`: Latin name, English text
+(required), Bangla text (optional, English shows while empty), picture and status. Only **active** remedies appear
+at `/remedies` and `/remedies/<address>`.
+
+Pictures (JPEG, PNG or WebP, up to 5 MB) are checked by content, resized to at most 1200 px and stored as WebP.
+In development they go to `backend/media/`. Deployed, they go to an S3-compatible bucket: set `STORAGE_BUCKET`
+and the other `STORAGE_*` variables in [`backend/.env.example`](backend/.env.example). Until a bucket is set,
+a deployed server refuses uploads (its disk is wiped on every deploy).
+
 ## Lists and keyword search
 
 Every list endpoint follows one convention (`backend/common/search.py`, `common/pagination.py`):

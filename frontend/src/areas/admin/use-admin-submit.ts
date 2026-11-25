@@ -7,8 +7,11 @@ const FIELD_MESSAGES: Record<string, string> = {
 
 /** Form state for admin screens, with the API's errors in admin wording. */
 export function useAdminSubmit() {
-  const describe = useDescribeErrorWith("admin", (field, code) =>
-    field === "username" && code === "invalid" ? "admin.error.username" : FIELD_MESSAGES[field],
-  );
+  const describe = useDescribeErrorWith("admin", (field, code) => {
+    if (code === "invalid" && (field === "username" || field === "slug")) {
+      return `admin.error.${field}`;
+    }
+    return FIELD_MESSAGES[field];
+  });
   return useSubmitWith(describe);
 }

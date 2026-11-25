@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.patients",
     "apps.staff",
+    "apps.remedies",
 ]
 
 MIDDLEWARE = [
@@ -133,8 +134,34 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Uploaded files. An S3-compatible bucket (AWS S3, Cloudflare R2, ...) when
+# STORAGE_BUCKET is set; otherwise the local media folder.
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+STORAGE_BUCKET = env.str("STORAGE_BUCKET", default="")
+UPLOADS_ENABLED = True
+STORAGES: dict[str, dict] = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+if STORAGE_BUCKET:
+    # A public address (CDN or public bucket domain) gives plain links; without one the
+    # bucket stays private and links are signed and expire.
+    _public_domain = env.str("STORAGE_PUBLIC_DOMAIN", default="")
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": STORAGE_BUCKET,
+            "endpoint_url": env.str("STORAGE_ENDPOINT_URL", default="") or None,
+            "region_name": env.str("STORAGE_REGION", default="") or None,
+            "access_key": env.str("STORAGE_ACCESS_KEY_ID", default=""),
+            "secret_key": env.str("STORAGE_SECRET_ACCESS_KEY", default=""),
+            "custom_domain": _public_domain or None,
+            "querystring_auth": not _public_domain,
+            "querystring_expire": 60 * 60,
+            "file_overwrite": False,
+        },
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -194,6 +221,7 @@ SPECTACULAR_SETTINGS = {
         "CheckResultEnum": "apps.health.serializers.CHECK_RESULT",
         "RoleEnum": "apps.staff.serializers.ROLE_CHOICES",
         "PermissionEnum": "apps.staff.serializers.PERMISSION_CHOICES",
+        "RemedyStatusEnum": "apps.remedies.models.Remedy.Status",
     },
 }
 
