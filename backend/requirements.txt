@@ -1,6 +1,7 @@
 # Runtime dependencies (pinned). Install: pip install -r requirements.txt
 Django==5.2.19
 djangorestframework==3.18.3
+django-filter==26.2
 drf-spectacular==0.30.0
 django-environ==0.14.0
 django-cors-headers==4.9.0
