@@ -1,0 +1,34 @@
+homeohub
+Patient - signin, signup, profile, history, consult a doctor, lookup common illness, remedy shop, remedy finder (AI)
+Doctor - signin, signup, dashboard - list of patients, send questions to patient, video chat with patient, patients history, prescription
+Remedy Shop - dashboard - list of remedies, picture, short description, add to cart, checkout (remedy shop won't be a different view/menu(not an e-commerce type), in self-consultancy after choosing the illness, remedies are recommended.)
+
+signin - phone no., password
+signup - phone no., password, age, gender, address()
+profile - picture, family history, patients history, mental picture, general picture, likes/dislikes
+common illness - name, short description, remedies with relevant short description, add to cart
+remedies - name, picture, short description, add to cart
+remedy finder(AI) - list of remedies matching patients description with relevant short description of the remedies provided by AI agent, add to cart
+consult a doctor - primary concern, secondary concern, tertiary concern.
+questions to patient - depending on the concerns design the questionnaire
+prescription - remedy, power, dosages, do's and don'ts, report after
+keyword search - should work in any list
+Payment- would intigrate sslcommerz type api later, use mock api during development; for self-consultancy payment will be required during final purchase and for doctor-consultancy payment would be required to see the prescription(doctor fee+platform fee), if prescription remedies are being purchased then it would go though add to cart-checkout flow.
+
+natural, holistic, healing, cure, homeohub.
+
+Integration of AI is out of scope right now.
+
+USER JOURNEY:
+Patient: 
+* patient has two ways to get consultancy - self-consultancy and doctor-consultancy.
+* self-consultancy : patient selects a type of illness(ex- selects Diarrhea; gets recommendation remedies for diarrhea(short point or description helps select remedy for the patient, ex -  one remedy for thin, liquid, or completely watery stool type, so patient can decide which one works for him.)), gets recommended remedies, add to cart, payment, gets delivery status. remedies should serialized as probability or recommended order.
+* doctor-consultancy : patient writes his/her symptoms and other details to get a doctor assigned. Admin from admin panel manually assigns a patient to a doctor. the doctor then reviews the patient details; can ask further questions for clearance or diagnosis or could give prescription directly. the remedies will be shown as a list and option to add to cart for purchase. the prescription can only be visible after payment.
+
+Doctor:
+from homeohub/doctor:
+
+*logs in with doctor-id; sees queued patient-assigned. send questions for further clarification or issues prescription.
+
+Admin-Panel:
+homeohub/admin goes to admin panel, include RBAC.
