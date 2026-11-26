@@ -32,6 +32,13 @@ class Payment(models.Model):
         blank=True,
         related_name="payments",
     )
+    invoice = models.ForeignKey(
+        "billing.ConsultationInvoice",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="payments",
+    )
     shop_assignment = models.ForeignKey(
         "orders.ShopAssignment",
         on_delete=models.PROTECT,

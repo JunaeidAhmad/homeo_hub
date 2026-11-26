@@ -13,12 +13,14 @@ from apps.billing.selectors import is_unlocked
 from apps.consultations.models import DoctorConsultation
 from apps.doctors.models import Doctor
 from apps.doctors.permissions import IsApprovedDoctor
+from apps.orders.cart import add_prescription_to_cart
 from apps.patients.models import Patient
 from apps.patients.permissions import IsPatient
 from common.serializers import ErrorSerializer
 
 from . import selectors, services
 from .serializers import (
+    AddPrescriptionToCartResponseSerializer,
     DoctorPrescriptionWorkspaceSerializer,
     LockedPrescriptionSerializer,
     PrescriptionIssueSerializer,
@@ -137,6 +139,34 @@ class PatientPrescriptionView(APIView):
                     "prescription": active,
                     "invoice": invoice,
                 },
+                context={"request": request},
+            ).data
+        )
+
+
+class PatientPrescriptionAddToCartView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="patient_prescription_add_to_cart",
+        tags=["consultations"],
+        request=None,
+        responses={
+            200: AddPrescriptionToCartResponseSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        patient = cast(Patient, request.user)
+        case = get_object_or_404(DoctorConsultation, pk=pk, patient=patient)
+        if selectors.active_prescription_header(case) is None:
+            raise Http404("Prescription not issued yet.")
+        cart, added_count, skipped = add_prescription_to_cart(patient, case)
+        return Response(
+            AddPrescriptionToCartResponseSerializer(
+                {"cart": cart, "added_count": added_count, "skipped": skipped},
                 context={"request": request},
             ).data
         )

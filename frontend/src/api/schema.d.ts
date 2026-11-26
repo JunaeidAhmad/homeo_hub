@@ -433,6 +433,81 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/invoices/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_invoices_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/invoices/{id}/close/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_invoices_close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/invoices/{id}/waive/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_invoices_waive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/me/": {
         parameters: {
             query?: never;
@@ -1472,6 +1547,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor-consultations/{id}/prescription/add-to-cart/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["patient_prescription_add_to_cart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor/application/": {
         parameters: {
             query?: never;
@@ -1958,6 +2049,11 @@ export interface components {
             /** @default 1 */
             quantity: number;
         };
+        AddPrescriptionToCartResponse: {
+            readonly cart: components["schemas"]["Cart"];
+            added_count: number;
+            skipped: components["schemas"]["SkippedPrescriptionItem"][];
+        };
         AdminAssignDoctorRequest: {
             /** Format: uuid */
             doctor_id: string;
@@ -2153,6 +2249,36 @@ export interface components {
             short_description_bn?: string;
             status?: components["schemas"]["IllnessStatusEnum"];
         };
+        AdminInvoice: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly consultation_id: string;
+            readonly consultation_code: string;
+            readonly patient_name: string;
+            readonly patient_phone: string;
+            readonly doctor_name: string | null;
+            readonly doctor_fee_poisha: number;
+            readonly platform_fee_poisha: number;
+            readonly total_poisha: number;
+            readonly status: components["schemas"]["InvoiceStatusEnum"];
+            readonly days_unpaid: number | null;
+            /** Format: date-time */
+            readonly paid_at: string | null;
+            /** Format: date-time */
+            readonly waived_at: string | null;
+            readonly waived_by_name: string | null;
+            readonly waive_reason: string;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            readonly closed_by_name: string | null;
+            readonly close_reason: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        AdminInvoiceReasonRequest: {
+            reason: string;
+        };
         /** @description The signed-in staff member, with what they are allowed to do. */
         AdminMe: {
             readonly id: number;
@@ -2264,6 +2390,9 @@ export interface components {
             /** Format: uuid */
             readonly order_id: string | null;
             readonly order_code: string | null;
+            /** Format: uuid */
+            readonly invoice_id: string | null;
+            readonly consultation_code: string | null;
             readonly patient_name: string;
             method: components["schemas"]["PaymentMethodEnum"];
             gateway?: string;
@@ -2497,6 +2626,7 @@ export interface components {
             readonly id: string;
             readonly remedy: components["schemas"]["CartRemedy"];
             readonly illness_name: string | null;
+            readonly source_label: string | null;
             readonly potency: components["schemas"]["PotenciesEnum"];
             readonly form: components["schemas"]["FormEnum"];
             readonly quantity: number;
@@ -2968,6 +3098,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["AdminIllness"][];
         };
+        PaginatedAdminInvoiceList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminInvoice"][];
+        };
         PaginatedAdminOrderSummaryList: {
             /** @example 123 */
             count: number;
@@ -3313,6 +3458,9 @@ export interface components {
             /** Format: uuid */
             readonly order_id: string | null;
             readonly order_code: string | null;
+            /** Format: uuid */
+            readonly invoice_id: string | null;
+            readonly consultation_id: string | null;
         };
         PatientPrescriptionBanner: {
             /** Format: date-time */
@@ -3351,7 +3499,7 @@ export interface components {
             readonly duration: string;
             readonly buyable: boolean;
             readonly unit_price_poisha: number | null;
-            readonly unavailable_reason: components["schemas"]["UnavailableReasonEnum"] | null;
+            readonly unavailable_reason: (components["schemas"]["UnavailableReasonEnum"] | components["schemas"]["NullEnum"]) | null;
         };
         PatientPrescriptionResponse: components["schemas"]["LockedPrescription"] | components["schemas"]["UnlockedPrescription"];
         PatientPrice: {
@@ -3411,7 +3559,9 @@ export interface components {
         PaymentMethodEnum: "COD" | "ONLINE";
         PaymentStartRequestRequest: {
             /** Format: uuid */
-            order_id: string;
+            order_id?: string | null;
+            /** Format: uuid */
+            invoice_id?: string | null;
         };
         PaymentStartResponse: {
             readonly tran_id: string;
@@ -3737,6 +3887,12 @@ export interface components {
             /** Format: uuid */
             location_id: string;
         };
+        SkippedPrescriptionItem: {
+            /** Format: uuid */
+            item_id: string;
+            remedy_name: string;
+            reason: components["schemas"]["UnavailableReasonEnum"];
+        };
         Staff: {
             readonly id: number;
             /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
@@ -3768,7 +3924,11 @@ export interface components {
          * @enum {string}
          */
         ThermalPreferenceEnum: "CHILLY" | "HOT" | "AMBIVALENT";
-        /** @enum {string} */
+        /**
+         * @description * `NOT_LISTED` - NOT_LISTED
+         *     * `NO_PRICE` - NO_PRICE
+         * @enum {string}
+         */
         UnavailableReasonEnum: "NOT_LISTED" | "NO_PRICE";
         UnlockedPrescription: {
             /** @default false */
@@ -4687,6 +4847,165 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_invoices_list: {
+        parameters: {
+            query?: {
+                older_than_days?: number;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                q?: string;
+                status?: "CLOSED" | "PAID" | "UNPAID" | "VOID" | "WAIVED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminInvoiceList"];
+                };
+            };
+        };
+    };
+    admin_invoices_close: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminInvoiceReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminInvoice"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_invoices_waive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminInvoiceReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminInvoice"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7253,6 +7572,51 @@ export interface operations {
             };
         };
     };
+    patient_prescription_add_to_cart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddPrescriptionToCartResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     doctor_application_update: {
         parameters: {
             query?: never;
@@ -8302,7 +8666,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["PaymentStartRequestRequest"];
             };

@@ -150,8 +150,10 @@ export function CartView() {
                       <p className="text-sm text-ink-soft">
                         {item.potency} · {t(`patient.remedy.form.${item.form}`)}
                       </p>
-                      {item.illness_name && (
-                        <p className="text-sm text-ink-muted">{item.illness_name}</p>
+                      {(item.source_label || item.illness_name) && (
+                        <p className="text-sm text-ink-muted">
+                          {item.source_label ?? item.illness_name}
+                        </p>
                       )}
                     </div>
                   </div>

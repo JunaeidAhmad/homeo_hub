@@ -146,7 +146,7 @@ def assign_line(order: Order, item: OrderItem, shop_remedy: ShopRemedy, staff: U
     locked_order = Order.objects.select_for_update().get(pk=order.pk)
     locked_item = (
         OrderItem.objects.select_for_update(of=("self",))
-        .select_related("self_prescription_item")
+        .select_related("self_prescription_item", "prescription_item")
         .get(pk=item.pk, order=locked_order)
     )
     locked_sr = (
@@ -158,12 +158,13 @@ def assign_line(order: Order, item: OrderItem, shop_remedy: ShopRemedy, staff: U
     if locked_order.status not in ASSIGNABLE_ORDER_STATUSES:
         raise InvalidTransition()
 
-    source = locked_item.self_prescription_item
+    source = locked_item.source_line
     if (
         not locked_sr.is_available
         or not locked_sr.shop.is_active
         or not locked_sr.shop.is_verified
         or source is None
+        or source.remedy_id is None
         or locked_sr.remedy_id != source.remedy_id
     ):
         raise NotEnoughStock()
@@ -400,8 +401,8 @@ class CandidateListing:
 
 
 def candidate_listings(order: Order, item: OrderItem) -> list[CandidateListing]:
-    source = item.self_prescription_item
-    if source is None:
+    source = item.source_line
+    if source is None or source.remedy_id is None:
         return []
     order_loc = order.location
     listings = ShopRemedy.objects.filter(

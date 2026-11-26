@@ -59,7 +59,11 @@ class PaymentStartView(GenericAPIView):
         assert isinstance(request.user, Patient)
         body = self.get_serializer(data=request.data)
         body.is_valid(raise_exception=True)
-        payment, gateway_url = services.start_payment(request.user, body.validated_data["order"])
+        payment, gateway_url = services.start_payment(
+            request.user,
+            order=body.validated_data.get("order"),
+            invoice=body.validated_data.get("invoice"),
+        )
         return Response(
             PaymentStartResponseSerializer(
                 {"tran_id": payment.tran_id, "gateway_url": gateway_url}
@@ -81,7 +85,7 @@ class PaymentStatusView(GenericAPIView):
     def get(self, request: Request, tran_id: str) -> Response:
         assert isinstance(request.user, Patient)
         payment = get_object_or_404(
-            Payment.objects.select_related("order"),
+            Payment.objects.select_related("order", "invoice"),
             tran_id=tran_id,
             patient=request.user,
         )
@@ -155,10 +159,16 @@ class MockGatewayCheckoutView(View):
 class AdminPaymentListView(AdminView, ListAPIView):
     required_permissions = {"GET": Perm.VIEW_PAYMENTS}
     serializer_class = AdminPaymentSerializer
-    search_fields = ["tran_id", "order__code", "patient__full_name", "patient__phone"]
+    search_fields = [
+        "tran_id",
+        "order__code",
+        "invoice__consultation__consultation_code",
+        "patient__full_name",
+        "patient__phone",
+    ]
     filterset_fields = ["status", "method", "is_flagged"]
     ordering_fields = ["created_at", "amount_poisha", "status"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        return Payment.objects.select_related("order", "patient").all()
+        return Payment.objects.select_related("order", "invoice__consultation", "patient").all()

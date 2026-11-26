@@ -149,6 +149,7 @@ def checkout(
             OrderItem(
                 order=order,
                 self_prescription_item=line.item.self_prescription_item,
+                prescription_item=line.item.prescription_item,
                 remedy_name=line.remedy.name,
                 unit_price_poisha=line.unit_price_poisha,
                 quantity=line.item.quantity,

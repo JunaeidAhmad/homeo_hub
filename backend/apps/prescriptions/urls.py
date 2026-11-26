@@ -13,4 +13,9 @@ urlpatterns = [
         views.PatientPrescriptionView.as_view(),
         name="patient-consultation-prescription",
     ),
+    path(
+        "doctor-consultations/<uuid:pk>/prescription/add-to-cart/",
+        views.PatientPrescriptionAddToCartView.as_view(),
+        name="patient-consultation-prescription-add-to-cart",
+    ),
 ]

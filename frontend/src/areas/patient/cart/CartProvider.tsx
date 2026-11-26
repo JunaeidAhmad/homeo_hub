@@ -22,6 +22,7 @@ type CartContextValue = {
   setQuantity: (itemId: string, quantity: number) => Promise<CartActionResult>;
   remove: (itemId: string) => Promise<CartActionResult>;
   refresh: () => Promise<void>;
+  replaceCart: (next: Cart) => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -136,10 +137,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [api],
   );
 
+  const replaceCart = useCallback((next: Cart) => {
+    setLoadedCart(next);
+    setError(false);
+  }, []);
+
   const cart = signedIn ? loadedCart : null;
 
   return (
-    <CartContext value={{ cart, loading, error, add, setQuantity, remove, refresh }}>
+    <CartContext value={{ cart, loading, error, add, setQuantity, remove, refresh, replaceCart }}>
       {children}
     </CartContext>
   );

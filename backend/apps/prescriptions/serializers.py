@@ -11,6 +11,8 @@ from apps.remedies.models import Remedy
 
 from .models import Prescription, PrescriptionAdvice, PrescriptionItem
 
+UNAVAILABLE_REASON_CHOICES = [("NOT_LISTED", "NOT_LISTED"), ("NO_PRICE", "NO_PRICE")]
+
 
 class PrescriptionDoctorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -216,7 +218,9 @@ class PatientPrescriptionItemSerializer(serializers.ModelSerializer):
     def get_unit_price_poisha(self, item: PrescriptionItem) -> int | None:
         return _active_price_info(item)[1]
 
-    @extend_schema_field({"type": "string", "enum": ["NOT_LISTED", "NO_PRICE"], "nullable": True})
+    @extend_schema_field(
+        serializers.ChoiceField(choices=UNAVAILABLE_REASON_CHOICES, allow_null=True)
+    )
     def get_unavailable_reason(self, item: PrescriptionItem) -> str | None:
         return _active_price_info(item)[2]
 
@@ -260,3 +264,21 @@ def build_locked_payload(
         },
         "invoice": invoice,
     }
+
+
+class SkippedPrescriptionItemSerializer(serializers.Serializer):
+    item_id = serializers.UUIDField()
+    remedy_name = serializers.CharField()
+    reason = serializers.ChoiceField(choices=UNAVAILABLE_REASON_CHOICES)
+
+
+class AddPrescriptionToCartResponseSerializer(serializers.Serializer):
+    cart = serializers.SerializerMethodField()
+    added_count = serializers.IntegerField()
+    skipped = SkippedPrescriptionItemSerializer(many=True)
+
+    @extend_schema_field({"$ref": "#/components/schemas/Cart"})
+    def get_cart(self, obj: dict[str, Any]) -> dict[str, Any]:
+        from apps.orders.serializers import CartSerializer
+
+        return CartSerializer.from_cart(obj["cart"], self.context)

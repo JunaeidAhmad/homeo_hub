@@ -278,6 +278,7 @@ SPECTACULAR_SETTINGS = {
         "PrescriptionStatusEnum": "apps.prescriptions.models.Prescription.Status",
         "AdviceKindEnum": "apps.prescriptions.models.PrescriptionAdvice.Kind",
         "InvoiceStatusEnum": "apps.billing.models.ConsultationInvoice.Status",
+        "UnavailableReasonEnum": "apps.prescriptions.serializers.UNAVAILABLE_REASON_CHOICES",
     },
 }
 

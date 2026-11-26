@@ -162,7 +162,12 @@ class OrderQuoteView(GenericAPIView):
 def _patient_orders_queryset(patient: Patient):
     return (
         Order.objects.filter(patient=patient)
-        .prefetch_related("items__self_prescription_item__remedy", "assignments", "history")
+        .prefetch_related(
+            "items__self_prescription_item__remedy",
+            "items__prescription_item__remedy",
+            "assignments",
+            "history",
+        )
         .distinct()
     )
 
@@ -170,10 +175,12 @@ def _patient_orders_queryset(patient: Patient):
 def _admin_orders_queryset():
     return Order.objects.select_related("patient", "location").prefetch_related(
         "items__self_prescription_item__remedy",
+        "items__prescription_item__remedy",
         "items__shop_assignment__shop",
         "items__shop_remedy",
         "assignments__shop",
         "assignments__items__self_prescription_item",
+        "assignments__items__prescription_item",
         "history__changed_by",
         "history__shop_assignment__shop",
         "payments",
@@ -375,7 +382,7 @@ class AdminOrderItemCandidatesView(AdminView, GenericAPIView):
     def get(self, request: Request, pk, item_id) -> Response:
         order = get_object_or_404(Order.objects.select_related("location"), pk=pk)
         item = get_object_or_404(
-            OrderItem.objects.select_related("self_prescription_item"),
+            OrderItem.objects.select_related("self_prescription_item", "prescription_item"),
             pk=item_id,
             order=order,
         )

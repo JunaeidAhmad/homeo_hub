@@ -40,6 +40,12 @@ class CartItem(models.Model):
         null=True,
         blank=True,
     )
+    prescription_item = models.ForeignKey(
+        "prescriptions.PrescriptionItem",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
     quantity = models.PositiveSmallIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -51,17 +57,28 @@ class CartItem(models.Model):
                 name="cart_item_quantity_range",
             ),
             models.CheckConstraint(
-                condition=Q(self_prescription_item__isnull=False),
+                condition=(
+                    Q(self_prescription_item__isnull=False, prescription_item__isnull=True)
+                    | Q(self_prescription_item__isnull=True, prescription_item__isnull=False)
+                ),
                 name="cart_item_has_one_source",
             ),
             models.UniqueConstraint(
                 fields=["cart", "self_prescription_item"],
                 name="cart_item_unique_self_rx_item",
             ),
+            models.UniqueConstraint(
+                fields=["cart", "prescription_item"],
+                name="cart_item_unique_rx_item",
+            ),
         ]
 
     def __str__(self) -> str:
         return f"CartItem {self.id} x{self.quantity}"
+
+    @property
+    def source_line(self):
+        return self.self_prescription_item or self.prescription_item
 
 
 class Order(models.Model):
@@ -155,6 +172,12 @@ class OrderItem(models.Model):
         null=True,
         blank=True,
     )
+    prescription_item = models.ForeignKey(
+        "prescriptions.PrescriptionItem",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
     shop_assignment = models.ForeignKey(
         ShopAssignment,
         on_delete=models.SET_NULL,
@@ -177,9 +200,22 @@ class OrderItem(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(self_prescription_item__isnull=False, prescription_item__isnull=True)
+                    | Q(self_prescription_item__isnull=True, prescription_item__isnull=False)
+                ),
+                name="order_item_has_one_source",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.remedy_name} x{self.quantity}"
+
+    @property
+    def source_line(self):
+        return self.self_prescription_item or self.prescription_item
 
 
 class OrderStatusHistory(models.Model):

@@ -31,6 +31,7 @@ class CartItemSerializer(serializers.Serializer):
     id = serializers.UUIDField(source="item.id", read_only=True)
     remedy = CartRemedySerializer(read_only=True)
     illness_name = serializers.SerializerMethodField()
+    source_label = serializers.SerializerMethodField()
     potency = serializers.ChoiceField(choices=Potency.choices, read_only=True)
     form = serializers.ChoiceField(choices=RemedyForm.choices, read_only=True)
     quantity = serializers.IntegerField(source="item.quantity", read_only=True)
@@ -42,6 +43,13 @@ class CartItemSerializer(serializers.Serializer):
         if priced.illness is None:
             return None
         return localized_text(priced.illness, "name")
+
+    def get_source_label(self, priced: PricedCartItem) -> str | None:
+        if priced.prescribed_by_name:
+            return f"Prescribed by Dr {priced.prescribed_by_name}"
+        if priced.illness is not None:
+            return localized_text(priced.illness, "name")
+        return None
 
 
 class CartSerializer(serializers.Serializer):
@@ -122,22 +130,26 @@ class PatientOrderItemSerializer(serializers.ModelSerializer):
         ]
 
     def get_remedy_name_bn(self, item: OrderItem) -> str:
-        if item.self_prescription_item:
-            return item.self_prescription_item.remedy.name_bn
+        source = item.source_line
+        if source and source.remedy:
+            return source.remedy.name_bn
         return ""
 
     def get_remedy_slug(self, item: OrderItem) -> str | None:
-        if item.self_prescription_item:
-            return item.self_prescription_item.remedy.slug
+        source = item.source_line
+        if source and source.remedy:
+            return source.remedy.slug
         return None
 
     @extend_schema_field(serializers.ChoiceField(choices=Potency.choices, allow_null=True))
     def get_potency(self, item: OrderItem) -> str | None:
-        return item.self_prescription_item.potency if item.self_prescription_item else None
+        source = item.source_line
+        return source.potency if source else None
 
     @extend_schema_field(serializers.ChoiceField(choices=RemedyForm.choices, allow_null=True))
     def get_form(self, item: OrderItem) -> str | None:
-        return item.self_prescription_item.form if item.self_prescription_item else None
+        source = item.source_line
+        return source.form if source else None
 
 
 class OrderTimelineEntrySerializer(serializers.ModelSerializer):
@@ -268,11 +280,13 @@ class AdminAssignmentLineSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.ChoiceField(choices=Potency.choices, allow_null=True))
     def get_potency(self, item: OrderItem) -> str | None:
-        return item.self_prescription_item.potency if item.self_prescription_item else None
+        source = item.source_line
+        return source.potency if source else None
 
     @extend_schema_field(serializers.ChoiceField(choices=RemedyForm.choices, allow_null=True))
     def get_form(self, item: OrderItem) -> str | None:
-        return item.self_prescription_item.form if item.self_prescription_item else None
+        source = item.source_line
+        return source.form if source else None
 
 
 class AdminShopAssignmentSerializer(serializers.ModelSerializer):

@@ -1043,6 +1043,195 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/admin/invoices/:
+    get:
+      operationId: admin_invoices_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: query
+        name: older_than_days
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CLOSED
+          - PAID
+          - UNPAID
+          - VOID
+          - WAIVED
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminInvoiceList'
+          description: ''
+  /api/v1/admin/invoices/{id}/close/:
+    post:
+      operationId: admin_invoices_close
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminInvoiceReasonRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInvoice'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/invoices/{id}/waive/:
+    post:
+      operationId: admin_invoices_waive
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminInvoiceReasonRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInvoice'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/me/:
     get:
       operationId: admin_me
@@ -3657,6 +3846,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/doctor-consultations/{id}/prescription/add-to-cart/:
+    post:
+      operationId: patient_prescription_add_to_cart
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - consultations
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddPrescriptionToCartResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/doctor/application/:
     patch:
       operationId: doctor_application_update
@@ -4586,7 +4814,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PaymentStartRequestRequest'
-        required: true
       security:
       - accessToken: []
       responses:
@@ -4777,6 +5004,23 @@ components:
       - form
       - potency
       - remedy_id
+    AddPrescriptionToCartResponse:
+      type: object
+      properties:
+        cart:
+          allOf:
+          - $ref: '#/components/schemas/Cart'
+          readOnly: true
+        added_count:
+          type: integer
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkippedPrescriptionItem'
+      required:
+      - added_count
+      - cart
+      - skipped
     AdminAssignDoctorRequest:
       type: object
       properties:
@@ -5418,6 +5662,109 @@ components:
       - category
       - name_en
       - short_description_en
+    AdminInvoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        patient_name:
+          type: string
+          readOnly: true
+        patient_phone:
+          type: string
+          readOnly: true
+        doctor_name:
+          type: string
+          nullable: true
+          readOnly: true
+        doctor_fee_poisha:
+          type: integer
+          readOnly: true
+        platform_fee_poisha:
+          type: integer
+          readOnly: true
+        total_poisha:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceStatusEnum'
+          readOnly: true
+        days_unpaid:
+          type: integer
+          nullable: true
+          readOnly: true
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        waived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        waived_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        waive_reason:
+          type: string
+          readOnly: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        close_reason:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - close_reason
+      - closed_at
+      - closed_by_name
+      - consultation_code
+      - consultation_id
+      - created_at
+      - days_unpaid
+      - doctor_fee_poisha
+      - doctor_name
+      - id
+      - paid_at
+      - patient_name
+      - patient_phone
+      - platform_fee_poisha
+      - status
+      - total_poisha
+      - waive_reason
+      - waived_at
+      - waived_by_name
+    AdminInvoiceReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 300
+      required:
+      - reason
     AdminMe:
       type: object
       description: The signed-in staff member, with what they are allowed to do.
@@ -5784,6 +6131,15 @@ components:
           type: string
           nullable: true
           readOnly: true
+        invoice_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        consultation_code:
+          type: string
+          nullable: true
+          readOnly: true
         patient_name:
           type: string
           readOnly: true
@@ -5808,8 +6164,10 @@ components:
           readOnly: true
       required:
       - amount_poisha
+      - consultation_code
       - created_at
       - id
+      - invoice_id
       - method
       - order_code
       - order_id
@@ -6451,6 +6809,10 @@ components:
           type: string
           nullable: true
           readOnly: true
+        source_label:
+          type: string
+          nullable: true
+          readOnly: true
         potency:
           allOf:
           - $ref: '#/components/schemas/PotenciesEnum'
@@ -6480,6 +6842,7 @@ components:
       - potency
       - quantity
       - remedy
+      - source_label
       - unit_price_poisha
     CartRemedy:
       type: object
@@ -7712,6 +8075,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdminIllness'
+    PaginatedAdminInvoiceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminInvoice'
     PaginatedAdminOrderSummaryList:
       type: object
       required:
@@ -8590,8 +8976,19 @@ components:
           type: string
           nullable: true
           readOnly: true
+        invoice_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        consultation_id:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - amount_poisha
+      - consultation_id
+      - invoice_id
       - order_code
       - order_id
       - tran_id
@@ -8709,10 +9106,11 @@ components:
           nullable: true
           readOnly: true
         unavailable_reason:
-          allOf:
-          - $ref: '#/components/schemas/UnavailableReasonEnum'
           nullable: true
           readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/UnavailableReasonEnum'
+          - $ref: '#/components/schemas/NullEnum'
       required:
       - buyable
       - dosage
@@ -8910,8 +9308,11 @@ components:
         order_id:
           type: string
           format: uuid
-      required:
-      - order_id
+          nullable: true
+        invoice_id:
+          type: string
+          format: uuid
+          nullable: true
     PaymentStartResponse:
       type: object
       properties:
@@ -9740,6 +10141,20 @@ components:
       - location_id
       - password
       - phone
+    SkippedPrescriptionItem:
+      type: object
+      properties:
+        item_id:
+          type: string
+          format: uuid
+        remedy_name:
+          type: string
+        reason:
+          $ref: '#/components/schemas/UnavailableReasonEnum'
+      required:
+      - item_id
+      - reason
+      - remedy_name
     Staff:
       type: object
       properties:
@@ -9829,10 +10244,13 @@ components:
         * `HOT` - Hot
         * `AMBIVALENT` - Ambivalent
     UnavailableReasonEnum:
-      type: string
       enum:
       - NOT_LISTED
       - NO_PRICE
+      type: string
+      description: |-
+        * `NOT_LISTED` - NOT_LISTED
+        * `NO_PRICE` - NO_PRICE
     UnlockedPrescription:
       type: object
       properties:

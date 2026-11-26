@@ -12,10 +12,12 @@ import type { AdminMessages } from "@/i18n/messages/admin";
 import { useMessages } from "@/i18n/provider";
 
 import { useStaffSession } from "../session";
+import { InvoiceDirectory } from "./InvoiceDirectory";
 
 type AdminPayment = components["schemas"]["AdminPayment"];
 type PaymentStatus = components["schemas"]["PaymentStatusEnum"];
 type PaymentMethod = components["schemas"]["PaymentMethodEnum"];
+type Tab = "payments" | "invoices";
 
 const STATUSES: PaymentStatus[] = [
   "INITIATED",
@@ -51,6 +53,7 @@ function formatDate(locale: Locale, iso: string): string {
 export function PaymentDirectory() {
   const { locale, t } = useMessages<AdminMessages>();
   const { api } = useStaffSession();
+  const [tab, setTab] = useState<Tab>("payments");
   const [status, setStatus] = useState<PaymentStatus | "">("");
   const [method, setMethod] = useState<PaymentMethod | "">("");
   const [flaggedOnly, setFlaggedOnly] = useState(false);
@@ -98,9 +101,14 @@ export function PaymentDirectory() {
       header: t("admin.orders.code"),
       cell: (row) =>
         row.order_id && row.order_code ? (
-          <Link href={`/admin/orders/${row.order_id}`} className="font-display text-primary underline">
+          <Link
+            href={`/admin/orders/${row.order_id}`}
+            className="font-display text-primary underline"
+          >
             {row.order_code}
           </Link>
+        ) : row.consultation_code ? (
+          <span className="font-display text-ink">{row.consultation_code}</span>
         ) : (
           "—"
         ),
@@ -118,7 +126,9 @@ export function PaymentDirectory() {
     {
       key: "amount",
       header: t("admin.payments.amount"),
-      cell: (row) => <span className="font-display">{formatMoney(locale, row.amount_poisha)}</span>,
+      cell: (row) => (
+        <span className="font-display">{formatMoney(locale, row.amount_poisha)}</span>
+      ),
     },
     {
       key: "status",
@@ -126,7 +136,9 @@ export function PaymentDirectory() {
       cell: (row) => {
         const current = row.status ?? "PENDING";
         return (
-          <span className={`rounded-control px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE[current]}`}>
+          <span
+            className={`rounded-control px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE[current]}`}
+          >
             {t(`admin.payments.status.${current}`)}
           </span>
         );
@@ -135,7 +147,9 @@ export function PaymentDirectory() {
     {
       key: "created",
       header: t("admin.payments.created"),
-      cell: (row) => <span className="text-sm text-ink-soft">{formatDate(locale, row.created_at)}</span>,
+      cell: (row) => (
+        <span className="text-sm text-ink-soft">{formatDate(locale, row.created_at)}</span>
+      ),
     },
   ];
 
@@ -145,78 +159,105 @@ export function PaymentDirectory() {
         {t("admin.payments.title")}
       </h1>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={statusId} className="text-[15px] font-semibold">
-            {t("admin.staff.status")}
-          </label>
-          <select
-            id={statusId}
-            value={status}
-            onChange={(event) => {
-              setStatus(event.target.value as PaymentStatus | "");
-              list.setPage(1);
-            }}
-            className="min-h-11 rounded-control border border-line-strong bg-surface px-3 text-base"
-          >
-            <option value="">{t("admin.orders.filter.all")}</option>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {t(`admin.payments.status.${s}`)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={methodId} className="text-[15px] font-semibold">
-            {t("admin.payments.method")}
-          </label>
-          <select
-            id={methodId}
-            value={method}
-            onChange={(event) => {
-              setMethod(event.target.value as PaymentMethod | "");
-              list.setPage(1);
-            }}
-            className="min-h-11 rounded-control border border-line-strong bg-surface px-3 text-base"
-          >
-            <option value="">{t("admin.orders.filter.all")}</option>
-            <option value="COD">{t("admin.orders.cod")}</option>
-            <option value="ONLINE">{t("admin.orders.online")}</option>
-          </select>
-        </div>
-
-        <button
-          type="button"
-          aria-pressed={flaggedOnly}
-          onClick={() => {
-            setFlaggedOnly((now) => !now);
-            list.setPage(1);
-          }}
-          className={`min-h-11 rounded-control border px-4 text-[15px] font-semibold ${
-            flaggedOnly
-              ? "border-amber bg-amber text-surface"
-              : "border-amber bg-amber-wash text-ink"
-          }`}
-        >
-          {t("admin.payments.flagged")}
-        </button>
+      <div className="flex gap-2">
+        {(["payments", "invoices"] as const).map((key) => {
+          const on = tab === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={on}
+              onClick={() => setTab(key)}
+              className={`min-h-11 rounded-control px-4 text-sm font-semibold ${
+                on
+                  ? "bg-primary text-surface"
+                  : "border border-line-strong bg-surface text-ink-soft hover:bg-mist/60"
+              }`}
+            >
+              {t(`admin.payments.tab.${key}`)}
+            </button>
+          );
+        })}
       </div>
 
-      <SearchableTable
-        columns={columns}
-        rows={list.rows}
-        getRowId={(row) => row.id}
-        query={list.query}
-        onQueryChange={list.setQuery}
-        page={list.page}
-        pageSize={list.pageSize}
-        total={list.total}
-        onPageChange={list.setPage}
-        onRetry={list.retry}
-        status={list.status}
-      />
+      {tab === "invoices" ? (
+        <InvoiceDirectory />
+      ) : (
+        <>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={statusId} className="text-[15px] font-semibold">
+                {t("admin.staff.status")}
+              </label>
+              <select
+                id={statusId}
+                value={status}
+                onChange={(event) => {
+                  setStatus(event.target.value as PaymentStatus | "");
+                  list.setPage(1);
+                }}
+                className="min-h-11 rounded-control border border-line-strong bg-surface px-3 text-base"
+              >
+                <option value="">{t("admin.orders.filter.all")}</option>
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {t(`admin.payments.status.${s}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={methodId} className="text-[15px] font-semibold">
+                {t("admin.payments.method")}
+              </label>
+              <select
+                id={methodId}
+                value={method}
+                onChange={(event) => {
+                  setMethod(event.target.value as PaymentMethod | "");
+                  list.setPage(1);
+                }}
+                className="min-h-11 rounded-control border border-line-strong bg-surface px-3 text-base"
+              >
+                <option value="">{t("admin.orders.filter.all")}</option>
+                <option value="COD">{t("admin.orders.cod")}</option>
+                <option value="ONLINE">{t("admin.orders.online")}</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              aria-pressed={flaggedOnly}
+              onClick={() => {
+                setFlaggedOnly((now) => !now);
+                list.setPage(1);
+              }}
+              className={`min-h-11 rounded-control border px-4 text-[15px] font-semibold ${
+                flaggedOnly
+                  ? "border-amber bg-amber text-surface"
+                  : "border-amber bg-amber-wash text-ink"
+              }`}
+            >
+              {t("admin.payments.flagged")}
+            </button>
+          </div>
+
+          <SearchableTable
+            columns={columns}
+            rows={list.rows}
+            getRowId={(row) => row.id}
+            query={list.query}
+            onQueryChange={list.setQuery}
+            page={list.page}
+            pageSize={list.pageSize}
+            total={list.total}
+            onPageChange={list.setPage}
+            onRetry={list.retry}
+            status={list.status}
+          />
+        </>
+      )}
     </section>
   );
 }

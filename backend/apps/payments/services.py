@@ -8,6 +8,9 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
+from apps.billing.models import ConsultationInvoice
+from apps.consultations.models import DoctorConsultation
+from apps.consultations.services import move_to_completed
 from apps.orders.models import Order, OrderStatusHistory
 from apps.patients.models import Patient
 from common.errors import ApiError
@@ -32,6 +35,12 @@ class OrderNotPayable(ApiError):
     default_detail = "This order is not awaiting online payment."
 
 
+class InvoiceNotPayable(ApiError):
+    status_code = 409
+    error_code = "INVOICE_NOT_PAYABLE"
+    default_detail = "This invoice is not awaiting payment."
+
+
 class InvalidGatewayPayload(ApiError):
     status_code = 400
     error_code = "INVALID_GATEWAY_PAYLOAD"
@@ -54,13 +63,36 @@ def _urls_for(tran_id: str) -> GatewayUrls:
 
 
 @transaction.atomic
-def start_payment(patient: Patient, order: Order) -> tuple[Payment, str]:
-    locked_order = Order.objects.select_for_update().get(pk=order.pk)
-    if (
-        locked_order.patient_id != patient.id
-        or locked_order.payment_method != Order.PaymentMethod.ONLINE
-        or locked_order.status != Order.Status.PENDING_PAYMENT
-    ):
+def start_payment(
+    patient: Patient,
+    order: Order | None = None,
+    *,
+    invoice: ConsultationInvoice | None = None,
+) -> tuple[Payment, str]:
+    if order is not None:
+        locked_order = Order.objects.select_for_update().get(pk=order.pk)
+        if (
+            locked_order.patient_id != patient.id
+            or locked_order.payment_method != Order.PaymentMethod.ONLINE
+            or locked_order.status != Order.Status.PENDING_PAYMENT
+        ):
+            raise OrderNotPayable()
+        amount_poisha = locked_order.total_poisha
+        locked_invoice = None
+    elif invoice is not None:
+        locked_invoice = (
+            ConsultationInvoice.objects.select_for_update(of=("self",))
+            .select_related("consultation")
+            .get(pk=invoice.pk)
+        )
+        if (
+            locked_invoice.consultation.patient_id != patient.id
+            or locked_invoice.status != ConsultationInvoice.Status.UNPAID
+        ):
+            raise InvoiceNotPayable()
+        amount_poisha = locked_invoice.total_poisha
+        locked_order = None
+    else:
         raise OrderNotPayable()
 
     gateway = get_gateway()
@@ -68,9 +100,10 @@ def start_payment(patient: Patient, order: Order) -> tuple[Payment, str]:
         tran_id=_new_tran_id(),
         patient=patient,
         order=locked_order,
+        invoice=locked_invoice,
         method=Payment.Method.ONLINE,
         gateway=getattr(gateway, "name", "gateway"),
-        amount_poisha=locked_order.total_poisha,
+        amount_poisha=amount_poisha,
         currency="BDT",
         status=Payment.Status.INITIATED,
     )
@@ -139,6 +172,29 @@ def _apply_validation(
                 to_status=Order.Status.PAID,
                 by_patient=False,
                 note=f"Payment {payment.tran_id}",
+            )
+
+    if payment.invoice_id is not None:
+        locked_invoice = ConsultationInvoice.objects.select_for_update().get(pk=payment.invoice_id)
+        locked_case = DoctorConsultation.objects.select_for_update().get(
+            pk=locked_invoice.consultation_id
+        )
+        if locked_invoice.status in (
+            ConsultationInvoice.Status.VOID,
+            ConsultationInvoice.Status.CLOSED,
+        ):
+            payment.is_flagged = True
+            payment.flag_reason = "Paid after invoice was closed or voided"
+        elif locked_invoice.status == ConsultationInvoice.Status.UNPAID:
+            locked_invoice.status = ConsultationInvoice.Status.PAID
+            locked_invoice.paid_at = now
+            locked_invoice.save(update_fields=["status", "paid_at", "updated_at"])
+            move_to_completed(
+                locked_case,
+                actor_type="patient",
+                actor_id=str(payment.patient_id),
+                actor_name=payment.patient.full_name,
+                note=f"Invoice paid ({payment.tran_id})",
             )
 
     payment.save(

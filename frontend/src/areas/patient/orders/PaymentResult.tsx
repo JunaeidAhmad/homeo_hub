@@ -80,12 +80,15 @@ export function PaymentResult() {
   }, [api, session.status, tranId]);
 
   async function retryPayment() {
-    if (!payment?.order_id || retrying) return;
+    if (!payment || retrying) return;
+    if (!payment.order_id && !payment.invoice_id) return;
     setRetrying(true);
     setRetryError("");
     try {
       const { data } = await api.POST("/api/v1/payments/", {
-        body: { order_id: payment.order_id },
+        body: payment.invoice_id
+          ? { invoice_id: payment.invoice_id }
+          : { order_id: payment.order_id },
       });
       if (data?.gateway_url) {
         window.location.assign(data.gateway_url);
@@ -99,24 +102,28 @@ export function PaymentResult() {
     }
   }
 
-  const showRetryAction =
+  const canRetry =
     payment &&
-    payment.order_id &&
-    (payment.status === "FAILED" || payment.status === "CANCELLED" || payment.status === "EXPIRED") ? (
-      <ActionBar>
-        <button
-          type="button"
-          disabled={retrying}
-          onClick={() => void retryPayment()}
-          className="flex min-h-[54px] w-full items-center justify-center rounded-control bg-primary px-5 text-[17px] font-bold text-surface disabled:opacity-60"
-        >
-          {t("patient.payment.tryAgain")}
-        </button>
-      </ActionBar>
-    ) : undefined;
+    (payment.order_id || payment.invoice_id) &&
+    (payment.status === "FAILED" || payment.status === "CANCELLED" || payment.status === "EXPIRED");
+
+  const showRetryAction = canRetry ? (
+    <ActionBar>
+      <button
+        type="button"
+        disabled={retrying}
+        onClick={() => void retryPayment()}
+        className="flex min-h-[54px] w-full items-center justify-center rounded-control bg-primary px-5 text-[17px] font-bold text-surface disabled:opacity-60"
+      >
+        {t("patient.payment.tryAgain")}
+      </button>
+    </ActionBar>
+  ) : undefined;
+
+  const backHref = payment?.consultation_id ? `/care/${payment.consultation_id}` : "/orders";
 
   return (
-    <TaskScreen title={t("patient.payment.title")} backHref="/orders" action={showRetryAction}>
+    <TaskScreen title={t("patient.payment.title")} backHref={backHref} action={showRetryAction}>
       {isGuest ? (
         <div className="flex flex-col items-center gap-4 rounded-panel border border-line bg-surface p-6 text-center">
           <p className="text-base text-ink-soft">{t("patient.orders.guest")}</p>
@@ -153,20 +160,39 @@ export function PaymentResult() {
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-3 pt-2">
-                {payment.order_id && (
-                  <Link
-                    href={`/orders/${payment.order_id}`}
-                    className="flex min-h-13 items-center justify-center rounded-control bg-primary px-6 font-bold text-surface"
-                  >
-                    {t("patient.payment.viewOrder")}
-                  </Link>
+                {payment.consultation_id ? (
+                  <>
+                    <Link
+                      href={`/care/${payment.consultation_id}/prescription?unlocked=1`}
+                      className="flex min-h-13 items-center justify-center rounded-control bg-primary px-6 font-bold text-surface"
+                    >
+                      {t("patient.payment.openPrescription")}
+                    </Link>
+                    <Link
+                      href={`/care/${payment.consultation_id}`}
+                      className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
+                    >
+                      {t("patient.payment.backCase")}
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    {payment.order_id && (
+                      <Link
+                        href={`/orders/${payment.order_id}`}
+                        className="flex min-h-13 items-center justify-center rounded-control bg-primary px-6 font-bold text-surface"
+                      >
+                        {t("patient.payment.viewOrder")}
+                      </Link>
+                    )}
+                    <Link
+                      href="/remedies"
+                      className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
+                    >
+                      {t("patient.payment.backRemedies")}
+                    </Link>
+                  </>
                 )}
-                <Link
-                  href="/remedies"
-                  className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
-                >
-                  {t("patient.payment.backRemedies")}
-                </Link>
               </div>
             </>
           )}
@@ -179,13 +205,22 @@ export function PaymentResult() {
               <h1 className="font-display text-3xl font-normal">
                 {t("patient.payment.failedTitle")}
               </h1>
-              {payment.order_id && (
+              {payment.consultation_id ? (
                 <Link
-                  href={`/orders/${payment.order_id}`}
+                  href={`/care/${payment.consultation_id}/prescription`}
                   className="font-semibold text-primary underline"
                 >
-                  {t("patient.payment.viewOrder")}
+                  {t("patient.payment.openPrescription")}
                 </Link>
+              ) : (
+                payment.order_id && (
+                  <Link
+                    href={`/orders/${payment.order_id}`}
+                    className="font-semibold text-primary underline"
+                  >
+                    {t("patient.payment.viewOrder")}
+                  </Link>
+                )
               )}
             </>
           )}
@@ -198,13 +233,22 @@ export function PaymentResult() {
               <h1 className="font-display text-3xl font-normal">
                 {t("patient.payment.cancelledTitle")}
               </h1>
-              {payment.order_id && (
+              {payment.consultation_id ? (
                 <Link
-                  href={`/orders/${payment.order_id}`}
+                  href={`/care/${payment.consultation_id}/prescription`}
                   className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
                 >
-                  {t("patient.payment.viewOrder")}
+                  {t("patient.payment.openPrescription")}
                 </Link>
+              ) : (
+                payment.order_id && (
+                  <Link
+                    href={`/orders/${payment.order_id}`}
+                    className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
+                  >
+                    {t("patient.payment.viewOrder")}
+                  </Link>
+                )
               )}
             </>
           )}
@@ -221,13 +265,22 @@ export function PaymentResult() {
                   ? t("patient.payment.pendingLong")
                   : t("patient.payment.checking")}
               </h1>
-              {payment.order_id && (
+              {payment.consultation_id ? (
                 <Link
-                  href={`/orders/${payment.order_id}`}
+                  href={`/care/${payment.consultation_id}/prescription`}
                   className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
                 >
-                  {t("patient.payment.viewOrder")}
+                  {t("patient.payment.openPrescription")}
                 </Link>
+              ) : (
+                payment.order_id && (
+                  <Link
+                    href={`/orders/${payment.order_id}`}
+                    className="flex min-h-11 items-center justify-center rounded-control border border-line-strong bg-surface px-5 font-semibold"
+                  >
+                    {t("patient.payment.viewOrder")}
+                  </Link>
+                )
               )}
             </>
           )}
