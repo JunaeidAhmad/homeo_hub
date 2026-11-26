@@ -287,6 +287,7 @@ SPECTACULAR_SETTINGS = {
         "UnavailableReasonEnum": "apps.prescriptions.serializers.UNAVAILABLE_REASON_CHOICES",
         "NotificationKindEnum": "apps.notifications.models.NotificationKind",
         "AuditActorTypeEnum": "apps.audit.models.AuditEntry.ActorType",
+        "QuestionTemplateStatusEnum": "apps.consultations.models.QuestionTemplate.Status",
     },
 }
 

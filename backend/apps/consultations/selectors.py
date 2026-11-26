@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
+from django.db.models import BooleanField, Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.shortcuts import get_object_or_404
 
 from apps.doctors.models import Doctor
 from apps.patients.models import Patient
 
-from .models import DoctorConsultation
+from .models import DoctorConsultation, QuestionTemplate
 
 AREA_MATCH_ORDER = {"UPAZILA": 0, "DISTRICT": 1, "DIVISION": 2, "OTHER": 3}
 _OPEN_STATUSES = (
@@ -31,7 +31,7 @@ def consultations_for_patient(patient: Patient) -> QuerySet[DoctorConsultation]:
     return (
         DoctorConsultation.objects.filter(patient=patient)
         .select_related("illness", "illness__category", "assigned_doctor", "invoice")
-        .prefetch_related("history", "question_sets__questions__answer")
+        .prefetch_related("categories", "history", "question_sets__questions__answer")
     )
 
 
@@ -44,7 +44,7 @@ def admin_consultations(*, status: str = "") -> QuerySet[DoctorConsultation]:
             "illness__category",
             "assigned_doctor",
         )
-        .prefetch_related("history")
+        .prefetch_related("categories", "history")
         .all()
     )
     if status:
@@ -64,7 +64,7 @@ def cases_for_doctor(
             "illness",
             "illness__category",
         )
-        .prefetch_related("history", "question_sets__questions__answer")
+        .prefetch_related("categories", "history", "question_sets__questions__answer")
     )
     if status:
         qs = qs.filter(status=status)
@@ -168,3 +168,46 @@ def assignable_doctors(
         )
     )
     return rows
+
+
+def admin_question_templates(
+    *, status: str = "", category_id: str = ""
+) -> QuerySet[QuestionTemplate]:
+    qs = QuestionTemplate.objects.prefetch_related("categories").all()
+    if status:
+        qs = qs.filter(status=status)
+    if category_id:
+        qs = qs.filter(categories__id=category_id).distinct()
+    return qs
+
+
+def suggested_question_templates(
+    consultation: DoctorConsultation, *, q: str = ""
+) -> QuerySet[QuestionTemplate]:
+    case_cat_ids = list(consultation.categories.values_list("pk", flat=True))
+    qs = QuestionTemplate.objects.filter(status=QuestionTemplate.Status.ACTIVE).prefetch_related(
+        "categories"
+    )
+    if q.strip():
+        needle = q.strip()
+        qs = qs.filter(Q(text_en__icontains=needle) | Q(text_bn__icontains=needle))
+    match_expr: Count | Value
+    if case_cat_ids:
+        match_expr = Count(
+            "categories",
+            filter=Q(categories__id__in=case_cat_ids),
+            distinct=True,
+        )
+    else:
+        match_expr = Value(0, output_field=IntegerField())
+    return (
+        qs.annotate(match_count=match_expr)
+        .annotate(
+            matches=Case(
+                When(match_count__gt=0, then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+        .order_by("-match_count", "-use_count", "text_en", "id")
+    )

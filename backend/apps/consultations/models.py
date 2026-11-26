@@ -50,6 +50,11 @@ class DoctorConsultation(models.Model):
         on_delete=models.SET_NULL,
         related_name="consultations",
     )
+    categories = models.ManyToManyField(
+        "illnesses.IllnessCategory",
+        blank=True,
+        related_name="consultations",
+    )
     chief_complaint = models.CharField(max_length=200)
     symptoms = models.TextField()
     duration_value = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -193,3 +198,35 @@ class Answer(models.Model):
 
     def __str__(self) -> str:
         return f"Answer to {self.question_id}"
+
+
+class QuestionTemplate(models.Model):
+    """Reusable bilingual question template tagged with illness categories."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE"
+        RETIRED = "RETIRED"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    text_en = models.TextField()
+    text_bn = models.TextField(blank=True, default="")
+    question_type = models.CharField(max_length=16, choices=Question.Type.choices)
+    options_en = models.JSONField(default=list, blank=True)
+    options_bn = models.JSONField(default=list, blank=True)
+    required = models.BooleanField(default=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.ACTIVE)
+    categories = models.ManyToManyField(
+        "illnesses.IllnessCategory",
+        blank=True,
+        related_name="question_templates",
+    )
+    use_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-use_count", "text_en", "id"]
+        indexes = [models.Index(fields=["status"], name="qtemplate_status")]
+
+    def __str__(self) -> str:
+        return self.text_en[:60]

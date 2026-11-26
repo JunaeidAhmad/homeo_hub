@@ -3,17 +3,18 @@
 import logging
 import math
 from typing import Any
+from uuid import UUID
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.db import connection, transaction
-from django.db.models import Max
+from django.db.models import F, Max
 from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
 from apps.accounts.sms import send_sms
 from apps.doctors.models import Doctor
-from apps.illnesses.models import Illness
+from apps.illnesses.models import Illness, IllnessCategory
 from apps.notifications.models import NotificationKind
 from apps.notifications.services import notify, staff_with_permission
 from apps.patients.models import Patient
@@ -28,6 +29,7 @@ from .models import (
     DoctorConsultation,
     Question,
     QuestionSet,
+    QuestionTemplate,
 )
 
 logger = logging.getLogger(__name__)
@@ -147,6 +149,7 @@ def submit(
     *,
     patient: Patient,
     illness: Illness | None = None,
+    category_ids: list[IllnessCategory] | None = None,
     chief_complaint: str,
     symptoms: str,
     duration_value: int | None = None,
@@ -155,6 +158,10 @@ def submit(
     urgency: str = DoctorConsultation.Urgency.ROUTINE,
 ) -> DoctorConsultation:
     """Create a patient consultation after checking the open-case limit."""
+    if category_ids and len(category_ids) > 3:
+        raise ValidationError(
+            {"category_ids": [ErrorDetail("Select up to 3 concern categories.", code="max_length")]}
+        )
     locked_patient = Patient.objects.select_for_update().get(pk=patient.pk)
     open_count = (
         DoctorConsultation.objects.filter(patient=locked_patient)
@@ -176,6 +183,8 @@ def submit(
         urgency=urgency,
         status=Status.SUBMITTED,
     )
+    if category_ids:
+        consultation.categories.set(category_ids)
     _move(
         consultation,
         Status.SUBMITTED,
@@ -474,6 +483,12 @@ def _validate_question_specs(questions: list[dict[str, Any]]) -> list[dict[str, 
                     ]
                 }
             )
+        template_id = raw.get("template_id")
+        if template_id is not None and not isinstance(template_id, UUID):
+            try:
+                template_id = UUID(str(template_id))
+            except ValueError:
+                template_id = None
         cleaned.append(
             {
                 "question_type": qtype,
@@ -483,6 +498,7 @@ def _validate_question_specs(questions: list[dict[str, Any]]) -> list[dict[str, 
                 "options": deduped_options,
                 "scale_min": scale_min,
                 "scale_max": scale_max,
+                "template_id": template_id,
             }
         )
     return cleaned
@@ -526,8 +542,17 @@ def send_questions(
         title=normalize_text(title).strip(),
         note=normalize_text(note).strip(),
     )
+    template_ids: list[UUID] = []
     for index, spec in enumerate(specs, start=1):
+        template_id = spec.pop("template_id", None)
+        if isinstance(template_id, UUID):
+            template_ids.append(template_id)
         Question.objects.create(question_set=qset, sort_order=index, **spec)
+
+    if template_ids:
+        QuestionTemplate.objects.filter(pk__in=set(template_ids)).update(
+            use_count=F("use_count") + 1
+        )
 
     _move(
         locked,
@@ -552,6 +577,127 @@ def send_questions(
         )
     )
     return qset
+
+
+@transaction.atomic
+def update_consultation_categories(
+    consultation: DoctorConsultation, categories: list[IllnessCategory]
+) -> DoctorConsultation:
+    if len(categories) > 3:
+        raise ValidationError(
+            {"category_ids": [ErrorDetail("Select up to 3 concern categories.", code="max_length")]}
+        )
+    consultation.categories.set(categories)
+    return consultation
+
+
+def _normalize_template_options(
+    question_type: str, raw_en: list[Any] | None, raw_bn: list[Any] | None
+) -> tuple[list[str], list[str]]:
+    if question_type not in (Question.Type.SINGLE_CHOICE, Question.Type.MULTI_CHOICE):
+        return [], []
+    en_list = [normalize_text(str(item)).strip() for item in (raw_en or [])]
+    bn_list = [normalize_text(str(item)).strip() for item in (raw_bn or [])]
+    paired: list[tuple[str, str]] = []
+    seen_en: set[str] = set()
+    for idx, en_val in enumerate(en_list):
+        if not en_val or en_val in seen_en:
+            continue
+        seen_en.add(en_val)
+        bn_val = bn_list[idx] if idx < len(bn_list) else ""
+        paired.append((en_val, bn_val))
+    if len(paired) < 2:
+        raise ValidationError(
+            {"options_en": [ErrorDetail("Add at least two distinct options.", code="invalid")]}
+        )
+    if bn_list and len(bn_list) != len(en_list):
+        raise ValidationError(
+            {
+                "options_bn": [
+                    ErrorDetail(
+                        "Bangla options must match the number of English options.",
+                        code="invalid",
+                    )
+                ]
+            }
+        )
+    return [row[0] for row in paired], [row[1] for row in paired]
+
+
+@transaction.atomic
+def create_question_template(
+    *,
+    text_en: str,
+    text_bn: str = "",
+    question_type: str,
+    options_en: list[Any] | None = None,
+    options_bn: list[Any] | None = None,
+    required: bool = True,
+    status: str = QuestionTemplate.Status.ACTIVE,
+    category_ids: list[IllnessCategory] | None = None,
+) -> QuestionTemplate:
+    clean_en = normalize_text(text_en).strip()
+    if not clean_en:
+        raise ValidationError(
+            {"text_en": [ErrorDetail("This field is required.", code="required")]}
+        )
+    clean_opts_en, clean_opts_bn = _normalize_template_options(
+        question_type, options_en, options_bn
+    )
+    template = QuestionTemplate.objects.create(
+        text_en=clean_en,
+        text_bn=normalize_text(text_bn).strip(),
+        question_type=question_type,
+        options_en=clean_opts_en,
+        options_bn=clean_opts_bn,
+        required=required,
+        status=status,
+    )
+    if category_ids is not None:
+        template.categories.set(category_ids)
+    return template
+
+
+@transaction.atomic
+def update_question_template(
+    template: QuestionTemplate,
+    *,
+    text_en: str | None = None,
+    text_bn: str | None = None,
+    question_type: str | None = None,
+    options_en: list[Any] | None = None,
+    options_bn: list[Any] | None = None,
+    required: bool | None = None,
+    status: str | None = None,
+    category_ids: list[IllnessCategory] | None = None,
+) -> QuestionTemplate:
+    if text_en is not None:
+        clean_en = normalize_text(text_en).strip()
+        if not clean_en:
+            raise ValidationError(
+                {"text_en": [ErrorDetail("This field is required.", code="required")]}
+            )
+        template.text_en = clean_en
+    if text_bn is not None:
+        template.text_bn = normalize_text(text_bn).strip()
+    if question_type is not None:
+        template.question_type = question_type
+    if required is not None:
+        template.required = required
+    if status is not None:
+        template.status = status
+    if options_en is not None or options_bn is not None or question_type is not None:
+        clean_opts_en, clean_opts_bn = _normalize_template_options(
+            template.question_type,
+            options_en if options_en is not None else template.options_en,
+            options_bn if options_bn is not None else template.options_bn,
+        )
+        template.options_en = clean_opts_en
+        template.options_bn = clean_opts_bn
+    template.save()
+    if category_ids is not None:
+        template.categories.set(category_ids)
+    return template
 
 
 def _coerce_yes_no(value: Any) -> bool | None:

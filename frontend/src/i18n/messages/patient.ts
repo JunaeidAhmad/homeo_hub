@@ -288,6 +288,9 @@ export const patient = defineCatalog({
     "patient.rx.versionLabel": "Version {version}",
     "patient.rx.regNoPrefix": "Reg.",
     "patient.rx.signatureLabel": "Prescribing physician",
+    "patient.care.categoriesLabel": "What is it about?",
+    "patient.care.categoriesHint": "Optional · pick up to 3",
+    "patient.care.categoriesMax": "You can select up to 3 categories.",
   },
   bn: {
     "patient.tab.home": "হোম",
@@ -576,6 +579,9 @@ export const patient = defineCatalog({
     "patient.rx.versionLabel": "সংস্করণ {version}",
     "patient.rx.regNoPrefix": "নিবন্ধন",
     "patient.rx.signatureLabel": "চিকিৎসকের স্বাক্ষর",
+    "patient.care.categoriesLabel": "কোন ধরনের সমস্যা?",
+    "patient.care.categoriesHint": "ঐচ্ছিক · সর্বোচ্চ ৩টি বেছে নিন",
+    "patient.care.categoriesMax": "সর্বোচ্চ ৩টি বিভাগ নির্বাচন করা যাবে।",
   },
 });
 

@@ -11,10 +11,12 @@ import type { AdminMessages } from "@/i18n/messages/admin";
 import { useMessages } from "@/i18n/provider";
 
 import { useStaffSession } from "../session";
+import { useAdminSubmit } from "../use-admin-submit";
 import { AssignDoctorPanel } from "./AssignDoctorPanel";
 import { CASE_STATUS_BADGE } from "./CaseQueue";
 
 type CaseDetailData = components["schemas"]["AdminConsultationDetail"];
+type CategoryOption = components["schemas"]["AdminIllnessCategory"];
 
 function formatDateTime(locale: Locale, iso: string): string {
   try {
@@ -29,9 +31,17 @@ function formatDateTime(locale: Locale, iso: string): string {
 
 export function CaseDetail({ caseId }: { caseId: string }) {
   const { locale, t } = useMessages<AdminMessages>();
-  const { api } = useStaffSession();
+  const session = useStaffSession();
+  const { api } = session;
+  const { pending, problems, submit } = useAdminSubmit();
   const [caseData, setCaseData] = useState<CaseDetailData | null>(null);
   const [loadStatus, setLoadStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [editingTags, setEditingTags] = useState(false);
+  const [allCategories, setAllCategories] = useState<CategoryOption[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+
+  const canAssign =
+    session.status === "signedIn" && session.staff.permissions.includes("assign_cases");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -43,6 +53,7 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       .then(({ data }) => {
         if (data) {
           setCaseData(data);
+          setSelectedTagIds(data.categories.map((c) => c.id));
           setLoadStatus("ready");
         } else {
           setLoadStatus("error");
@@ -53,6 +64,40 @@ export function CaseDetail({ caseId }: { caseId: string }) {
       });
     return () => controller.abort();
   }, [api, caseId]);
+
+  function openTagEditor() {
+    if (!caseData) return;
+    setSelectedTagIds(caseData.categories.map((c) => c.id));
+    setEditingTags(true);
+    if (allCategories.length === 0) {
+      void api.GET("/api/v1/admin/illness-categories/").then(({ data }) => {
+        if (data) setAllCategories(data.results.filter((c) => c.is_active));
+      });
+    }
+  }
+
+  function toggleTag(id: string) {
+    setSelectedTagIds((current) => {
+      if (current.includes(id)) return current.filter((item) => item !== id);
+      if (current.length >= 3) return current;
+      return [...current, id];
+    });
+  }
+
+  function saveTags() {
+    if (!caseData) return;
+    void submit(
+      () =>
+        api.PATCH("/api/v1/admin/doctor-consultations/{id}/", {
+          params: { path: { id: caseData.id } },
+          body: { category_ids: selectedTagIds },
+        }),
+      (updated) => {
+        setCaseData(updated);
+        setEditingTags(false);
+      },
+    );
+  }
 
   if (loadStatus === "loading") {
     return (
@@ -153,6 +198,77 @@ export function CaseDetail({ caseId }: { caseId: string }) {
                 </p>
               </div>
             )}
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-ink-muted">
+                  {t("admin.cases.categories")}
+                </p>
+                {canAssign && !editingTags && (
+                  <button
+                    type="button"
+                    onClick={openTagEditor}
+                    className="text-xs font-semibold text-primary underline"
+                  >
+                    {t("admin.cases.editTags")}
+                  </button>
+                )}
+              </div>
+              {editingTags ? (
+                <div className="mt-2 flex flex-col gap-3 rounded-control border border-line bg-mist p-3">
+                  <p className="text-xs text-ink-muted">{t("admin.cases.tagsHint")}</p>
+                  {problems.form && <FormAlert>{problems.form}</FormAlert>}
+                  <div className="flex flex-wrap gap-2">
+                    {allCategories.map((cat) => {
+                      const active = selectedTagIds.includes(cat.id);
+                      const label = locale === "bn" ? cat.name_bn || cat.name_en : cat.name_en;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => toggleTag(cat.id)}
+                          className={`min-h-10 rounded-control border border-line-strong px-3 text-xs font-semibold ${
+                            active ? "bg-ink text-surface" : "bg-surface text-ink"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={saveTags}
+                      className="min-h-10 rounded-control bg-primary px-4 text-xs font-bold text-surface disabled:opacity-60"
+                    >
+                      {t("admin.cases.saveTags")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingTags(false)}
+                      className="min-h-10 rounded-control border border-line-strong bg-surface px-3 text-xs font-semibold"
+                    >
+                      {t("admin.cases.cancel")}
+                    </button>
+                  </div>
+                </div>
+              ) : caseData.categories.length === 0 ? (
+                <p className="text-sm text-ink-muted">{t("admin.cases.categoriesNone")}</p>
+              ) : (
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {caseData.categories.map((cat) => (
+                    <span
+                      key={cat.id}
+                      className="rounded-control border border-line bg-mist px-2.5 py-0.5 text-xs font-semibold text-ink"
+                    >
+                      {cat.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
         <div>

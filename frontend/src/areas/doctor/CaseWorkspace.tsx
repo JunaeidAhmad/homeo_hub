@@ -175,6 +175,21 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
             <p className="text-sm text-ink-soft">{caseData.illness.name}</p>
           </div>
         )}
+        {caseData.categories.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-ink-muted">{t("doctor.case.categories")}</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {caseData.categories.map((cat) => (
+                <span
+                  key={cat.id}
+                  className="rounded-control border border-line bg-mist px-2.5 py-0.5 text-xs font-semibold text-ink"
+                >
+                  {cat.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
         <div>
           <p className="text-xs font-semibold text-ink-muted">{t("doctor.case.symptoms")}</p>
           <p className="whitespace-pre-line text-sm text-ink-soft">{caseData.symptoms}</p>
@@ -300,6 +315,7 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
     <QuestionsPanel
       caseId={caseData.id}
       caseStatus={caseData.status}
+      categories={caseData.categories}
       questionSets={caseData.question_sets}
       onSent={(created) =>
         setCaseData((now) =>

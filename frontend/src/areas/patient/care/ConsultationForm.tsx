@@ -25,6 +25,7 @@ import { toAsciiDigits } from "@/lib/digits";
 import type { ConsultationUrgency, DurationUnit } from "./status";
 
 type IllnessOption = components["schemas"]["PublicIllnessSummary"];
+type CategoryOption = components["schemas"]["ConsultationCategory"];
 const DURATION_UNITS: readonly DurationUnit[] = ["DAYS", "WEEKS", "MONTHS", "YEARS"];
 
 export function ConsultationForm() {
@@ -38,6 +39,8 @@ export function ConsultationForm() {
   const { pending, problems, setProblems, submit } = useSubmitWith(describe);
 
   const [illnesses, setIllnesses] = useState<IllnessOption[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [illnessId, setIllnessId] = useState("");
   const [chiefComplaint, setChiefComplaint] = useState("");
   const [symptoms, setSymptoms] = useState("");
@@ -58,8 +61,31 @@ export function ConsultationForm() {
       .catch(() => {
         // Optional helper dropdown; ignore lookup failures cleanly.
       });
+    publicClient
+      .GET("/api/v1/consultations/categories/", { signal: controller.signal })
+      .then(({ data }) => {
+        if (data) setCategories(data);
+      })
+      .catch(() => {
+        // Optional concern tags; ignore lookup failures cleanly.
+      });
     return () => controller.abort();
   }, [publicClient]);
+
+  function toggleCategory(id: string) {
+    setCategoryIds((current) => {
+      if (current.includes(id)) {
+        setProblems({ fields: {} });
+        return current.filter((item) => item !== id);
+      }
+      if (current.length >= 3) {
+        setProblems({ fields: { category_ids: t("patient.care.categoriesMax") } });
+        return current;
+      }
+      setProblems({ fields: {} });
+      return [...current, id];
+    });
+  }
 
   const isGuest =
     session.status === "signedOut" || (session.status === "unavailable" && !session.hasSession);
@@ -105,6 +131,7 @@ export function ConsultationForm() {
         session.api.POST("/api/v1/consultations/", {
           body: {
             illness_id: illnessId || null,
+            category_ids: categoryIds,
             chief_complaint: chiefComplaint.trim(),
             symptoms: symptoms.trim(),
             duration_value: parsedDuration,
@@ -155,6 +182,36 @@ export function ConsultationForm() {
           onChange={(event) => setChiefComplaint(event.target.value)}
           maxLength={200}
         />
+
+        {categories.length > 0 && (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-[15px] font-semibold">
+              {t("patient.care.categoriesLabel")}
+            </legend>
+            <p className="text-sm text-ink-muted">{t("patient.care.categoriesHint")}</p>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => {
+                const selected = categoryIds.includes(cat.id);
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleCategory(cat.id)}
+                    className={`min-h-11 rounded-control border border-line-strong px-3.5 text-sm font-semibold ${
+                      selected ? "bg-ink text-surface" : "bg-surface text-ink"
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
+            {problems.fields.category_ids && (
+              <FieldError>{problems.fields.category_ids}</FieldError>
+            )}
+          </fieldset>
+        )}
 
         <TextAreaField
           label={t("patient.care.symptoms")}

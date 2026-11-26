@@ -76,7 +76,16 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        patch: operations["admin_consultations_update"];
         trace?: never;
     };
     "/api/v1/admin/doctor-consultations/{id}/assign/": {
@@ -849,6 +858,74 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/question-templates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_question_templates_list"];
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_question_templates_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/question-templates/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_question_templates_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        patch: operations["admin_question_templates_update"];
         trace?: never;
     };
     "/api/v1/admin/remedies/": {
@@ -1749,6 +1826,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/consultations/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["consultation_categories_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor-consultations/{id}/prescription/": {
         parameters: {
             query?: never;
@@ -1919,6 +2012,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["doctor_consultations_send_questions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/consultations/{id}/question-templates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_consultations_question_templates"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2495,6 +2604,7 @@ export interface components {
             readonly consultation_code: string;
             readonly patient: components["schemas"]["AdminConsultationPatient"];
             readonly illness: components["schemas"]["ConsultationIllness"] | null;
+            readonly categories: components["schemas"]["ConsultationCategory"][];
             readonly chief_complaint: string | null;
             readonly symptoms: string | null;
             readonly duration_value: number | null;
@@ -2820,6 +2930,36 @@ export interface components {
             price_poisha: number;
             is_active?: boolean;
         };
+        AdminQuestionTemplate: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly text_en: string;
+            readonly text_bn: string;
+            readonly question_type: components["schemas"]["QuestionTypeEnum"];
+            readonly options_en: string[];
+            readonly options_bn: string[];
+            readonly required: boolean;
+            readonly status: components["schemas"]["QuestionTemplateStatusEnum"];
+            readonly categories: components["schemas"]["ConsultationCategory"][];
+            readonly use_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AdminQuestionTemplateWriteRequest: {
+            text_en: string;
+            /** @default  */
+            text_bn: string;
+            question_type: components["schemas"]["QuestionTypeEnum"];
+            options_en?: string[];
+            options_bn?: string[];
+            /** @default true */
+            required: boolean;
+            /** @default ACTIVE */
+            status: components["schemas"]["QuestionTemplateStatusEnum"];
+            category_ids?: string[];
+        };
         AdminRankedRemediesInputRequest: {
             remedy_ids: string[];
         };
@@ -3088,6 +3228,12 @@ export interface components {
             general_picture: boolean;
             likes_dislikes: boolean;
         };
+        ConsultationCategory: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly slug: string;
+            readonly name: string;
+        };
         ConsultationDoctorSummary: {
             /** Format: uuid */
             readonly id: string;
@@ -3137,6 +3283,7 @@ export interface components {
         ConsultationSubmitRequest: {
             /** Format: uuid */
             illness_id?: string | null;
+            category_ids?: string[];
             chief_complaint: string;
             symptoms: string;
             duration_value?: number | null;
@@ -3173,6 +3320,7 @@ export interface components {
             readonly urgency: components["schemas"]["UrgencyEnum"];
             readonly status: components["schemas"]["ConsultationStatusEnum"];
             readonly illness: components["schemas"]["ConsultationIllness"];
+            readonly categories: components["schemas"]["ConsultationCategory"][];
             readonly patient: components["schemas"]["DoctorPatientProfile"];
             /** Format: date-time */
             readonly submitted_at: string;
@@ -3315,6 +3463,18 @@ export interface components {
             doctor: components["schemas"]["PrescriptionDoctor"];
             latest: components["schemas"]["DoctorPrescriptionDetail"] | null;
             versions: components["schemas"]["DoctorPrescriptionVersion"][];
+        };
+        DoctorQuestionTemplate: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly text: string;
+            readonly question_type: components["schemas"]["QuestionTypeEnum"];
+            readonly options: string[];
+            readonly required: boolean;
+            readonly categories: components["schemas"]["ConsultationCategory"][];
+            readonly use_count: number;
+            readonly match_count: number;
+            readonly matches: boolean;
         };
         DoctorSignUpRequest: {
             phone: string;
@@ -3587,6 +3747,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["AdminPayment"][];
         };
+        PaginatedAdminQuestionTemplateList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminQuestionTemplate"][];
+        };
         PaginatedAdminRemedyList: {
             /** @example 123 */
             count: number;
@@ -3722,6 +3897,9 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Staff"][];
         };
+        PatchedAdminConsultationCategoriesUpdateRequest: {
+            category_ids?: string[];
+        };
         PatchedAdminDoctorFeeUpdateRequest: {
             consultation_fee_poisha?: number;
         };
@@ -3741,6 +3919,19 @@ export interface components {
             short_description_en?: string;
             short_description_bn?: string;
             status?: components["schemas"]["IllnessStatusEnum"];
+        };
+        PatchedAdminQuestionTemplateWriteRequest: {
+            text_en?: string;
+            /** @default  */
+            text_bn: string;
+            question_type?: components["schemas"]["QuestionTypeEnum"];
+            options_en?: string[];
+            options_bn?: string[];
+            /** @default true */
+            required: boolean;
+            /** @default ACTIVE */
+            status: components["schemas"]["QuestionTemplateStatusEnum"];
+            category_ids?: string[];
         };
         /** @description Everything about a remedy, both languages, for the editor. */
         PatchedAdminRemedyRequest: {
@@ -3854,6 +4045,7 @@ export interface components {
             readonly urgency: components["schemas"]["UrgencyEnum"];
             readonly status: components["schemas"]["ConsultationStatusEnum"];
             readonly illness: components["schemas"]["ConsultationIllness"];
+            readonly categories: components["schemas"]["ConsultationCategory"][];
             readonly doctor: components["schemas"]["ConsultationDoctorSummary"];
             /** Format: date-time */
             readonly submitted_at: string;
@@ -4207,6 +4399,8 @@ export interface components {
             scale_min: number;
             /** @default 5 */
             scale_max: number;
+            /** Format: uuid */
+            template_id?: string | null;
         };
         QuestionSet: {
             /** Format: uuid */
@@ -4227,6 +4421,12 @@ export interface components {
             note: string;
             questions: components["schemas"]["QuestionCreateInputRequest"][];
         };
+        /**
+         * @description * `ACTIVE` - Active
+         *     * `RETIRED` - Retired
+         * @enum {string}
+         */
+        QuestionTemplateStatusEnum: "ACTIVE" | "RETIRED";
         /**
          * @description * `TEXT` - Text
          *     * `LONG_TEXT` - Long Text
@@ -4587,6 +4787,63 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_consultations_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminConsultationCategoriesUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConsultationDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {
@@ -6171,6 +6428,198 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedAdminPaymentList"];
+                };
+            };
+        };
+    };
+    admin_question_templates_list: {
+        parameters: {
+            query?: {
+                category?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                q?: string;
+                status?: "ACTIVE" | "RETIRED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminQuestionTemplateList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_question_templates_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminQuestionTemplateWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminQuestionTemplate"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_question_templates_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminQuestionTemplate"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_question_templates_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminQuestionTemplateWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminQuestionTemplate"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -8482,6 +8931,25 @@ export interface operations {
             };
         };
     };
+    consultation_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsultationCategory"][];
+                };
+            };
+        };
+    };
     patient_prescription_read: {
         parameters: {
             query?: never;
@@ -9007,6 +9475,53 @@ export interface operations {
                 };
             };
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultations_question_templates: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorQuestionTemplate"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

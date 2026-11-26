@@ -10,6 +10,7 @@ from rest_framework import status as http_status
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -17,6 +18,7 @@ from rest_framework.views import APIView
 from apps.audit import services as audit
 from apps.doctors.models import Doctor
 from apps.doctors.permissions import IsApprovedDoctor
+from apps.illnesses.models import IllnessCategory
 from apps.patients.models import Patient
 from apps.patients.permissions import IsPatient
 from apps.staff.permissions import AdminView
@@ -26,17 +28,22 @@ from common.search import KeywordSearchFilter
 from common.serializers import ErrorSerializer
 
 from . import selectors, services
-from .models import DoctorConsultation, QuestionSet
+from .models import DoctorConsultation, QuestionSet, QuestionTemplate
 from .serializers import (
     AdminAssignDoctorSerializer,
+    AdminConsultationCategoriesUpdateSerializer,
     AdminConsultationDetailSerializer,
     AdminConsultationSummarySerializer,
+    AdminQuestionTemplateSerializer,
+    AdminQuestionTemplateWriteSerializer,
     AnswerBatchSubmitSerializer,
     AssignableDoctorSerializer,
+    ConsultationCategorySerializer,
     ConsultationSubmitSerializer,
     ConsultationWithdrawSerializer,
     DoctorConsultationDetailSerializer,
     DoctorConsultationSummarySerializer,
+    DoctorQuestionTemplateSerializer,
     PatientConsultationDetailSerializer,
     PatientConsultationSummarySerializer,
     QuestionSetCreateSerializer,
@@ -183,7 +190,7 @@ class AdminConsultationListView(AdminView, ListAPIView):
 
 
 class AdminConsultationDetailView(AdminView, APIView):
-    required_permissions = {"GET": Perm.VIEW_CASES}
+    required_permissions = {"GET": Perm.VIEW_CASES, "PATCH": Perm.ASSIGN_CASES}
 
     @extend_schema(
         operation_id="admin_consultations_read",
@@ -198,6 +205,35 @@ class AdminConsultationDetailView(AdminView, APIView):
         case = get_object_or_404(selectors.admin_consultations(), pk=pk)
         audit.read(request, "consultation.read", case)
         return Response(AdminConsultationDetailSerializer(case, context={"request": request}).data)
+
+    @extend_schema(
+        operation_id="admin_consultations_update",
+        tags=["admin"],
+        request=AdminConsultationCategoriesUpdateSerializer,
+        responses={
+            200: AdminConsultationDetailSerializer,
+            400: ErrorSerializer,
+            **ADMIN_REFUSED,
+            404: ErrorSerializer,
+        },
+    )
+    def patch(self, request: Request, pk: str) -> Response:
+        body = AdminConsultationCategoriesUpdateSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        case = get_object_or_404(DoctorConsultation.objects.prefetch_related("categories"), pk=pk)
+        before = {"category_ids": [str(c.pk) for c in case.categories.all()]}
+        updated = services.update_consultation_categories(case, body.validated_data["category_ids"])
+        audit.change(
+            request,
+            "consultation.categories.update",
+            updated,
+            before=before,
+            after={"category_ids": [str(c.pk) for c in updated.categories.all()]},
+        )
+        detail = get_object_or_404(selectors.admin_consultations(), pk=updated.pk)
+        return Response(
+            AdminConsultationDetailSerializer(detail, context={"request": request}).data
+        )
 
 
 class AdminConsultationAssignView(AdminView, APIView):
@@ -452,3 +488,169 @@ class PatientQuestionSetAnswersView(APIView):
             QuestionSet.objects.prefetch_related("questions__answer"), pk=updated.pk
         )
         return Response(QuestionSetSerializer(loaded, context={"request": request}).data)
+
+
+class ConsultationCategoryListView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        operation_id="consultation_categories_list",
+        tags=["consultations"],
+        responses={200: ConsultationCategorySerializer(many=True)},
+    )
+    def get(self, request: Request) -> Response:
+        categories = IllnessCategory.objects.filter(is_active=True)
+        return Response(
+            ConsultationCategorySerializer(categories, many=True, context={"request": request}).data
+        )
+
+
+def _template_snapshot(template: QuestionTemplate) -> dict[str, Any]:
+    return {
+        "text_en": template.text_en,
+        "text_bn": template.text_bn,
+        "question_type": template.question_type,
+        "options_en": template.options_en,
+        "options_bn": template.options_bn,
+        "required": template.required,
+        "status": template.status,
+        "category_ids": sorted(
+            str(cid) for cid in template.categories.values_list("pk", flat=True)
+        ),
+    }
+
+
+class AdminQuestionTemplateListView(AdminView, ListAPIView):
+    required_permissions = {"GET": Perm.MANAGE_ILLNESSES, "POST": Perm.MANAGE_ILLNESSES}
+    serializer_class = AdminQuestionTemplateSerializer
+    filter_backends = [KeywordSearchFilter]
+    search_fields = ["text_en", "text_bn"]
+
+    @extend_schema(
+        operation_id="admin_question_templates_list",
+        tags=["admin"],
+        parameters=[
+            OpenApiParameter(name="q", type=str, required=False),
+            OpenApiParameter(
+                name="status",
+                type=str,
+                required=False,
+                enum=[choice for choice, _ in QuestionTemplate.Status.choices],
+            ),
+            OpenApiParameter(name="category", type=str, required=False),
+        ],
+        responses={200: AdminQuestionTemplateSerializer(many=True), **ADMIN_REFUSED},
+    )
+    def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self) -> QuerySet[QuestionTemplate]:
+        if getattr(self, "swagger_fake_view", False):
+            return QuestionTemplate.objects.none()
+        return selectors.admin_question_templates(
+            status=self.request.query_params.get("status", ""),
+            category_id=self.request.query_params.get("category", ""),
+        )
+
+    @extend_schema(
+        operation_id="admin_question_templates_create",
+        tags=["admin"],
+        request=AdminQuestionTemplateWriteSerializer,
+        responses={
+            201: AdminQuestionTemplateSerializer,
+            400: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def post(self, request: Request) -> Response:
+        body = AdminQuestionTemplateWriteSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        created = services.create_question_template(**body.validated_data)
+        audit.change(
+            request,
+            "question_template.create",
+            created,
+            before=None,
+            after=_template_snapshot(created),
+        )
+        loaded = get_object_or_404(
+            QuestionTemplate.objects.prefetch_related("categories"), pk=created.pk
+        )
+        return Response(
+            AdminQuestionTemplateSerializer(loaded, context={"request": request}).data,
+            status=http_status.HTTP_201_CREATED,
+        )
+
+
+class AdminQuestionTemplateDetailView(AdminView, APIView):
+    required_permissions = {"GET": Perm.MANAGE_ILLNESSES, "PATCH": Perm.MANAGE_ILLNESSES}
+
+    @extend_schema(
+        operation_id="admin_question_templates_read",
+        tags=["admin"],
+        responses={
+            200: AdminQuestionTemplateSerializer,
+            404: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def get(self, request: Request, pk: str) -> Response:
+        template = get_object_or_404(QuestionTemplate.objects.prefetch_related("categories"), pk=pk)
+        return Response(
+            AdminQuestionTemplateSerializer(template, context={"request": request}).data
+        )
+
+    @extend_schema(
+        operation_id="admin_question_templates_update",
+        tags=["admin"],
+        request=AdminQuestionTemplateWriteSerializer,
+        responses={
+            200: AdminQuestionTemplateSerializer,
+            400: ErrorSerializer,
+            404: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def patch(self, request: Request, pk: str) -> Response:
+        template = get_object_or_404(QuestionTemplate.objects.prefetch_related("categories"), pk=pk)
+        before = _template_snapshot(template)
+        body = AdminQuestionTemplateWriteSerializer(data=request.data, partial=True)
+        body.is_valid(raise_exception=True)
+        updated = services.update_question_template(template, **body.validated_data)
+        audit.change(
+            request,
+            "question_template.update",
+            updated,
+            before=before,
+            after=_template_snapshot(updated),
+        )
+        loaded = get_object_or_404(
+            QuestionTemplate.objects.prefetch_related("categories"), pk=updated.pk
+        )
+        return Response(AdminQuestionTemplateSerializer(loaded, context={"request": request}).data)
+
+
+class DoctorQuestionTemplatesView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_consultations_question_templates",
+        tags=["doctor"],
+        parameters=[OpenApiParameter(name="q", type=str, required=False)],
+        responses={
+            200: DoctorQuestionTemplateSerializer(many=True),
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+        },
+    )
+    def get(self, request: Request, pk: str) -> Response:
+        case = get_object_or_404(
+            DoctorConsultation.objects.prefetch_related("categories"),
+            pk=pk,
+            assigned_doctor=cast(Doctor, request.user),
+        )
+        rows = selectors.suggested_question_templates(case, q=request.query_params.get("q", ""))
+        return Response(
+            DoctorQuestionTemplateSerializer(rows, many=True, context={"request": request}).data
+        )

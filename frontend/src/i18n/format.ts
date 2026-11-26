@@ -7,6 +7,33 @@ export function numberFormat(locale: Locale, options?: Intl.NumberFormatOptions)
   return new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US", options);
 }
 
+const DHAKA_TZ = "Asia/Dhaka";
+
+/** Format an ISO timestamp in Asia/Dhaka using the active locale. */
+export function formatDateTime(
+  locale: Locale,
+  iso: string,
+  options: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" },
+): string {
+  try {
+    return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
+      timeZone: DHAKA_TZ,
+      ...options,
+    }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}
+
+/** Format an ISO timestamp's clock time in Asia/Dhaka. */
+export function formatTime(
+  locale: Locale,
+  iso: string,
+  options: Intl.DateTimeFormatOptions = { hour: "numeric", minute: "2-digit", hour12: true },
+): string {
+  return formatDateTime(locale, iso, options);
+}
+
 /** Format integer poisha as ৳ + amount in the page's digits (no decimals for whole taka). */
 export function formatMoney(locale: Locale, poisha: number): string {
   const whole = poisha % 100 === 0;

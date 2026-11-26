@@ -5,23 +5,39 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.doctors.models import Doctor
-from apps.illnesses.models import Illness
+from apps.illnesses.models import Illness, IllnessCategory
 from apps.locations.models import Location
 from apps.locations.serializers import LocationSerializer
 from apps.patients.models import Patient, PatientProfile
 from apps.staff.roles import Perm
-from common.i18n import localized_text
+from common.i18n import current_language, localized_text
 from common.private_files import signed_link
 from common.serializers import LocalizedField
 
 from . import selectors
-from .models import Answer, ConsultationStatusHistory, DoctorConsultation, Question, QuestionSet
+from .models import (
+    Answer,
+    ConsultationStatusHistory,
+    DoctorConsultation,
+    Question,
+    QuestionSet,
+    QuestionTemplate,
+)
 
 
 def _area_label(location: Location) -> str:
     return ", ".join(
         localized_text(location, level) for level in ("upazila", "district", "division")
     )
+
+
+class ConsultationCategorySerializer(serializers.ModelSerializer):
+    name = LocalizedField()
+
+    class Meta:
+        model = IllnessCategory
+        fields = ["id", "slug", "name"]
+        read_only_fields = fields
 
 
 class ConsultationIllnessSerializer(serializers.ModelSerializer):
@@ -116,6 +132,7 @@ class QuestionCreateInputSerializer(serializers.ModelSerializer):
     )
     scale_min = serializers.IntegerField(min_value=1, max_value=9, required=False, default=1)
     scale_max = serializers.IntegerField(min_value=2, max_value=10, required=False, default=5)
+    template_id = serializers.UUIDField(required=False, allow_null=True, default=None)
 
     class Meta:
         model = Question
@@ -127,6 +144,7 @@ class QuestionCreateInputSerializer(serializers.ModelSerializer):
             "options",
             "scale_min",
             "scale_max",
+            "template_id",
         ]
         extra_kwargs = {
             "help_text": {"max_length": 300, "required": False, "allow_blank": True, "default": ""},
@@ -180,6 +198,7 @@ class PatientPrescriptionBannerSerializer(serializers.Serializer):
 
 class PatientConsultationDetailSerializer(serializers.ModelSerializer):
     illness = ConsultationIllnessSerializer(read_only=True)
+    categories = ConsultationCategorySerializer(many=True, read_only=True)
     doctor = ConsultationDoctorSummarySerializer(source="assigned_doctor", read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
     question_sets = QuestionSetSerializer(many=True, read_only=True)
@@ -198,6 +217,7 @@ class PatientConsultationDetailSerializer(serializers.ModelSerializer):
             "urgency",
             "status",
             "illness",
+            "categories",
             "doctor",
             "submitted_at",
             "assigned_at",
@@ -244,6 +264,15 @@ class ConsultationSubmitSerializer(serializers.Serializer):
         pk_field=serializers.UUIDField(),
         required=False,
         allow_null=True,
+    )
+    category_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(
+            queryset=IllnessCategory.objects.filter(is_active=True),
+            pk_field=serializers.UUIDField(),
+        ),
+        max_length=3,
+        required=False,
+        default=list,
     )
     chief_complaint = serializers.CharField(max_length=200)
     symptoms = serializers.CharField(max_length=4000)
@@ -331,6 +360,7 @@ class AdminConsultationSummarySerializer(serializers.ModelSerializer):
 class AdminConsultationDetailSerializer(serializers.ModelSerializer):
     patient = AdminConsultationPatientSerializer(read_only=True)
     illness = ConsultationIllnessSerializer(read_only=True, allow_null=True)
+    categories = ConsultationCategorySerializer(many=True, read_only=True)
     doctor = ConsultationDoctorSummarySerializer(source="assigned_doctor", read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
     chief_complaint = serializers.CharField(allow_null=True, read_only=True)
@@ -346,6 +376,7 @@ class AdminConsultationDetailSerializer(serializers.ModelSerializer):
             "consultation_code",
             "patient",
             "illness",
+            "categories",
             "chief_complaint",
             "symptoms",
             "duration_value",
@@ -380,7 +411,120 @@ class AdminConsultationDetailSerializer(serializers.ModelSerializer):
                 "symptom_notes",
             ):
                 data[field] = None
+            data["categories"] = []
         return data
+
+
+class AdminConsultationCategoriesUpdateSerializer(serializers.Serializer):
+    category_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(
+            queryset=IllnessCategory.objects.filter(is_active=True),
+            pk_field=serializers.UUIDField(),
+        ),
+        max_length=3,
+    )
+
+
+class AdminQuestionTemplateSerializer(serializers.ModelSerializer):
+    categories = ConsultationCategorySerializer(many=True, read_only=True)
+    options_en = serializers.ListField(child=serializers.CharField(), read_only=True)
+    options_bn = serializers.ListField(child=serializers.CharField(), read_only=True)
+
+    class Meta:
+        model = QuestionTemplate
+        fields = [
+            "id",
+            "text_en",
+            "text_bn",
+            "question_type",
+            "options_en",
+            "options_bn",
+            "required",
+            "status",
+            "categories",
+            "use_count",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+
+class AdminQuestionTemplateWriteSerializer(serializers.ModelSerializer):
+    text_en = serializers.CharField(max_length=1000)
+    text_bn = serializers.CharField(max_length=1000, required=False, allow_blank=True, default="")
+    question_type = serializers.ChoiceField(choices=Question.Type.choices)
+    options_en = serializers.ListField(
+        child=serializers.CharField(max_length=200), required=False, default=list
+    )
+    options_bn = serializers.ListField(
+        child=serializers.CharField(max_length=200, allow_blank=True), required=False, default=list
+    )
+    status = serializers.ChoiceField(
+        choices=QuestionTemplate.Status.choices,
+        required=False,
+        default=QuestionTemplate.Status.ACTIVE,
+    )
+    category_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(
+            queryset=IllnessCategory.objects.all(),
+            pk_field=serializers.UUIDField(),
+        ),
+        required=False,
+        default=list,
+    )
+
+    class Meta:
+        model = QuestionTemplate
+        fields = [
+            "text_en",
+            "text_bn",
+            "question_type",
+            "options_en",
+            "options_bn",
+            "required",
+            "status",
+            "category_ids",
+        ]
+        extra_kwargs = {
+            "required": {"required": False, "default": True},
+        }
+
+
+class DoctorQuestionTemplateSerializer(serializers.ModelSerializer):
+    text = serializers.SerializerMethodField()
+    options = serializers.SerializerMethodField()
+    categories = ConsultationCategorySerializer(many=True, read_only=True)
+    match_count = serializers.IntegerField(read_only=True)
+    matches = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = QuestionTemplate
+        fields = [
+            "id",
+            "text",
+            "question_type",
+            "options",
+            "required",
+            "categories",
+            "use_count",
+            "match_count",
+            "matches",
+        ]
+        read_only_fields = fields
+
+    def get_text(self, obj: QuestionTemplate) -> str:
+        return localized_text(obj, "text")
+
+    def get_options(self, obj: QuestionTemplate) -> list[str]:
+        en = list(obj.options_en or [])
+        if current_language() != "bn":
+            return en
+        bn = list(obj.options_bn or [])
+        resolved: list[str] = []
+        for idx, item_en in enumerate(en):
+            item_bn = bn[idx].strip() if idx < len(bn) and isinstance(bn[idx], str) else ""
+            resolved.append(item_bn or item_en)
+        return resolved
 
 
 class AdminAssignDoctorSerializer(serializers.Serializer):
@@ -557,6 +701,7 @@ class DoctorHistorySummarySerializer(serializers.ModelSerializer):
 
 class DoctorConsultationDetailSerializer(serializers.ModelSerializer):
     illness = ConsultationIllnessSerializer(read_only=True)
+    categories = ConsultationCategorySerializer(many=True, read_only=True)
     patient = DoctorPatientProfileSerializer(read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
     question_sets = QuestionSetSerializer(many=True, read_only=True)
@@ -575,6 +720,7 @@ class DoctorConsultationDetailSerializer(serializers.ModelSerializer):
             "urgency",
             "status",
             "illness",
+            "categories",
             "patient",
             "submitted_at",
             "assigned_at",

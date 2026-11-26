@@ -4,6 +4,11 @@ from . import views
 
 urlpatterns = [
     path(
+        "consultations/categories/",
+        views.ConsultationCategoryListView.as_view(),
+        name="consultation-categories-list",
+    ),
+    path(
         "consultations/",
         views.PatientConsultationListCreateView.as_view(),
         name="consultations-list",
@@ -67,5 +72,20 @@ urlpatterns = [
         "doctor/consultations/<uuid:pk>/question-sets/",
         views.DoctorQuestionSetCreateView.as_view(),
         name="doctor-consultations-question-sets",
+    ),
+    path(
+        "doctor/consultations/<uuid:pk>/question-templates/",
+        views.DoctorQuestionTemplatesView.as_view(),
+        name="doctor-consultations-question-templates",
+    ),
+    path(
+        "admin/question-templates/",
+        views.AdminQuestionTemplateListView.as_view(),
+        name="admin-question-templates-list",
+    ),
+    path(
+        "admin/question-templates/<uuid:pk>/",
+        views.AdminQuestionTemplateDetailView.as_view(),
+        name="admin-question-templates-detail",
     ),
 ]

@@ -23,6 +23,11 @@ export const ADMIN_NAV: readonly AdminSection[] = [
   { href: "/admin/remedies", label: "admin.nav.remedies", permission: "manage_remedies" },
   { href: "/admin/illnesses", label: "admin.nav.illnesses", permission: "manage_illnesses" },
   {
+    href: "/admin/question-templates",
+    label: "admin.nav.questionTemplates",
+    permission: "manage_illnesses",
+  },
+  {
     href: "/admin/shops",
     label: "admin.nav.shops",
     permission: ["manage_shops", "manage_own_shop"],

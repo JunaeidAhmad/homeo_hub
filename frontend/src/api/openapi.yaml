@@ -187,6 +187,63 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+    patch:
+      operationId: admin_consultations_update
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminConsultationCategoriesUpdateRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminConsultationDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/doctor-consultations/{id}/assign/:
     post:
       operationId: admin_consultations_assign
@@ -1992,6 +2049,217 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAdminPaymentList'
+          description: ''
+  /api/v1/admin/question-templates/:
+    get:
+      operationId: admin_question_templates_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - RETIRED
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminQuestionTemplateList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: admin_question_templates_create
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminQuestionTemplateWriteRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionTemplate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/question-templates/{id}/:
+    get:
+      operationId: admin_question_templates_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionTemplate'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: admin_question_templates_update
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminQuestionTemplateWriteRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminQuestionTemplate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
   /api/v1/admin/remedies/:
     get:
@@ -4275,6 +4543,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/consultations/categories/:
+    get:
+      operationId: consultation_categories_list
+      tags:
+      - consultations
+      security:
+      - accessToken: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConsultationCategory'
+          description: ''
   /api/v1/doctor-consultations/{id}/prescription/:
     get:
       operationId: patient_prescription_read
@@ -4738,6 +5023,51 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/consultations/{id}/question-templates/:
+    get:
+      operationId: doctor_consultations_question_templates
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: q
+        schema:
+          type: string
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorQuestionTemplate'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
           content:
             application/json:
               schema:
@@ -5973,6 +6303,11 @@ components:
           - $ref: '#/components/schemas/ConsultationIllness'
           readOnly: true
           nullable: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationCategory'
+          readOnly: true
         chief_complaint:
           type: string
           readOnly: true
@@ -6044,6 +6379,7 @@ components:
       - assigned_at
       - cancel_reason
       - cancelled_at
+      - categories
       - chief_complaint
       - clinical_hidden
       - closed_at
@@ -7051,6 +7387,108 @@ components:
       required:
       - form
       - price_poisha
+    AdminQuestionTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        text_en:
+          type: string
+          readOnly: true
+        text_bn:
+          type: string
+          readOnly: true
+        question_type:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTypeEnum'
+          readOnly: true
+        options_en:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        options_bn:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        required:
+          type: boolean
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTemplateStatusEnum'
+          readOnly: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationCategory'
+          readOnly: true
+        use_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - categories
+      - created_at
+      - id
+      - options_bn
+      - options_en
+      - question_type
+      - required
+      - status
+      - text_bn
+      - text_en
+      - updated_at
+      - use_count
+    AdminQuestionTemplateWriteRequest:
+      type: object
+      properties:
+        text_en:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        text_bn:
+          type: string
+          default: ''
+          maxLength: 1000
+        question_type:
+          $ref: '#/components/schemas/QuestionTypeEnum'
+        options_en:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+        options_bn:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+        required:
+          type: boolean
+          default: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTemplateStatusEnum'
+          default: ACTIVE
+        category_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - question_type
+      - text_en
     AdminRankedRemediesInputRequest:
       type: object
       properties:
@@ -7821,6 +8259,24 @@ components:
       - medical_history
       - mental_picture
       - picture
+    ConsultationCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+      - slug
     ConsultationDoctorSummary:
       type: object
       properties:
@@ -7954,6 +8410,12 @@ components:
           type: string
           format: uuid
           nullable: true
+        category_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 3
         chief_complaint:
           type: string
           minLength: 1
@@ -8059,6 +8521,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/ConsultationIllness'
           readOnly: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationCategory'
+          readOnly: true
         patient:
           allOf:
           - $ref: '#/components/schemas/DoctorPatientProfile'
@@ -8099,6 +8566,7 @@ components:
           readOnly: true
       required:
       - assigned_at
+      - categories
       - chief_complaint
       - closed_at
       - consultation_code
@@ -8575,6 +9043,52 @@ components:
       - doctor
       - latest
       - versions
+    DoctorQuestionTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        text:
+          type: string
+          readOnly: true
+        question_type:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTypeEnum'
+          readOnly: true
+        options:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        required:
+          type: boolean
+          readOnly: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationCategory'
+          readOnly: true
+        use_count:
+          type: integer
+          readOnly: true
+        match_count:
+          type: integer
+          readOnly: true
+        matches:
+          type: boolean
+          readOnly: true
+      required:
+      - categories
+      - id
+      - match_count
+      - matches
+      - options
+      - question_type
+      - required
+      - text
+      - use_count
     DoctorSignUpRequest:
       type: object
       properties:
@@ -9089,6 +9603,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdminPayment'
+    PaginatedAdminQuestionTemplateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminQuestionTemplate'
     PaginatedAdminRemedyList:
       type: object
       required:
@@ -9296,6 +9833,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Staff'
+    PatchedAdminConsultationCategoriesUpdateRequest:
+      type: object
+      properties:
+        category_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 3
     PatchedAdminDoctorFeeUpdateRequest:
       type: object
       properties:
@@ -9355,6 +9901,42 @@ components:
           maxLength: 2000
         status:
           $ref: '#/components/schemas/IllnessStatusEnum'
+    PatchedAdminQuestionTemplateWriteRequest:
+      type: object
+      properties:
+        text_en:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        text_bn:
+          type: string
+          default: ''
+          maxLength: 1000
+        question_type:
+          $ref: '#/components/schemas/QuestionTypeEnum'
+        options_en:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+        options_bn:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+        required:
+          type: boolean
+          default: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTemplateStatusEnum'
+          default: ACTIVE
+        category_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
     PatchedAdminRemedyRequest:
       type: object
       description: Everything about a remedy, both languages, for the editor.
@@ -9687,6 +10269,11 @@ components:
           allOf:
           - $ref: '#/components/schemas/ConsultationIllness'
           readOnly: true
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationCategory'
+          readOnly: true
         doctor:
           allOf:
           - $ref: '#/components/schemas/ConsultationDoctorSummary'
@@ -9741,6 +10328,7 @@ components:
       - assigned_at
       - cancel_reason
       - cancelled_at
+      - categories
       - chief_complaint
       - closed_at
       - consultation_code
@@ -10743,6 +11331,10 @@ components:
           maximum: 10
           minimum: 2
           default: 5
+        template_id:
+          type: string
+          format: uuid
+          nullable: true
       required:
       - prompt
       - question_type
@@ -10801,6 +11393,14 @@ components:
             $ref: '#/components/schemas/QuestionCreateInputRequest'
       required:
       - questions
+    QuestionTemplateStatusEnum:
+      enum:
+      - ACTIVE
+      - RETIRED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `RETIRED` - Retired
     QuestionTypeEnum:
       enum:
       - TEXT
