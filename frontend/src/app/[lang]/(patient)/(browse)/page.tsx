@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CareNow } from "@/areas/patient/home/CareNow";
 import { CommonIllnesses } from "@/areas/patient/home/CommonIllnesses";
 import { HomeGreeting } from "@/areas/patient/home/HomeGreeting";
+import { HomeIllustration } from "@/areas/patient/home/HomeIllustration";
 import { IllnessPicker } from "@/areas/patient/home/IllnessPicker";
 import { Icon } from "@/components/Icon";
 import { common } from "@/i18n/messages/common";
@@ -21,6 +22,7 @@ export default async function Home() {
         className="flex flex-col gap-6 desktop:flex-row desktop:items-start desktop:gap-12"
       >
         <div className="flex flex-col gap-2.5 desktop:flex-1">
+          <HomeIllustration />
           <HomeGreeting />
           <h1
             id="home-title"
@@ -28,6 +30,9 @@ export default async function Home() {
           >
             {t("patient.home.title")}
           </h1>
+          <p className="text-lg leading-normal text-balance text-ink-soft desktop:text-xl">
+            {t("patient.home.subtitle")}
+          </p>
         </div>
 
         <div className="flex flex-col gap-4 desktop:flex-1">

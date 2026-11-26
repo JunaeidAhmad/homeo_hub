@@ -2,7 +2,7 @@ import { defineCatalog } from "../catalog";
 
 export const common = defineCatalog({
   en: {
-    "app.tagline": "Natural · Holistic · Healing · Cure",
+    "app.tagline": "Natural · Holistic · Healing",
     "app.description": "Homeopathy care: self care and doctor consultations.",
     "app.disclaimer":
       "Homeopathic care is an alternative/complementary practice and does not replace conventional medical diagnosis or emergency care.",
@@ -52,7 +52,7 @@ export const common = defineCatalog({
     "notifications.justNow": "Just now",
   },
   bn: {
-    "app.tagline": "প্রাকৃতিক · সামগ্রিক · নিরাময় · আরোগ্য",
+    "app.tagline": "প্রাকৃতিক · সামগ্রিক · নিরাময়",
     "app.description":
       "হোমিওপ্যাথি চিকিৎসা: নিজে ওষুধ বেছে নেওয়া এবং ডাক্তারের পরামর্শ।",
     "app.disclaimer":

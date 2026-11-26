@@ -1,6 +1,6 @@
 # HomeoHub — Architectural Design
 
-> Natural · Holistic · Healing · Cure
+> Natural · Holistic · Healing
 > Version 0.2 · 2026-11-11 · Status: Draft for review
 > Changes from 0.1: doctor area moved to `/doctor`; product decisions recorded (§13); backend changed to Django + DRF (ADR-09); Flutter mobile app added (see [03-mobile-app.md](03-mobile-app.md)).
 
