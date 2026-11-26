@@ -1,6 +1,6 @@
 """Reading illnesses and ranked remedies."""
 
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Count, Prefetch, Q, QuerySet
 
 from apps.remedies.models import Remedy
 from apps.remedies.selectors import active_prices_prefetch
@@ -17,8 +17,20 @@ def all_illnesses() -> QuerySet[Illness]:
 
 
 def public_categories() -> QuerySet[IllnessCategory]:
-    """Active categories that have at least one active illness, with active illnesses prefetched."""
-    active_illnesses = Illness.objects.filter(status=Illness.Status.ACTIVE).order_by("name_en")
+    """Active categories that have at least one active illness, with active illnesses prefetched.
+
+    Each prefetched illness carries ``remedy_count``: how many active remedies it lists.
+    """
+    active_illnesses = (
+        Illness.objects.filter(status=Illness.Status.ACTIVE)
+        .annotate(
+            remedy_count=Count(
+                "ranked_remedies",
+                filter=Q(ranked_remedies__remedy__status=Remedy.Status.ACTIVE),
+            )
+        )
+        .order_by("name_en")
+    )
     return (
         IllnessCategory.objects.filter(
             is_active=True,

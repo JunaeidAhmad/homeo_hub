@@ -51,6 +51,11 @@ def snapshot(instance: models.Model | None, fields: Sequence[str]) -> dict[str, 
     return data
 
 
+def actor_of(request: Request | HttpRequest | None) -> tuple[str, str, str]:
+    """(actor_type, actor_id, actor_label) of whoever made ``request``."""
+    return _actor_from_request(request)
+
+
 def _actor_from_request(request: Request | HttpRequest | None) -> tuple[str, str, str]:
     if request is None:
         return (AuditEntry.ActorType.SYSTEM, "", "system")
@@ -106,8 +111,11 @@ def read(
     request: Request | HttpRequest | None,
     action: str,
     target: models.Model | tuple[str, str],
+    *,
+    actor: tuple[str, str, str] | None = None,
 ) -> AuditEntry:
-    actor_type, actor_id, actor_label = _actor_from_request(request)
+    """Record a read. ``actor`` overrides the request's user (for links opened without auth)."""
+    actor_type, actor_id, actor_label = actor or _actor_from_request(request)
     target_type, target_id = _target_ref(target)
     return AuditEntry.objects.create(
         actor_type=actor_type,

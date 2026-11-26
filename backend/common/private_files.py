@@ -69,8 +69,15 @@ def delete_private(name: str) -> None:
 
 
 def signed_link(request: Request | HttpRequest | None, name: str, minutes: int = 5) -> str:
+    """A link to a private file, valid for ``minutes``.
+
+    The link is opened without credentials (an <img> or a new tab), so it carries who asked
+    for it; reading a patient's photo is audited against that person.
+    """
+    from apps.audit import services as audit
+
     signer = TimestampSigner(salt=_SIGNER_SALT)
-    token = signer.sign(f"{minutes}:{name}")
+    token = signer.sign_object({"m": minutes, "n": name, "a": list(audit.actor_of(request))})
     path = f"/api/v1/files/{token}/"
     return request.build_absolute_uri(path) if request is not None else path
 
@@ -85,11 +92,11 @@ class PrivateFileView(APIView):
     def get(self, request: Request, token: str):
         signer = TimestampSigner(salt=_SIGNER_SALT)
         try:
-            unsigned = signer.unsign(token)
-            minutes_str, name = unsigned.split(":", 1)
-            max_age = int(minutes_str) * 60
-            signer.unsign(token, max_age=max_age)
-        except (BadSignature, SignatureExpired, ValueError) as error:
+            payload = signer.unsign_object(token)
+            signer.unsign_object(token, max_age=int(payload["m"]) * 60)
+            name = str(payload["n"])
+            actor_type, actor_id, actor_label = (str(part) for part in payload["a"])
+        except (BadSignature, SignatureExpired, ValueError, KeyError, TypeError) as error:
             raise Http404("File link is invalid or expired.") from error
 
         storage = storages["private"]
@@ -100,7 +107,12 @@ class PrivateFileView(APIView):
         if name.startswith("consultations/"):
             from apps.audit import services as audit
 
-            audit.read(request, "patient_photo.read", ("patient_photo", name))
+            audit.read(
+                request,
+                "patient_photo.read",
+                ("patient_photo", name),
+                actor=(actor_type, actor_id, actor_label),
+            )
         response = FileResponse(storage.open(name, "rb"), content_type=content_type)
         response["X-Content-Type-Options"] = "nosniff"
         response["Cache-Control"] = "private, no-store"

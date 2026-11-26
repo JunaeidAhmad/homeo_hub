@@ -94,6 +94,12 @@ def checkout(
         Cart.objects.select_for_update().filter(patient=patient, status=Cart.Status.ACTIVE).first()
     )
     if cart is None:
+        # A retry with the same key may have waited on the lock while the first request
+        # placed the order and closed the cart: answer with that order, not "cart empty".
+        if key:
+            existing = Order.objects.filter(patient=patient, idempotency_key=key).first()
+            if existing is not None:
+                return existing, False
         raise CartEmpty()
 
     priced = price_cart(cart)

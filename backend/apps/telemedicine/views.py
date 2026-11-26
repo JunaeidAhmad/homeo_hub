@@ -145,7 +145,9 @@ class DoctorAppointmentReproposeView(APIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         doctor = cast(Doctor, request.user)
-        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        appt = get_object_or_404(
+            VideoAppointment, pk=pk, doctor=doctor, consultation__assigned_doctor=doctor
+        )
         body = ProposeAppointmentSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         updated = services.repropose(appt, doctor, **body.validated_data)
@@ -171,7 +173,9 @@ class DoctorAppointmentCancelView(APIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         doctor = cast(Doctor, request.user)
-        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        appt = get_object_or_404(
+            VideoAppointment, pk=pk, doctor=doctor, consultation__assigned_doctor=doctor
+        )
         body = AppointmentNoteSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         updated = services.cancel(
@@ -409,7 +413,9 @@ class DoctorAppointmentDetailView(APIView):
     )
     def patch(self, request: Request, pk: str) -> Response:
         doctor = cast(Doctor, request.user)
-        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        appt = get_object_or_404(
+            VideoAppointment, pk=pk, doctor=doctor, consultation__assigned_doctor=doctor
+        )
         body = DoctorMeetingLinkSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         updated = services.save_meeting_link(
@@ -436,7 +442,9 @@ class DoctorAppointmentStartCallView(APIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         doctor = cast(Doctor, request.user)
-        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        appt = get_object_or_404(
+            VideoAppointment, pk=pk, doctor=doctor, consultation__assigned_doctor=doctor
+        )
         call, join_url = services.start_call(appt, doctor)
         return Response({"call_id": call.pk, "join_url": join_url})
 
@@ -458,7 +466,12 @@ class DoctorCallEndView(APIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         doctor = cast(Doctor, request.user)
-        call = get_object_or_404(CallSession, pk=pk, appointment__doctor=doctor)
+        call = get_object_or_404(
+            CallSession,
+            pk=pk,
+            appointment__doctor=doctor,
+            appointment__consultation__assigned_doctor=doctor,
+        )
         ended = services.end_call(call, doctor)
         loaded = _load_doctor_appointment(str(ended.appointment_id))
         return Response(DoctorAppointmentSerializer(loaded).data)
@@ -481,7 +494,9 @@ class DoctorAppointmentNoShowView(APIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         doctor = cast(Doctor, request.user)
-        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        appt = get_object_or_404(
+            VideoAppointment, pk=pk, doctor=doctor, consultation__assigned_doctor=doctor
+        )
         updated = services.mark_no_show(appt, doctor)
         loaded = _load_doctor_appointment(str(updated.pk))
         return Response(DoctorAppointmentSerializer(loaded).data)

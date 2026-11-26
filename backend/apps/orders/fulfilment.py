@@ -248,6 +248,7 @@ def assign_line(order: Order, item: OrderItem, shop_remedy: ShopRemedy, staff: U
     OrderStatusHistory.objects.create(
         order=locked_order,
         shop_assignment=assignment,
+        shop_id=assignment.shop_id,
         from_status="",
         to_status=ShopAssignment.Status.ASSIGNED,
         changed_by=staff,
@@ -260,8 +261,9 @@ def assign_line(order: Order, item: OrderItem, shop_remedy: ShopRemedy, staff: U
 
 @transaction.atomic
 def unassign_line(item: OrderItem, staff: User) -> Order:
+    # Lock order: the order first, then its rows (as every fulfilment service does).
+    locked_order = Order.objects.select_for_update().get(pk=item.order_id)
     locked_item = OrderItem.objects.select_for_update().get(pk=item.pk)
-    locked_order = Order.objects.select_for_update().get(pk=locked_item.order_id)
     if locked_item.shop_assignment_id is None:
         return locked_order
 
@@ -279,6 +281,17 @@ def unassign_line(item: OrderItem, staff: User) -> Order:
     locked_item.shop_unit_price_poisha = None
     locked_item.save(update_fields=["shop_assignment", "shop_remedy", "shop_unit_price_poisha"])
 
+    OrderStatusHistory.objects.create(
+        order=locked_order,
+        shop_assignment=assignment,
+        shop_id=assignment.shop_id,
+        from_status=ShopAssignment.Status.ASSIGNED,
+        to_status=ShopAssignment.Status.CANCELLED,
+        changed_by=staff,
+        by_patient=False,
+        note=f"Unassigned {locked_item.remedy_name}",
+    )
+
     if not assignment.items.exists():
         assignment.delete()
     else:
@@ -295,8 +308,9 @@ def advance_assignment(
     cash_collected_poisha: int | None = None,
     note: str = "",
 ) -> Order:
+    # Lock order: the order first, then its rows (as every fulfilment service does).
+    locked_order = Order.objects.select_for_update().get(pk=assignment.order_id)
     locked = ShopAssignment.objects.select_for_update().get(pk=assignment.pk)
-    locked_order = Order.objects.select_for_update().get(pk=locked.order_id)
     prev = locked.status
 
     if to_status not in ALLOWED_TRANSITIONS.get(prev, ()):
@@ -350,6 +364,7 @@ def advance_assignment(
     OrderStatusHistory.objects.create(
         order=locked_order,
         shop_assignment=locked,
+        shop_id=locked.shop_id,
         from_status=prev,
         to_status=to_status,
         changed_by=staff,
@@ -395,6 +410,7 @@ def cancel_order(
         OrderStatusHistory.objects.create(
             order=locked,
             shop_assignment=assignment,
+            shop_id=assignment.shop_id,
             from_status=ShopAssignment.Status.ASSIGNED,
             to_status=ShopAssignment.Status.CANCELLED,
             changed_by=actor,
@@ -406,10 +422,12 @@ def cancel_order(
     locked.status = Order.Status.CANCELLED
     locked.cancelled_at = now
     locked.save(update_fields=["status", "cancelled_at", "updated_at"])
-    Payment.objects.filter(
-        order=locked,
-        status__in=[Payment.Status.INITIATED, Payment.Status.PENDING],
-    ).update(status=Payment.Status.CANCELLED, updated_at=now)
+    # Only attempts that never reached the gateway are cancelled here. A PENDING one may still
+    # be paid; its result must be recorded (and flagged for refund), so it is left for the
+    # gateway's notification or reconcile_payments to settle.
+    Payment.objects.filter(order=locked, status=Payment.Status.INITIATED).update(
+        status=Payment.Status.CANCELLED, updated_at=now
+    )
     OrderStatusHistory.objects.create(
         order=locked,
         shop_assignment=None,

@@ -184,6 +184,7 @@ def _admin_orders_queryset():
         "assignments__items__prescription_item",
         "history__changed_by",
         "history__shop_assignment__shop",
+        "history__shop",
         "payments",
     )
 

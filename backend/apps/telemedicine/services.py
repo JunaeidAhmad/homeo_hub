@@ -156,7 +156,7 @@ def expire_if_passed(appointment: VideoAppointment) -> VideoAppointment:
         return appointment
 
     locked = (
-        VideoAppointment.objects.select_for_update()
+        VideoAppointment.objects.select_for_update(of=("self",))
         .select_related("consultation", "consultation__assigned_doctor", "doctor")
         .get(pk=appointment.pk)
     )
@@ -260,9 +260,9 @@ def repropose(
 ) -> VideoAppointment:
     appointment = expire_if_passed(appointment)
     locked = (
-        VideoAppointment.objects.select_for_update()
+        VideoAppointment.objects.select_for_update(of=("self",))
         .select_related("consultation", "consultation__patient", "consultation__assigned_doctor")
-        .get(pk=appointment.pk, doctor=doctor)
+        .get(pk=appointment.pk, doctor=doctor, consultation__assigned_doctor=doctor)
     )
     if locked.status not in (Status.RESCHEDULE_REQUESTED, Status.ACCEPTED):
         raise InvalidAppointmentState()
@@ -321,7 +321,7 @@ def accept(appointment: VideoAppointment, patient: Patient) -> VideoAppointment:
 
     with transaction.atomic():
         locked = (
-            VideoAppointment.objects.select_for_update()
+            VideoAppointment.objects.select_for_update(of=("self",))
             .select_related("consultation", "consultation__assigned_doctor", "doctor")
             .get(pk=appointment.pk, consultation__patient=patient)
         )
@@ -351,7 +351,7 @@ def reject(appointment: VideoAppointment, patient: Patient, *, note: str = "") -
 
     with transaction.atomic():
         locked = (
-            VideoAppointment.objects.select_for_update()
+            VideoAppointment.objects.select_for_update(of=("self",))
             .select_related("consultation", "consultation__assigned_doctor", "doctor")
             .get(pk=appointment.pk, consultation__patient=patient)
         )
@@ -389,7 +389,7 @@ def request_reschedule(
 
     with transaction.atomic():
         locked = (
-            VideoAppointment.objects.select_for_update()
+            VideoAppointment.objects.select_for_update(of=("self",))
             .select_related("consultation", "consultation__assigned_doctor", "doctor")
             .get(pk=appointment.pk, consultation__patient=patient)
         )
@@ -425,7 +425,7 @@ def cancel(
     appointment = expire_if_passed(appointment)
     with transaction.atomic():
         locked = (
-            VideoAppointment.objects.select_for_update()
+            VideoAppointment.objects.select_for_update(of=("self",))
             .select_related(
                 "consultation", "consultation__patient", "consultation__assigned_doctor", "doctor"
             )
@@ -463,22 +463,51 @@ def cancel(
         return locked
 
 
-def cancel_for_withdrawal(consultation: DoctorConsultation) -> None:
-    """Cancel any active appointment when a consultation is withdrawn."""
-    active = VideoAppointment.objects.filter(
-        consultation=consultation,
-        status__in=(Status.PROPOSED, Status.RESCHEDULE_REQUESTED, Status.ACCEPTED),
-    ).first()
+def cancel_for_case_change(
+    consultation: DoctorConsultation, *, actor_type: str, note: str
+) -> VideoAppointment | None:
+    """Cancel the case's live appointment when the case leaves its doctor.
+
+    Called when the patient withdraws, staff reassign the case, a suspended doctor's
+    cases go back to the queue, or the case is completed or closed. The appointment
+    belongs to the doctor who proposed it, so it must not outlive their hold on the case.
+    Both sides are told, except whoever caused the change.
+    """
+    active = (
+        VideoAppointment.objects.select_for_update(of=("self",))
+        .select_related("doctor", "consultation", "consultation__patient")
+        .filter(
+            consultation=consultation,
+            status__in=(Status.PROPOSED, Status.RESCHEDULE_REQUESTED, Status.ACCEPTED),
+        )
+        .first()
+    )
     if active is None:
-        return
+        return None
     active.status = Status.CANCELLED
     active.save(update_fields=["status", "updated_at"])
     AppointmentEvent.objects.create(
-        appointment=active,
-        kind=Kind.CANCELLED,
-        actor_type="patient",
-        note="Consultation withdrawn.",
+        appointment=active, kind=Kind.CANCELLED, actor_type=actor_type, note=note[:500]
     )
+
+    time_en, time_bn = dhaka_time_labels(active.start_at)
+    params = {
+        "code": active.consultation.consultation_code,
+        "doctor_name": active.doctor.full_name,
+        "time_en": time_en,
+        "time_bn": time_bn,
+    }
+    case_id = active.consultation.pk
+    patient = active.consultation.patient
+    doctor = active.doctor
+
+    def _tell() -> None:
+        if actor_type != "patient":
+            notify(NotificationKind.CALL_CANCELLED, [patient], params, f"/care/{case_id}")
+        notify(NotificationKind.CALL_CANCELLED, [doctor], params, f"/doctor/cases/{case_id}")
+
+    transaction.on_commit(_tell)
+    return active
 
 
 def _validate_meeting_link(raw: str) -> tuple[str, str]:
@@ -513,7 +542,9 @@ def save_meeting_link(
     appointment: VideoAppointment, doctor: Doctor, *, meeting_link: str
 ) -> VideoAppointment:
     appointment = expire_if_passed(appointment)
-    locked = VideoAppointment.objects.select_for_update().get(pk=appointment.pk, doctor=doctor)
+    locked = VideoAppointment.objects.select_for_update(of=("self",)).get(
+        pk=appointment.pk, doctor=doctor, consultation__assigned_doctor=doctor
+    )
     if locked.status not in (Status.PROPOSED, Status.ACCEPTED):
         raise InvalidAppointmentState()
     link, host = _validate_meeting_link(meeting_link)
@@ -527,9 +558,9 @@ def save_meeting_link(
 @transaction.atomic
 def start_call(appointment: VideoAppointment, doctor: Doctor) -> tuple[CallSession, str]:
     locked = (
-        VideoAppointment.objects.select_for_update()
+        VideoAppointment.objects.select_for_update(of=("self",))
         .select_related("consultation", "consultation__patient", "doctor")
-        .get(pk=appointment.pk, doctor=doctor)
+        .get(pk=appointment.pk, doctor=doctor, consultation__assigned_doctor=doctor)
     )
     if locked.status not in (Status.ACCEPTED, Status.IN_PROGRESS):
         raise InvalidAppointmentState()
@@ -574,7 +605,7 @@ def start_call(appointment: VideoAppointment, doctor: Doctor) -> tuple[CallSessi
 @transaction.atomic
 def join_call(call: CallSession, patient: Patient) -> tuple[CallSession, str]:
     locked = (
-        CallSession.objects.select_for_update()
+        CallSession.objects.select_for_update(of=("self",))
         .select_related("appointment", "appointment__consultation")
         .get(pk=call.pk, appointment__consultation__patient=patient)
     )
@@ -591,9 +622,13 @@ def join_call(call: CallSession, patient: Patient) -> tuple[CallSession, str]:
 @transaction.atomic
 def end_call(call: CallSession, doctor: Doctor) -> CallSession:
     locked = (
-        CallSession.objects.select_for_update()
+        CallSession.objects.select_for_update(of=("self",))
         .select_related("appointment")
-        .get(pk=call.pk, appointment__doctor=doctor)
+        .get(
+            pk=call.pk,
+            appointment__doctor=doctor,
+            appointment__consultation__assigned_doctor=doctor,
+        )
     )
     if locked.status not in (CallStatus.RINGING, CallStatus.LIVE):
         raise CallNotActive()
@@ -622,7 +657,9 @@ def end_call(call: CallSession, doctor: Doctor) -> CallSession:
 
 @transaction.atomic
 def mark_no_show(appointment: VideoAppointment, doctor: Doctor) -> VideoAppointment:
-    locked = VideoAppointment.objects.select_for_update().get(pk=appointment.pk, doctor=doctor)
+    locked = VideoAppointment.objects.select_for_update(of=("self",)).get(
+        pk=appointment.pk, doctor=doctor, consultation__assigned_doctor=doctor
+    )
     if locked.status not in (Status.ACCEPTED, Status.IN_PROGRESS):
         raise NoShowNotAllowed()
     now = timezone.now()

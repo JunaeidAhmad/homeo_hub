@@ -18,6 +18,8 @@
   --color-primary-deep: #164e3a;
   --color-amber: #8a4700; /* "needs you" and liquid remedies */
   --color-amber-wash: #fbebd3;
+  --color-amber-ink: #3d2a10; /* body text on the amber wash */
+  --color-on-deep-soft: #d7e8de; /* secondary text on primary-deep panels */
   --color-danger: #a12b2b;
   --color-glass: #f6f9f7; /* clear vial glass */
   --color-glass-line: #afc0b5;

@@ -16,13 +16,13 @@ import type { CommonMessages } from "@/i18n/messages/common";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 
-import { ORDER_STATUS_META } from "./status";
+import { ACTIVE_ORDER_STATUSES, ORDER_STATUS_META } from "./status";
 
 type OrderCard = components["schemas"]["PatientOrderCard"];
 
 const FILTERS: { key: "all" | "active" | "delivered" | "cancelled"; statusParam: string }[] = [
   { key: "all", statusParam: "" },
-  { key: "active", statusParam: "PENDING_PAYMENT,CONFIRMED,PAID,PROCESSING,SHIPPED" },
+  { key: "active", statusParam: ACTIVE_ORDER_STATUSES.join(",") },
   { key: "delivered", statusParam: "DELIVERED" },
   { key: "cancelled", statusParam: "CANCELLED,RETURNED" },
 ];

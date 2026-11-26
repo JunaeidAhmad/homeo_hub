@@ -12359,9 +12359,18 @@ components:
         name:
           type: string
           readOnly: true
+        other_name:
+          type: string
+          readOnly: true
+          description: The name in the other language (blank when it has none).
+        remedy_count:
+          type: integer
+          readOnly: true
       required:
       - id
       - name
+      - other_name
+      - remedy_count
       - slug
     PushPublicKey:
       type: object

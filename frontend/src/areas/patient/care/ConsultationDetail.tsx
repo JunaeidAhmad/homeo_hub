@@ -58,6 +58,16 @@ function buildTimeline(history: HistoryItem[], status: ConsultationStatus) {
   return { isCancelled, completedCount, terminalEntry };
 }
 
+/** Open cases the patient may still withdraw (a prescribed one only while unpaid: the API checks). */
+const WITHDRAWABLE: ConsultationStatus[] = [
+  "SUBMITTED",
+  "ASSIGNED",
+  "IN_REVIEW",
+  "AWAITING_PATIENT",
+  "RESPONDED",
+  "PRESCRIBED",
+];
+
 export function ConsultationDetail({ caseId }: { caseId: string }) {
   const { locale, t } = useMessages<PatientMessages>();
   const session = useSession();
@@ -393,7 +403,7 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
         )}
       </section>
 
-      {caseData.status === "SUBMITTED" && (
+      {WITHDRAWABLE.includes(caseData.status) && (
         <div>
           <button
             type="button"

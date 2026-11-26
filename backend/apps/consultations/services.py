@@ -20,7 +20,7 @@ from apps.notifications.services import notify, staff_with_permission
 from apps.patients.models import Patient
 from apps.staff.roles import Perm
 from common.errors import ApiError
-from common.private_files import store_private
+from common.private_files import delete_private, store_private
 from common.search import normalize_text
 
 from .models import (
@@ -55,6 +55,7 @@ ALLOWED_TRANSITIONS: dict[str, set[str]] = {
         Status.CLOSED,
         Status.ASSIGNED,
         Status.SUBMITTED,
+        Status.CANCELLED,
     },
     Status.AWAITING_PATIENT: {
         Status.AWAITING_PATIENT,
@@ -63,6 +64,7 @@ ALLOWED_TRANSITIONS: dict[str, set[str]] = {
         Status.CLOSED,
         Status.ASSIGNED,
         Status.SUBMITTED,
+        Status.CANCELLED,
     },
     Status.RESPONDED: {
         Status.AWAITING_PATIENT,
@@ -70,8 +72,10 @@ ALLOWED_TRANSITIONS: dict[str, set[str]] = {
         Status.CLOSED,
         Status.ASSIGNED,
         Status.SUBMITTED,
+        Status.CANCELLED,
     },
-    Status.PRESCRIBED: {Status.CLOSED, Status.COMPLETED, Status.CLOSED_UNPAID},
+    # A prescribed case can still be withdrawn while its invoice is unpaid (the invoice is voided).
+    Status.PRESCRIBED: {Status.CLOSED, Status.COMPLETED, Status.CLOSED_UNPAID, Status.CANCELLED},
     Status.COMPLETED: set(),
     Status.CLOSED_UNPAID: set(),
     Status.CLOSED: set(),
@@ -94,13 +98,25 @@ class InvalidConsultationTransition(ApiError):
 class ConsultationNotCancellable(ApiError):
     status_code = 409
     error_code = "CONSULTATION_NOT_CANCELLABLE"
-    default_detail = "You can only withdraw a consultation before a doctor is assigned."
+    default_detail = "This consultation is already finished, so it can't be withdrawn."
 
 
 class DoctorNotAssignable(ApiError):
     status_code = 409
     error_code = "DOCTOR_NOT_ASSIGNABLE"
     default_detail = "Only approved doctors can be assigned to consultations."
+
+
+class QuestionsStillOpen(ApiError):
+    status_code = 409
+    error_code = "QUESTIONS_STILL_OPEN"
+    default_detail = "The patient has not answered your last questions yet."
+
+
+class NotAwaitingAnswers(ApiError):
+    status_code = 409
+    error_code = "NOT_AWAITING_ANSWERS"
+    default_detail = "This consultation is not waiting for your answers any more."
 
 
 class QuestionSetAlreadyAnswered(ApiError):
@@ -215,12 +231,23 @@ def submit(
 def withdraw(
     consultation: DoctorConsultation, patient: Patient, reason: str = ""
 ) -> DoctorConsultation:
-    """Cancel a patient's own consultation while it is still waiting in queue."""
+    """Cancel a patient's own consultation at any point before it is finished.
+
+    An unpaid invoice is voided and any scheduled video call is cancelled with it.
+    """
+    from apps.billing.models import ConsultationInvoice
     from apps.billing.services import void_unpaid_invoice
-    from apps.telemedicine.services import cancel_for_withdrawal
+    from apps.telemedicine.services import cancel_for_case_change
 
     locked = DoctorConsultation.objects.select_for_update().get(pk=consultation.pk, patient=patient)
-    if locked.status != Status.SUBMITTED:
+    if locked.status in CLOSED_STATUSES:
+        raise ConsultationNotCancellable()
+    if (
+        locked.status == Status.PRESCRIBED
+        and ConsultationInvoice.objects.filter(
+            consultation=locked, status=ConsultationInvoice.Status.PAID
+        ).exists()
+    ):
         raise ConsultationNotCancellable()
     clean_reason = normalize_text(reason).strip()
     locked.cancelled_at = timezone.now()
@@ -235,7 +262,7 @@ def withdraw(
     )
     locked.save(update_fields=["status", "cancelled_at", "cancel_reason", "updated_at"])
     void_unpaid_invoice(locked)
-    cancel_for_withdrawal(locked)
+    cancel_for_case_change(locked, actor_type="patient", note="Consultation withdrawn.")
     return locked
 
 
@@ -295,6 +322,9 @@ def move_to_completed(
         note=note,
     )
     consultation.save(update_fields=["status", "closed_at", "updated_at"])
+    from apps.telemedicine.services import cancel_for_case_change
+
+    cancel_for_case_change(consultation, actor_type="system", note="Consultation finished.")
     return entry
 
 
@@ -317,6 +347,9 @@ def move_to_closed_unpaid(
         note=note,
     )
     consultation.save(update_fields=["status", "closed_at", "updated_at"])
+    from apps.telemedicine.services import cancel_for_case_change
+
+    cancel_for_case_change(consultation, actor_type="system", note="Consultation finished.")
     return entry
 
 
@@ -335,10 +368,13 @@ def assign(
     note: str = "",
 ) -> DoctorConsultation:
     """Assign (or reassign) a consultation to an approved doctor."""
+    from apps.telemedicine.services import cancel_for_case_change
+
     locked = DoctorConsultation.objects.select_for_update().get(pk=consultation.pk)
     locked_doctor = Doctor.objects.select_for_update().get(pk=doctor.pk)
     if locked_doctor.status != Doctor.Status.APPROVED:
         raise DoctorNotAssignable()
+    previous_doctor_id = locked.assigned_doctor_id
 
     clean_note = normalize_text(note).strip()
     doc_label = (
@@ -360,6 +396,9 @@ def assign(
         note=audit_note,
     )
     locked.save(update_fields=["assigned_doctor", "assigned_at", "status", "updated_at"])
+    if previous_doctor_id is not None and previous_doctor_id != locked_doctor.pk:
+        # The previous doctor's call cannot carry over: only the assigned doctor runs calls.
+        cancel_for_case_change(locked, actor_type="staff", note="Consultation reassigned.")
 
     patient_obj = locked.patient
     doctor_phone = locked_doctor.phone
@@ -424,6 +463,8 @@ def return_to_queue(doctor: Doctor) -> int:
             ),
         )
     )
+    from apps.telemedicine.services import cancel_for_case_change
+
     doc_label = doctor.doctor_code or str(doctor.pk)
     for case in open_cases:
         case.assigned_doctor = None
@@ -436,6 +477,7 @@ def return_to_queue(doctor: Doctor) -> int:
             note=f"Returned to queue after doctor {doc_label} was suspended.",
         )
         case.save(update_fields=["assigned_doctor", "assigned_at", "status", "updated_at"])
+        cancel_for_case_change(case, actor_type="system", note="Doctor suspended.")
     return len(open_cases)
 
 
@@ -535,6 +577,9 @@ def send_questions(
         Status.RESPONDED,
     ):
         raise InvalidConsultationTransition()
+    # One round at a time: the patient answers before the doctor asks again.
+    if locked.question_sets.filter(answered_at__isnull=True).exists():
+        raise QuestionsStillOpen()
 
     max_round = locked.question_sets.aggregate(m=Max("round_number"))["m"] or 0
     qset = QuestionSet.objects.create(
@@ -731,6 +776,9 @@ def submit_answers(
     )
     if locked_set.answered_at is not None:
         raise QuestionSetAlreadyAnswered()
+    # Withdrawn, finished, or sent back to the queue: the doctor is no longer waiting.
+    if locked_case.status != Status.AWAITING_PATIENT:
+        raise NotAwaitingAnswers()
 
     submitted_by_qid: dict[str, Any] = {}
     for entry in raw_answers:
@@ -741,127 +789,142 @@ def submit_answers(
     errors: dict[str, list[ErrorDetail]] = {}
     pending_records: list[tuple[Question, Any, tuple[str, str, str] | None]] = []
 
-    for question in questions:
-        qid = str(question.pk)
-        raw_val = submitted_by_qid.get(qid)
-        qtype = question.question_type
+    # Photos are written to storage as they are checked; if any answer is refused, remove them
+    # again so nothing is left in storage without an answer pointing to it.
+    stored_names: list[str] = []
+    try:
+        for question in questions:
+            qid = str(question.pk)
+            raw_val = submitted_by_qid.get(qid)
+            qtype = question.question_type
 
-        if qtype == Question.Type.PHOTO:
-            upload = files.get(f"file_{qid}") or files.get(qid)
-            if upload is None:
-                if question.required:
-                    errors[qid] = [ErrorDetail("Please upload a photo.", code="required")]
-                continue
-            stored = store_private(
-                upload,
-                f"consultations/{locked_case.pk}/answers",
-                field=qid,
-                allowed=("JPEG", "PNG", "WEBP"),
-                max_bytes=10 * 1024 * 1024,
-            )
-            pending_records.append(
-                (question, None, (stored.name, str(upload.name or "photo"), stored.content_type))
-            )
-            continue
-
-        if qtype in (Question.Type.TEXT, Question.Type.LONG_TEXT):
-            text = normalize_text(str(raw_val)).strip() if raw_val is not None else ""
-            if not text:
-                if question.required:
-                    errors[qid] = [ErrorDetail("This field is required.", code="required")]
-                continue
-            max_len = 500 if qtype == Question.Type.TEXT else 4000
-            if len(text) > max_len:
-                errors[qid] = [ErrorDetail("Answer is too long.", code="max_length")]
-                continue
-            pending_records.append((question, text, None))
-            continue
-
-        if qtype == Question.Type.YES_NO:
-            if raw_val is None or raw_val == "":
-                if question.required:
-                    errors[qid] = [ErrorDetail("Please choose Yes or No.", code="required")]
-                continue
-            parsed = _coerce_yes_no(raw_val)
-            if parsed is None:
-                errors[qid] = [ErrorDetail("Choose Yes or No.", code="invalid")]
-                continue
-            pending_records.append((question, parsed, None))
-            continue
-
-        if qtype == Question.Type.SINGLE_CHOICE:
-            choice = normalize_text(str(raw_val)).strip() if raw_val is not None else ""
-            if not choice:
-                if question.required:
-                    errors[qid] = [ErrorDetail("Please select an option.", code="required")]
-                continue
-            if choice not in question.options:
-                errors[qid] = [ErrorDetail("Invalid choice.", code="invalid")]
-                continue
-            pending_records.append((question, choice, None))
-            continue
-
-        if qtype == Question.Type.MULTI_CHOICE:
-            if raw_val is None or raw_val == []:
-                if question.required:
-                    errors[qid] = [
-                        ErrorDetail("Please select at least one option.", code="required")
-                    ]
-                continue
-            if not isinstance(raw_val, list):
-                errors[qid] = [ErrorDetail("Expected a list of choices.", code="invalid")]
-                continue
-            chosen = list(
-                dict.fromkeys(
-                    normalize_text(str(item)).strip() for item in raw_val if str(item).strip()
+            if qtype == Question.Type.PHOTO:
+                upload = files.get(f"file_{qid}") or files.get(qid)
+                if upload is None:
+                    if question.required:
+                        errors[qid] = [ErrorDetail("Please upload a photo.", code="required")]
+                    continue
+                stored = store_private(
+                    upload,
+                    f"consultations/{locked_case.pk}/answers",
+                    field=qid,
+                    allowed=("JPEG", "PNG", "WEBP"),
+                    max_bytes=10 * 1024 * 1024,
                 )
-            )
-            if not chosen:
-                if question.required:
-                    errors[qid] = [
-                        ErrorDetail("Please select at least one option.", code="required")
-                    ]
+                stored_names.append(stored.name)
+                pending_records.append(
+                    (
+                        question,
+                        None,
+                        (stored.name, str(upload.name or "photo"), stored.content_type),
+                    )
+                )
                 continue
-            if any(item not in question.options for item in chosen):
-                errors[qid] = [ErrorDetail("Contains an invalid choice.", code="invalid")]
-                continue
-            pending_records.append((question, chosen, None))
-            continue
 
-        if qtype == Question.Type.NUMBER:
-            if raw_val is None or str(raw_val).strip() == "":
-                if question.required:
-                    errors[qid] = [ErrorDetail("Enter a number.", code="required")]
+            if qtype in (Question.Type.TEXT, Question.Type.LONG_TEXT):
+                text = normalize_text(str(raw_val)).strip() if raw_val is not None else ""
+                if not text:
+                    if question.required:
+                        errors[qid] = [ErrorDetail("This field is required.", code="required")]
+                    continue
+                max_len = 500 if qtype == Question.Type.TEXT else 4000
+                if len(text) > max_len:
+                    errors[qid] = [ErrorDetail("Answer is too long.", code="max_length")]
+                    continue
+                pending_records.append((question, text, None))
                 continue
-            try:
-                num = float(raw_val)
-            except (TypeError, ValueError):
-                errors[qid] = [ErrorDetail("Enter a valid number.", code="invalid")]
-                continue
-            if not math.isfinite(num):
-                errors[qid] = [ErrorDetail("Enter a finite number.", code="invalid")]
-                continue
-            final_num: int | float = int(num) if num.is_integer() else num
-            pending_records.append((question, final_num, None))
-            continue
 
-        if qtype == Question.Type.SCALE:
-            if raw_val is None or str(raw_val).strip() == "":
-                if question.required:
-                    errors[qid] = [ErrorDetail("Choose a rating.", code="required")]
+            if qtype == Question.Type.YES_NO:
+                if raw_val is None or raw_val == "":
+                    if question.required:
+                        errors[qid] = [ErrorDetail("Please choose Yes or No.", code="required")]
+                    continue
+                parsed = _coerce_yes_no(raw_val)
+                if parsed is None:
+                    errors[qid] = [ErrorDetail("Choose Yes or No.", code="invalid")]
+                    continue
+                pending_records.append((question, parsed, None))
                 continue
-            try:
-                score = int(raw_val)
-            except (TypeError, ValueError):
-                errors[qid] = [ErrorDetail("Choose a whole number.", code="invalid")]
-                continue
-            if isinstance(raw_val, bool) or not (question.scale_min <= score <= question.scale_max):
-                errors[qid] = [ErrorDetail("Rating out of range.", code="invalid")]
-                continue
-            pending_records.append((question, score, None))
 
-    if errors:
-        raise ValidationError(errors)
+            if qtype == Question.Type.SINGLE_CHOICE:
+                choice = normalize_text(str(raw_val)).strip() if raw_val is not None else ""
+                if not choice:
+                    if question.required:
+                        errors[qid] = [ErrorDetail("Please select an option.", code="required")]
+                    continue
+                if choice not in question.options:
+                    errors[qid] = [ErrorDetail("Invalid choice.", code="invalid")]
+                    continue
+                pending_records.append((question, choice, None))
+                continue
+
+            if qtype == Question.Type.MULTI_CHOICE:
+                if raw_val is None or raw_val == []:
+                    if question.required:
+                        errors[qid] = [
+                            ErrorDetail("Please select at least one option.", code="required")
+                        ]
+                    continue
+                if not isinstance(raw_val, list):
+                    errors[qid] = [ErrorDetail("Expected a list of choices.", code="invalid")]
+                    continue
+                chosen = list(
+                    dict.fromkeys(
+                        normalize_text(str(item)).strip() for item in raw_val if str(item).strip()
+                    )
+                )
+                if not chosen:
+                    if question.required:
+                        errors[qid] = [
+                            ErrorDetail("Please select at least one option.", code="required")
+                        ]
+                    continue
+                if any(item not in question.options for item in chosen):
+                    errors[qid] = [ErrorDetail("Contains an invalid choice.", code="invalid")]
+                    continue
+                pending_records.append((question, chosen, None))
+                continue
+
+            if qtype == Question.Type.NUMBER:
+                if raw_val is None or str(raw_val).strip() == "":
+                    if question.required:
+                        errors[qid] = [ErrorDetail("Enter a number.", code="required")]
+                    continue
+                try:
+                    num = float(raw_val)
+                except (TypeError, ValueError):
+                    errors[qid] = [ErrorDetail("Enter a valid number.", code="invalid")]
+                    continue
+                if not math.isfinite(num):
+                    errors[qid] = [ErrorDetail("Enter a finite number.", code="invalid")]
+                    continue
+                final_num: int | float = int(num) if num.is_integer() else num
+                pending_records.append((question, final_num, None))
+                continue
+
+            if qtype == Question.Type.SCALE:
+                if raw_val is None or str(raw_val).strip() == "":
+                    if question.required:
+                        errors[qid] = [ErrorDetail("Choose a rating.", code="required")]
+                    continue
+                try:
+                    score = int(raw_val)
+                except (TypeError, ValueError):
+                    errors[qid] = [ErrorDetail("Choose a whole number.", code="invalid")]
+                    continue
+                if isinstance(raw_val, bool) or not (
+                    question.scale_min <= score <= question.scale_max
+                ):
+                    errors[qid] = [ErrorDetail("Rating out of range.", code="invalid")]
+                    continue
+                pending_records.append((question, score, None))
+
+        if errors:
+            raise ValidationError(errors)
+    except Exception:
+        for name in stored_names:
+            delete_private(name)
+        raise
 
     for question, val_json, file_info in pending_records:
         Answer.objects.create(

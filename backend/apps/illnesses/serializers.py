@@ -4,7 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.remedies.serializers import RemedyCardSerializer
-from common.i18n import localized_text
+from common.i18n import current_language, localized_text
 from common.serializers import LocalizedField
 
 from .models import Illness, IllnessCategory, IllnessRemedy
@@ -83,10 +83,18 @@ class AdminRankedRemediesInputSerializer(serializers.Serializer):
 
 class PublicIllnessSummarySerializer(serializers.ModelSerializer):
     name = LocalizedField()
+    other_name = serializers.SerializerMethodField(
+        help_text="The name in the other language (blank when it has none)."
+    )
+    remedy_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Illness
-        fields = ["id", "slug", "name"]
+        fields = ["id", "slug", "name", "other_name", "remedy_count"]
+
+    def get_other_name(self, illness: Illness) -> str:
+        other = illness.name_en if current_language() == "bn" else illness.name_bn
+        return other if other != localized_text(illness, "name") else ""
 
 
 class PublicIllnessCategorySerializer(serializers.ModelSerializer):

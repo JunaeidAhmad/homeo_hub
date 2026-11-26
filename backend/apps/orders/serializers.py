@@ -201,7 +201,11 @@ class PatientOrderDetailSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OrderTimelineEntrySerializer(many=True))
     def get_timeline(self, order: Order) -> list[dict[str, Any]]:
-        rows = [row for row in order.history.all() if row.shop_assignment_id is None]
+        rows = [
+            row
+            for row in order.history.all()
+            if row.shop_id is None and row.shop_assignment_id is None
+        ]
         return list(OrderTimelineEntrySerializer(rows, many=True).data)
 
 
@@ -343,6 +347,8 @@ class AdminOrderHistorySerializer(serializers.ModelSerializer):
         return None
 
     def get_shop_name(self, entry: OrderStatusHistory) -> str | None:
+        if entry.shop:
+            return entry.shop.name
         if entry.shop_assignment:
             return entry.shop_assignment.shop.name
         return None

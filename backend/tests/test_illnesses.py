@@ -179,6 +179,12 @@ def test_inactive_illnesses_categories_and_remedies_are_hidden_from_public(manag
     categories = visitor.get(CATEGORIES_PUBLIC).json()
     assert [c["slug"] for c in categories] == [active_cat["slug"]]
     assert [i["slug"] for i in categories[0]["illnesses"]] == [active_illness["slug"]]
+    # Only the active remedy counts; the draft and archived ones are hidden.
+    assert categories[0]["illnesses"][0]["remedy_count"] == 1
+    assert categories[0]["illnesses"][0]["other_name"] == "অ্যাসিডিটি"
+    in_bangla = visitor.get(CATEGORIES_PUBLIC, headers={"Accept-Language": "bn"}).json()
+    assert in_bangla[0]["illnesses"][0]["name"] == "অ্যাসিডিটি"
+    assert in_bangla[0]["illnesses"][0]["other_name"] == "Dry cough"
 
     assert visitor.get(f"{ILLNESSES_PUBLIC}{inactive_illness['slug']}/").status_code == 404
     assert visitor.get(f"{ILLNESSES_PUBLIC}{hidden_cat_illness['slug']}/").status_code == 404

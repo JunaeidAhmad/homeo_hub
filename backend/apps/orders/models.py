@@ -221,12 +221,21 @@ class OrderItem(models.Model):
 class OrderStatusHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="history")
+    # Rows about one shop's part of the order. They stay when the assignment is removed
+    # (unassign/reassign), and patients never see them: `shop` marks them for good.
     shop_assignment = models.ForeignKey(
         ShopAssignment,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="history",
+    )
+    shop = models.ForeignKey(
+        "shops.Shop",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
     )
     from_status = models.CharField(max_length=20, blank=True, default="")
     to_status = models.CharField(max_length=20, choices=Order.Status.choices)

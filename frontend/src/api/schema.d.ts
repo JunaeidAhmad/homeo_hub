@@ -4770,6 +4770,9 @@ export interface components {
             readonly id: string;
             slug: string;
             readonly name: string;
+            /** @description The name in the other language (blank when it has none). */
+            readonly other_name: string;
+            readonly remedy_count: number;
         };
         PushPublicKey: {
             public_key: string;

@@ -40,3 +40,12 @@ export const ORDER_STATUS_META: Record<
     badgeClass: "bg-mist text-ink-muted",
   },
 };
+
+/** Orders still on their way to the patient (not delivered, cancelled or returned). */
+export const ACTIVE_ORDER_STATUSES: OrderStatus[] = [
+  "PENDING_PAYMENT",
+  "CONFIRMED",
+  "PAID",
+  "PROCESSING",
+  "SHIPPED",
+];

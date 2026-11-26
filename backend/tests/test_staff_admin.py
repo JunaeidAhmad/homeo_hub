@@ -184,3 +184,8 @@ def test_staff_and_patient_sessions_stay_apart(location):
 
     assert client.post(REFRESH, headers=WEB).status_code == 401  # not a staff token
     assert client.post("/api/v1/auth/refresh/", headers=WEB).status_code == 200
+
+
+def test_password_only_django_admin_is_not_mounted_outside_local_development():
+    # Its sign-in skips the staff TOTP step, so only DEBUG (local) settings may expose it.
+    assert APIClient().get("/django-admin/login/").status_code == 404

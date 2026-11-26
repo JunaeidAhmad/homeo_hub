@@ -345,3 +345,34 @@ def test_cod_delivery_requires_amount_and_patient_status_follows_assignments(loc
         "SHIPPED",
         "DELIVERED",
     ]
+
+
+def test_unassigning_keeps_the_shop_history_and_patients_still_never_see_it(location):
+    fulfil = staff_client("fulfil_hist", Role.FULFILMENT_MANAGER)
+    remedy = make_remedy("Arnica")
+    shop = shops.create_shop(
+        name="Mirpur Shop",
+        location=location,
+        address_line="2 Road",
+        phone="01722222222",
+        is_verified=True,
+    )
+    listing = shops.create_listing(
+        shop=shop, remedy=remedy, pack_size=10, unit="ML", price_poisha=9000, stock_qty=10
+    )
+    patient, order = place_order(location, [(remedy, 1)])
+    item_url = f"{ADMIN_ORDERS}{order['id']}/items/{order['items'][0]['id']}/assign/"
+
+    assigned = fulfil.post(item_url, {"shop_remedy_id": str(listing.id)}, format="json")
+    assert assigned.status_code == 200, assigned.content
+    # The line was the shop's only one, so unassigning deletes the assignment itself.
+    detail = fulfil.delete(item_url).json()
+    assert detail["assignments"] == []
+
+    notes = {(row["note"], row["shop_name"]) for row in detail["history"]}
+    assert ("Assigned Arnica", "Mirpur Shop") in notes
+    assert ("Unassigned Arnica", "Mirpur Shop") in notes
+
+    timeline = patient.get(f"/api/v1/orders/{order['id']}/").json()["timeline"]
+    assert all("Arnica" not in (row.get("note") or "") for row in timeline)
+    assert_no_shop_keys(timeline)

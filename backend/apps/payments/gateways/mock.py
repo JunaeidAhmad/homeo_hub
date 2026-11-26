@@ -50,7 +50,8 @@ class MockGateway:
         return RedirectData(tran_id=tran_id, outcome=outcome, raw=dict(data))
 
     def validate(self, val_id: str) -> Validation:
-        session = MockGatewaySession.objects.filter(val_id=val_id).first()
+        # A blank val_id must never match a session that has not been paid yet.
+        session = MockGatewaySession.objects.filter(val_id=val_id).first() if val_id else None
         if session is None:
             return Validation(
                 status="INVALID",

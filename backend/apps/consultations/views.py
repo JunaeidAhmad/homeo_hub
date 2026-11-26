@@ -381,6 +381,8 @@ class DoctorConsultationOpenView(APIView):
         detail = get_object_or_404(
             selectors.cases_for_doctor(cast(Doctor, request.user)), pk=updated.pk
         )
+        # The response carries the patient's record, so it is a clinical read like the GET.
+        audit.read(request, "consultation.patient_record.read", detail)
         return Response(
             DoctorConsultationDetailSerializer(detail, context={"request": request}).data
         )

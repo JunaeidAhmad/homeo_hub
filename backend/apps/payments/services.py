@@ -166,7 +166,11 @@ def _apply_validation(
         if locked_order.status == Order.Status.CANCELLED:
             payment.is_flagged = True
             payment.flag_reason = "Paid after the order was cancelled"
-        elif locked_order.status == Order.Status.PENDING_PAYMENT:
+        elif locked_order.status != Order.Status.PENDING_PAYMENT:
+            # Another payment for this order already succeeded: this one needs a refund.
+            payment.is_flagged = True
+            payment.flag_reason = "Order was already paid"
+        else:
             locked_order.status = Order.Status.PAID
             locked_order.save(update_fields=["status", "updated_at"])
             OrderStatusHistory.objects.create(
@@ -188,7 +192,11 @@ def _apply_validation(
         ):
             payment.is_flagged = True
             payment.flag_reason = "Paid after invoice was closed or voided"
-        elif locked_invoice.status == ConsultationInvoice.Status.UNPAID:
+        elif locked_invoice.status != ConsultationInvoice.Status.UNPAID:
+            # Already paid (another attempt) or waived: this one needs a refund.
+            payment.is_flagged = True
+            payment.flag_reason = "Invoice was already paid or waived"
+        else:
             locked_invoice.status = ConsultationInvoice.Status.PAID
             locked_invoice.paid_at = now
             locked_invoice.save(update_fields=["status", "paid_at", "updated_at"])
@@ -272,18 +280,16 @@ def handle_ipn(data: dict[str, Any]) -> Payment | None:
     if payment.status in FINAL_PAYMENT_STATUSES:
         return payment
 
-    if ipn.status == "CANCELLED":
-        payment.status = Payment.Status.CANCELLED
-        payment.save(update_fields=["status", "updated_at"])
-        return payment
-
-    if ipn.status in {"FAILED", "FAIL"}:
-        payment.status = Payment.Status.FAILED
-        payment.save(update_fields=["status", "updated_at"])
-        return payment
-
-    validation = gateway.validate(ipn.val_id)
-    return _apply_validation(payment, validation, ipn.val_id, PaymentEvent.Kind.VALIDATE)
+    # The IPN endpoint is public, so its body is only a hint: the outcome always comes from
+    # the gateway, by the val_id it gave (success) or by asking about the tran_id (anything else).
+    validation = gateway.validate(ipn.val_id) if ipn.val_id else None
+    if validation is None or validation.tran_id != payment.tran_id:
+        validation = gateway.query(payment.tran_id)
+    if validation is None:
+        return payment  # no result at the gateway yet; reconcile_payments settles it later
+    return _apply_validation(
+        payment, validation, str(validation.raw.get("val_id", "")), PaymentEvent.Kind.VALIDATE
+    )
 
 
 @transaction.atomic
