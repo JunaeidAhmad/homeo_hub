@@ -217,6 +217,7 @@ def withdraw(
 ) -> DoctorConsultation:
     """Cancel a patient's own consultation while it is still waiting in queue."""
     from apps.billing.services import void_unpaid_invoice
+    from apps.telemedicine.services import cancel_for_withdrawal
 
     locked = DoctorConsultation.objects.select_for_update().get(pk=consultation.pk, patient=patient)
     if locked.status != Status.SUBMITTED:
@@ -234,6 +235,7 @@ def withdraw(
     )
     locked.save(update_fields=["status", "cancelled_at", "cancel_reason", "updated_at"])
     void_unpaid_invoice(locked)
+    cancel_for_withdrawal(locked)
     return locked
 
 

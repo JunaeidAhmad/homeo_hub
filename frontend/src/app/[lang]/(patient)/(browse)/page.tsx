@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { UpcomingCallCard } from "@/areas/patient/home/UpcomingCallCard";
 import { common } from "@/i18n/messages/common";
 import { patient } from "@/i18n/messages/patient";
 import { getTranslator } from "@/i18n/server";
@@ -14,6 +15,8 @@ export default async function Home() {
           {t("patient.home.title")}
         </h1>
       </header>
+
+      <UpcomingCallCard />
 
       <div className="grid gap-4 desktop:grid-cols-2">
         <article className="flex flex-col justify-between gap-4 rounded-panel border border-line bg-surface p-6">

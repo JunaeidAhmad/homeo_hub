@@ -128,9 +128,10 @@ def notify(
     context: Mapping[str, Any],
     link: str,
     dedupe_key: str | None = None,
+    push_tag: str | None = None,
 ) -> list[Notification]:
     """Create notification rows and send SMS + Web Push. Call only inside transaction.on_commit."""
-    title_en, title_bn, body_en, body_bn, should_sms = render_message(kind, context)
+    title_en, title_bn, body_en, body_bn, sms_target = render_message(kind, context)
     created: list[Notification] = []
 
     for target in recipients:
@@ -160,7 +161,10 @@ def notify(
         local_title = title_bn if lang == "bn" else title_en
         local_body = body_bn if lang == "bn" else body_en
 
-        if should_sms and phone and rtype != RecipientType.STAFF:
+        send_sms_to_target = sms_target == "all" or (
+            sms_target == "patient" and rtype == RecipientType.PATIENT
+        )
+        if send_sms_to_target and phone and rtype != RecipientType.STAFF:
             try:
                 send_sms(phone, f"HomeoHub: {local_body}")
             except Exception:
@@ -174,7 +178,7 @@ def notify(
             title=local_title,
             body=local_body,
             url=link,
-            tag=kind,
+            tag=push_tag or kind,
         )
 
     return created

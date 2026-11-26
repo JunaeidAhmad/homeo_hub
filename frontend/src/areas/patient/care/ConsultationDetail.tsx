@@ -18,6 +18,7 @@ import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 
 import { CONSULTATION_STATUS_META, URGENCY_BADGE, type ConsultationStatus } from "./status";
+import { AppointmentPanel } from "./AppointmentPanel";
 
 type Detail = components["schemas"]["PatientConsultationDetail"];
 type HistoryItem = components["schemas"]["ConsultationHistory"];
@@ -205,6 +206,8 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
           }
         />
       </section>
+
+      {caseData.doctor && <AppointmentPanel caseId={caseData.id} />}
 
       {caseData.prescription_summary && (
         <section

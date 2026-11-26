@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.billing",
     "apps.notifications",
     "apps.audit",
+    "apps.telemedicine",
 ]
 
 MIDDLEWARE = [
@@ -288,6 +289,8 @@ SPECTACULAR_SETTINGS = {
         "NotificationKindEnum": "apps.notifications.models.NotificationKind",
         "AuditActorTypeEnum": "apps.audit.models.AuditEntry.ActorType",
         "QuestionTemplateStatusEnum": "apps.consultations.models.QuestionTemplate.Status",
+        "AppointmentStatusEnum": "apps.telemedicine.models.VideoAppointment.Status",
+        "AppointmentEventKindEnum": "apps.telemedicine.models.AppointmentEvent.Kind",
     },
 }
 

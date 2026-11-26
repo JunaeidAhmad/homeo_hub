@@ -1392,6 +1392,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/appointments/{id}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["appointments_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["appointments_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/{id}/reject/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["appointments_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/{id}/reschedule-request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["appointments_reschedule_request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/appointments/upcoming/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["appointments_upcoming"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/doctor/login/": {
         parameters: {
             query?: never;
@@ -1842,6 +1922,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor-consultations/{id}/appointments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["consultations_appointments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor-consultations/{id}/prescription/": {
         parameters: {
             query?: never;
@@ -1938,6 +2034,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor/appointments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_appointments_calendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/appointments/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_appointments_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/appointments/{id}/repropose/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_appointments_repropose"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor/consultations/": {
         parameters: {
             query?: never;
@@ -1964,6 +2108,22 @@ export interface paths {
         get: operations["doctor_consultations_read"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/consultations/{id}/appointments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_consultation_appointments_list"];
+        put?: never;
+        post: operations["doctor_consultation_appointments_propose"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3107,6 +3267,49 @@ export interface components {
         AnswerBatchSubmitRequest: {
             answers: components["schemas"]["QuestionAnswerInputRequest"][];
         };
+        AppointmentEvent: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["AppointmentEventKindEnum"];
+            readonly actor_type: string;
+            readonly note: string;
+            /** Format: date-time */
+            readonly proposed_start_at: string | null;
+            readonly preferred_times: string[];
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /**
+         * @description * `PROPOSED` - Proposed
+         *     * `ACCEPTED` - Accepted
+         *     * `REJECTED` - Rejected
+         *     * `RESCHEDULE_REQUESTED` - Reschedule Requested
+         *     * `RESCHEDULED` - Rescheduled
+         *     * `CANCELLED` - Cancelled
+         *     * `EXPIRED` - Expired
+         *     * `CALL_STARTED` - Call Started
+         *     * `CALL_ENDED` - Call Ended
+         *     * `NO_SHOW` - No Show
+         * @enum {string}
+         */
+        AppointmentEventKindEnum: "PROPOSED" | "ACCEPTED" | "REJECTED" | "RESCHEDULE_REQUESTED" | "RESCHEDULED" | "CANCELLED" | "EXPIRED" | "CALL_STARTED" | "CALL_ENDED" | "NO_SHOW";
+        AppointmentNoteRequest: {
+            /** @default  */
+            note: string;
+        };
+        /**
+         * @description * `PROPOSED` - Proposed
+         *     * `RESCHEDULE_REQUESTED` - Reschedule Requested
+         *     * `ACCEPTED` - Accepted
+         *     * `IN_PROGRESS` - In Progress
+         *     * `COMPLETED` - Completed
+         *     * `REJECTED` - Rejected
+         *     * `EXPIRED` - Expired
+         *     * `NO_SHOW` - No Show
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        AppointmentStatusEnum: "PROPOSED" | "RESCHEDULE_REQUESTED" | "ACCEPTED" | "IN_PROGRESS" | "COMPLETED" | "REJECTED" | "EXPIRED" | "NO_SHOW" | "CANCELLED";
         /**
          * @description * `UPAZILA` - UPAZILA
          *     * `DISTRICT` - DISTRICT
@@ -3297,6 +3500,37 @@ export interface components {
         ConsultationWithdrawRequest: {
             /** @default  */
             reason: string;
+        };
+        DoctorAppointment: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly consultation_id: string;
+            /** Format: date-time */
+            readonly start_at: string;
+            readonly duration_minutes: number;
+            /** Format: date-time */
+            readonly end_at: string;
+            readonly status: components["schemas"]["AppointmentStatusEnum"];
+            readonly events: components["schemas"]["AppointmentEvent"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        DoctorCalendarItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly consultation_id: string;
+            readonly consultation_code: string;
+            readonly patient_name: string;
+            /** Format: date-time */
+            readonly start_at: string;
+            readonly duration_minutes: number;
+            /** Format: date-time */
+            readonly end_at: string;
+            readonly status: components["schemas"]["AppointmentStatusEnum"];
         };
         DoctorCertificate: {
             /** Format: uuid */
@@ -3611,9 +3845,18 @@ export interface components {
          *     * `ORDER_STATUS_CHANGED` - Order Status Changed
          *     * `CONSULTATION_WAITING` - Consultation Waiting
          *     * `DOCTOR_APPLICATION` - Doctor Application
+         *     * `CALL_PROPOSED` - Call Proposed
+         *     * `CALL_ACCEPTED` - Call Accepted
+         *     * `CALL_REJECTED` - Call Rejected
+         *     * `CALL_RESCHEDULE_REQUESTED` - Call Reschedule Requested
+         *     * `CALL_RESCHEDULED` - Call Rescheduled
+         *     * `CALL_CANCELLED` - Call Cancelled
+         *     * `CALL_EXPIRED` - Call Expired
+         *     * `CALL_REMINDER_30` - Call Reminder 30
+         *     * `CALL_REMINDER_5` - Call Reminder 5
          * @enum {string}
          */
-        NotificationKindEnum: "DOCTOR_ASSIGNED" | "QUESTIONS_SENT" | "PATIENT_ANSWERED" | "PRESCRIPTION_READY" | "PAYMENT_RESULT" | "ORDER_STATUS_CHANGED" | "CONSULTATION_WAITING" | "DOCTOR_APPLICATION";
+        NotificationKindEnum: "DOCTOR_ASSIGNED" | "QUESTIONS_SENT" | "PATIENT_ANSWERED" | "PRESCRIPTION_READY" | "PAYMENT_RESULT" | "ORDER_STATUS_CHANGED" | "CONSULTATION_WAITING" | "DOCTOR_APPLICATION" | "CALL_PROPOSED" | "CALL_ACCEPTED" | "CALL_REJECTED" | "CALL_RESCHEDULE_REQUESTED" | "CALL_RESCHEDULED" | "CALL_CANCELLED" | "CALL_EXPIRED" | "CALL_REMINDER_30" | "CALL_REMINDER_5";
         /** @enum {unknown} */
         NullEnum: null;
         OrderQuoteRequestRequest: {
@@ -4033,6 +4276,25 @@ export interface components {
             readonly location: components["schemas"]["Location"];
             readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
         };
+        PatientAppointment: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly consultation_id: string;
+            readonly consultation_code: string;
+            readonly doctor_name: string;
+            /** Format: date-time */
+            readonly start_at: string;
+            readonly duration_minutes: number;
+            /** Format: date-time */
+            readonly end_at: string;
+            readonly status: components["schemas"]["AppointmentStatusEnum"];
+            readonly events: components["schemas"]["AppointmentEvent"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         PatientConsultationDetail: {
             /** Format: uuid */
             readonly id: string;
@@ -4331,6 +4593,14 @@ export interface components {
             total: number;
             sections: components["schemas"]["CompletenessSections"];
         };
+        ProposeAppointmentRequest: {
+            /** Format: date-time */
+            start_at: string;
+            /** @default 20 */
+            duration_minutes: number;
+            /** @default  */
+            note: string;
+        };
         PublicIllnessCategory: {
             /** Format: uuid */
             readonly id: string;
@@ -4501,6 +4771,11 @@ export interface components {
          * @enum {string}
          */
         RemedyStatusEnum: "DRAFT" | "ACTIVE" | "ARCHIVED";
+        RescheduleRequestRequest: {
+            /** @default  */
+            note: string;
+            preferred_times?: string[];
+        };
         ResendRequest: {
             /** Format: uuid */
             verification_id: string;
@@ -7790,6 +8065,256 @@ export interface operations {
             };
         };
     };
+    appointments_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientAppointment"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    appointments_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AppointmentNoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    appointments_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AppointmentNoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    appointments_reschedule_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RescheduleRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    appointments_upcoming: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientAppointment"];
+                };
+            };
+            /** @description No upcoming confirmed appointment */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     auth_doctor_login: {
         parameters: {
             query?: never;
@@ -8950,6 +9475,43 @@ export interface operations {
             };
         };
     };
+    consultations_appointments_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientAppointment"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     patient_prescription_read: {
         parameters: {
             query?: never;
@@ -9173,6 +9735,182 @@ export interface operations {
             };
         };
     };
+    doctor_appointments_calendar: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorCalendarItem"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_appointments_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AppointmentNoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_appointments_repropose: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposeAppointmentRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     doctor_consultations_list: {
         parameters: {
             query?: {
@@ -9247,6 +9985,116 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultation_appointments_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultation_appointments_propose: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposeAppointmentRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

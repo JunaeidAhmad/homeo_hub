@@ -17,7 +17,7 @@ class NotificationTemplate:
     title_bn: str
     body_en: str
     body_bn: str
-    sms_mode: str = "never"  # "never" | "always" | "order_shipped_or_delivered"
+    sms_mode: str = "never"  # "never" | "always" | "patient" | "order_shipped_or_delivered"
 
 
 CATALOG: dict[str, NotificationTemplate] = {
@@ -77,6 +77,69 @@ CATALOG: dict[str, NotificationTemplate] = {
         body_bn="{name}-এর ডাক্তার আবেদন পর্যালোচনার জন্য প্রস্তুত।",
         sms_mode="never",
     ),
+    NotificationKind.CALL_PROPOSED: NotificationTemplate(
+        title_en="Video call time proposed",
+        title_bn="ভিডিও কলের সময় প্রস্তাবিত হয়েছে",
+        body_en="Dr {doctor_name} proposed a video call on {time_en} for consultation {code}.",
+        body_bn="ডা. {doctor_name} পরামর্শ {code}-এর জন্য {time_bn} সময়ে ভিডিও কলের প্রস্তাব দিয়েছেন।",
+        sms_mode="patient",
+    ),
+    NotificationKind.CALL_ACCEPTED: NotificationTemplate(
+        title_en="Video call confirmed",
+        title_bn="ভিডিও কল নিশ্চিত হয়েছে",
+        body_en="Patient confirmed the video call on {time_en} for consultation {code}.",
+        body_bn="রোগী পরামর্শ {code}-এর {time_bn} সময়ের ভিডিও কলটি নিশ্চিত করেছেন।",
+        sms_mode="never",
+    ),
+    NotificationKind.CALL_REJECTED: NotificationTemplate(
+        title_en="Video call declined",
+        title_bn="ভিডিও কল বাতিল হয়েছে",
+        body_en="Patient declined the proposed video call for consultation {code}.",
+        body_bn="রোগী পরামর্শ {code}-এর প্রস্তাবিত ভিডিও কলটি বাতিল করেছেন।",
+        sms_mode="never",
+    ),
+    NotificationKind.CALL_RESCHEDULE_REQUESTED: NotificationTemplate(
+        title_en="Another call time requested",
+        title_bn="অন্য সময়ের অনুরোধ",
+        body_en="Patient asked for another time for consultation {code}.",
+        body_bn="রোগী পরামর্শ {code}-এর ভিডিও কলের জন্য অন্য সময় চেয়েছেন।",
+        sms_mode="never",
+    ),
+    NotificationKind.CALL_RESCHEDULED: NotificationTemplate(
+        title_en="Video call rescheduled",
+        title_bn="ভিডিও কলের নতুন সময়",
+        body_en="Your video call for consultation {code} was moved to {time_en}.",
+        body_bn="পরামর্শ {code}-এর ভিডিও কল {time_bn} সময়ে পরিবর্তন করা হয়েছে।",
+        sms_mode="patient",
+    ),
+    NotificationKind.CALL_CANCELLED: NotificationTemplate(
+        title_en="Video call cancelled",
+        title_bn="ভিডিও কল বাতিল হয়েছে",
+        body_en="The video call for consultation {code} ({time_en}) was cancelled.",
+        body_bn="পরামর্শ {code}-এর ভিডিও কল ({time_bn}) বাতিল করা হয়েছে।",
+        sms_mode="patient",
+    ),
+    NotificationKind.CALL_EXPIRED: NotificationTemplate(
+        title_en="Call proposal expired",
+        title_bn="কলের প্রস্তাবের মেয়াদ শেষ",
+        body_en="The proposed video call at {time_en} for consultation {code} expired.",
+        body_bn="পরামর্শ {code}-এর {time_bn} সময়ের ভিডিও কলের প্রস্তাবের মেয়াদ শেষ হয়েছে।",
+        sms_mode="never",
+    ),
+    NotificationKind.CALL_REMINDER_30: NotificationTemplate(
+        title_en="Video call in 30 minutes",
+        title_bn="৩০ মিনিট পর ভিডিও কল",
+        body_en="Your video call for consultation {code} starts at {time_en}.",
+        body_bn="পরামর্শ {code}-এর ভিডিও কল {time_bn} সময়ে শুরু হবে।",
+        sms_mode="never",
+    ),
+    NotificationKind.CALL_REMINDER_5: NotificationTemplate(
+        title_en="Video call in 5 minutes",
+        title_bn="৫ মিনিট পর ভিডিও কল",
+        body_en="Your video call for consultation {code} starts soon at {time_en}.",
+        body_bn="পরামর্শ {code}-এর ভিডিও কল শীঘ্রই {time_bn} সময়ে শুরু হবে।",
+        sms_mode="never",
+    ),
 }
 
 
@@ -85,7 +148,7 @@ class _SafeDict(dict):
         return ""
 
 
-def render_message(kind: str, context: Mapping[str, Any]) -> tuple[str, str, str, str, bool]:
+def render_message(kind: str, context: Mapping[str, Any]) -> tuple[str, str, str, str, str]:
     template = CATALOG[kind]
     safe = _SafeDict(context)
     title_en = template.title_en.format_map(safe)[:160]
@@ -93,9 +156,13 @@ def render_message(kind: str, context: Mapping[str, Any]) -> tuple[str, str, str
     body_en = template.body_en.format_map(safe)[:500]
     body_bn = template.body_bn.format_map(safe)[:500]
     if template.sms_mode == "always":
-        send_sms_flag = True
+        sms_target = "all"
+    elif template.sms_mode == "patient":
+        sms_target = "patient"
     elif template.sms_mode == "order_shipped_or_delivered":
-        send_sms_flag = str(context.get("order_status", "")) in ("SHIPPED", "DELIVERED")
+        sms_target = (
+            "all" if str(context.get("order_status", "")) in ("SHIPPED", "DELIVERED") else "none"
+        )
     else:
-        send_sms_flag = False
-    return title_en, title_bn, body_en, body_bn, send_sms_flag
+        sms_target = "none"
+    return title_en, title_bn, body_en, body_bn, sms_target

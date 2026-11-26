@@ -15,11 +15,12 @@ import { useMessages } from "@/i18n/provider";
 import { DOCTOR_STATUS_BADGE } from "./DoctorQueue";
 import { PrescriptionEditor } from "./PrescriptionEditor";
 import { QuestionsPanel } from "./QuestionsPanel";
+import { VideoCallTab } from "./VideoCallTab";
 import { useDoctorSession } from "./session";
 
 type CaseDetail = components["schemas"]["DoctorConsultationDetail"];
-type MobileTab = "case" | "questions" | "prescription";
-type RightTab = "questions" | "prescription";
+type MobileTab = "case" | "questions" | "call" | "prescription";
+type RightTab = "questions" | "call" | "prescription";
 
 function formatDate(locale: Locale, iso: string): string {
   try {
@@ -341,6 +342,8 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
     />
   );
 
+  const callPanel = <VideoCallTab caseId={caseData.id} caseStatus={caseData.status} />;
+
   return (
     <div className="flex flex-col gap-5">
       <div>
@@ -358,15 +361,15 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
         </span>
       </div>
 
-      {/* Mobile 3-tab switcher */}
-      <div className="flex gap-2 desktop:hidden">
-        {(["case", "questions", "prescription"] as const).map((tab) => (
+      {/* Mobile tab switcher */}
+      <div className="grid grid-cols-2 gap-2 desktop:hidden">
+        {(["case", "questions", "call", "prescription"] as const).map((tab) => (
           <button
             key={tab}
             type="button"
             aria-pressed={mobileTab === tab}
             onClick={() => setMobileTab(tab)}
-            className={`min-h-10 flex-1 rounded-control px-3 text-sm font-semibold ${
+            className={`min-h-10 rounded-control px-3 text-sm font-semibold ${
               mobileTab === tab
                 ? "bg-primary text-surface"
                 : "border border-line-strong bg-surface text-ink-soft"
@@ -380,21 +383,22 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
       <div className="desktop:hidden">
         {mobileTab === "case" && caseColumn}
         {mobileTab === "questions" && questionsPanel}
+        {mobileTab === "call" && callPanel}
         {mobileTab === "prescription" && prescriptionPanel}
       </div>
 
       {/* Desktop 2-column workspace */}
-      <div className="hidden gap-6 desktop:grid desktop:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="hidden gap-6 desktop:grid desktop:grid-cols-[minmax(0,1fr)_400px]">
         <div>{caseColumn}</div>
         <aside className="flex flex-col gap-4">
           <div className="flex gap-2">
-            {(["questions", "prescription"] as const).map((tab) => (
+            {(["questions", "call", "prescription"] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
                 aria-pressed={rightTab === tab}
                 onClick={() => setRightTab(tab)}
-                className={`min-h-10 flex-1 rounded-control px-3 text-sm font-semibold ${
+                className={`min-h-10 flex-1 rounded-control px-2.5 text-sm font-semibold ${
                   rightTab === tab
                     ? "bg-primary text-surface"
                     : "border border-line-strong bg-surface text-ink-soft"
@@ -404,7 +408,11 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
               </button>
             ))}
           </div>
-          {rightTab === "questions" ? questionsPanel : prescriptionPanel}
+          {rightTab === "questions"
+            ? questionsPanel
+            : rightTab === "call"
+              ? callPanel
+              : prescriptionPanel}
         </aside>
       </div>
     </div>
