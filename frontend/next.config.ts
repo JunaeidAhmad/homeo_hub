@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  devIndicators: false, // no floating "N" badge in development
   cacheComponents: true,
   partialPrefetching: true,
   // /api/... is forwarded to Django, which needs its trailing slash (see src/proxy.ts).
