@@ -210,8 +210,10 @@ SMS_PROVIDER = env.str("SMS_PROVIDER", default="") or "apps.accounts.sms.Unconfi
 # A cost ceiling across all numbers, whatever the per-number limits allow.
 OTP_MAX_SENDS_PER_HOUR = env.int("OTP_MAX_SENDS_PER_HOUR", default=500)
 REFRESH_COOKIE_SECURE = True
+# Same value as the web app's PROXY_SHARED_SECRET. Required in staging/production;
 # Shared with the web app, which sends it when naming the visitor it is forwarding for.
 PROXY_SHARED_SECRET = env.str("PROXY_SHARED_SECRET", default="")
+DELIVERY_CHARGE_POISHA = env.int("DELIVERY_CHARGE_POISHA", default=6000)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "HomeoHub API",
@@ -228,6 +230,8 @@ SPECTACULAR_SETTINGS = {
         "IllnessStatusEnum": "apps.illnesses.models.Illness.Status",
         "PotenciesEnum": "apps.remedies.choices.Potency",
         "CartStatusEnum": "apps.orders.models.Cart.Status",
+        "OrderStatusEnum": "apps.orders.models.Order.Status",
+        "PaymentMethodEnum": "apps.orders.models.Order.PaymentMethod",
     },
 }
 

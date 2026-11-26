@@ -2,6 +2,7 @@
 
 import uuid
 
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -61,3 +62,92 @@ class CartItem(models.Model):
 
     def __str__(self) -> str:
         return f"CartItem {self.id} x{self.quantity}"
+
+
+class Order(models.Model):
+    class PaymentMethod(models.TextChoices):
+        COD = "COD"
+        ONLINE = "ONLINE"
+
+    class Status(models.TextChoices):
+        PENDING_PAYMENT = "PENDING_PAYMENT"
+        CONFIRMED = "CONFIRMED"
+        PAID = "PAID"
+        PROCESSING = "PROCESSING"
+        SHIPPED = "SHIPPED"
+        DELIVERED = "DELIVERED"
+        CANCELLED = "CANCELLED"
+        RETURNED = "RETURNED"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=24, unique=True)
+    patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT, related_name="orders")
+    location = models.ForeignKey("locations.Location", on_delete=models.PROTECT)
+    shipping_address = models.JSONField()
+    payment_method = models.CharField(max_length=10, choices=PaymentMethod.choices)
+    status = models.CharField(max_length=20, choices=Status.choices)
+    subtotal_poisha = models.PositiveIntegerField()
+    delivery_charge_poisha = models.PositiveIntegerField()
+    total_poisha = models.PositiveIntegerField()
+    idempotency_key = models.CharField(max_length=128, null=True, blank=True)  # noqa: DJ001
+    placed_at = models.DateTimeField(auto_now_add=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-placed_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["patient", "idempotency_key"],
+                condition=Q(idempotency_key__isnull=False),
+                name="order_patient_idempotency_unique",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["patient", "-placed_at"], name="order_patient_placed"),
+            models.Index(fields=["status"], name="order_status"),
+        ]
+
+    def __str__(self) -> str:
+        return self.code
+
+
+class OrderItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    self_prescription_item = models.ForeignKey(
+        "selfcare.SelfPrescriptionItem",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    remedy_name = models.CharField(max_length=150)
+    unit_price_poisha = models.PositiveIntegerField()
+    quantity = models.PositiveSmallIntegerField()
+    line_total_poisha = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.remedy_name} x{self.quantity}"
+
+
+class OrderStatusHistory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="history")
+    from_status = models.CharField(max_length=20, blank=True, default="")
+    to_status = models.CharField(max_length=20, choices=Order.Status.choices)
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    by_patient = models.BooleanField(default=False)
+    note = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.order_id}: {self.from_status or 'NEW'} -> {self.to_status}"

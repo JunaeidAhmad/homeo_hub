@@ -1589,6 +1589,213 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/orders/:
+    get:
+      operationId: orders_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - orders
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPatientOrderCardList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: orders_create
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutRequestRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientOrderDetail'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientOrderDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/orders/{id}/:
+    get:
+      operationId: orders_read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - orders
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientOrderDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/orders/{id}/cancel/:
+    post:
+      operationId: orders_cancel
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - orders
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientOrderDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/orders/quote/:
+    post:
+      operationId: orders_quote
+      tags:
+      - orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderQuoteRequestRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderQuoteResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/remedies/:
     get:
       operationId: remedies_list
@@ -2201,6 +2408,32 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    CheckoutRequestRequest:
+      type: object
+      properties:
+        location_id:
+          type: string
+          format: uuid
+        recipient_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+        address_line:
+          type: string
+          minLength: 1
+          maxLength: 500
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+      required:
+      - address_line
+      - location_id
+      - payment_method
+      - phone
+      - recipient_name
     Error:
       type: object
       description: Every error response (see common/errors.py).
@@ -2315,6 +2548,61 @@ components:
       required:
       - password
       - phone
+    NullEnum:
+      enum:
+      - null
+    OrderQuoteRequestRequest:
+      type: object
+      properties:
+        location_id:
+          type: string
+          format: uuid
+      required:
+      - location_id
+    OrderQuoteResponse:
+      type: object
+      properties:
+        subtotal_poisha:
+          type: integer
+        delivery_charge_poisha:
+          type: integer
+        total_poisha:
+          type: integer
+      required:
+      - delivery_charge_poisha
+      - subtotal_poisha
+      - total_poisha
+    OrderStatusEnum:
+      enum:
+      - PENDING_PAYMENT
+      - CONFIRMED
+      - PAID
+      - PROCESSING
+      - SHIPPED
+      - DELIVERED
+      - CANCELLED
+      - RETURNED
+      type: string
+      description: |-
+        * `PENDING_PAYMENT` - Pending Payment
+        * `CONFIRMED` - Confirmed
+        * `PAID` - Paid
+        * `PROCESSING` - Processing
+        * `SHIPPED` - Shipped
+        * `DELIVERED` - Delivered
+        * `CANCELLED` - Cancelled
+        * `RETURNED` - Returned
+    OrderTimelineEntry:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/OrderStatusEnum'
+        at:
+          type: string
+          format: date-time
+      required:
+      - at
+      - status
     PaginatedAdminIllnessCategoryList:
       type: object
       required:
@@ -2407,6 +2695,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Location'
+    PaginatedPatientOrderCardList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientOrderCard'
     PaginatedRemedyCardList:
       type: object
       required:
@@ -2623,6 +2934,151 @@ components:
       - phone_verified
       - preferred_language
       - user_type
+    PatientOrderCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          maxLength: 24
+        placed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        item_count:
+          type: integer
+          readOnly: true
+        total_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/OrderStatusEnum'
+      required:
+      - code
+      - id
+      - item_count
+      - placed_at
+      - status
+      - total_poisha
+    PatientOrderDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          maxLength: 24
+        placed_at:
+          type: string
+          format: date-time
+          readOnly: true
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/OrderStatusEnum'
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        shipping_address:
+          allOf:
+          - $ref: '#/components/schemas/ShippingAddress'
+          readOnly: true
+        subtotal_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        delivery_charge_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        total_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        can_cancel:
+          type: boolean
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientOrderItem'
+          readOnly: true
+        timeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderTimelineEntry'
+          readOnly: true
+      required:
+      - can_cancel
+      - code
+      - delivery_charge_poisha
+      - id
+      - items
+      - payment_method
+      - placed_at
+      - shipping_address
+      - status
+      - subtotal_poisha
+      - timeline
+      - total_poisha
+    PatientOrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        remedy_name:
+          type: string
+          maxLength: 150
+        remedy_name_bn:
+          type: string
+          readOnly: true
+        remedy_slug:
+          type: string
+          nullable: true
+          readOnly: true
+        potency:
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/PotenciesEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        form:
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/FormEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        quantity:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        unit_price_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        line_total_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - form
+      - id
+      - line_total_poisha
+      - potency
+      - quantity
+      - remedy_name
+      - remedy_name_bn
+      - remedy_slug
+      - unit_price_poisha
     PatientPrice:
       type: object
       properties:
@@ -2640,6 +3096,14 @@ components:
       - patient
       type: string
       description: '* `patient` - patient'
+    PaymentMethodEnum:
+      enum:
+      - COD
+      - ONLINE
+      type: string
+      description: |-
+        * `COD` - Cod
+        * `ONLINE` - Online
     PermissionEnum:
       enum:
       - manage_staff
@@ -3036,6 +3500,25 @@ components:
       description: |-
         * `patient` - patient
         * `staff` - staff
+    ShippingAddress:
+      type: object
+      properties:
+        recipient_name:
+          type: string
+        phone:
+          type: string
+        address_line:
+          type: string
+        area_en:
+          type: string
+        area_bn:
+          type: string
+      required:
+      - address_line
+      - area_bn
+      - area_en
+      - phone
+      - recipient_name
     SignUpRequest:
       type: object
       properties:

@@ -672,6 +672,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orders/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["orders_list"];
+        put?: never;
+        post: operations["orders_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["orders_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["orders_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/quote/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["orders_quote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/remedies/": {
         parameters: {
             query?: never;
@@ -886,6 +950,14 @@ export interface components {
          * @enum {string}
          */
         CheckResultEnum: "ok" | "error";
+        CheckoutRequestRequest: {
+            /** Format: uuid */
+            location_id: string;
+            recipient_name: string;
+            phone: string;
+            address_line: string;
+            payment_method: components["schemas"]["PaymentMethodEnum"];
+        };
         /** @description Every error response (see common/errors.py). */
         Error: {
             error: components["schemas"]["ErrorBody"];
@@ -941,6 +1013,34 @@ export interface components {
         LogInRequest: {
             phone: string;
             password: string;
+        };
+        /** @enum {unknown} */
+        NullEnum: null;
+        OrderQuoteRequestRequest: {
+            /** Format: uuid */
+            location_id: string;
+        };
+        OrderQuoteResponse: {
+            subtotal_poisha: number;
+            delivery_charge_poisha: number;
+            total_poisha: number;
+        };
+        /**
+         * @description * `PENDING_PAYMENT` - Pending Payment
+         *     * `CONFIRMED` - Confirmed
+         *     * `PAID` - Paid
+         *     * `PROCESSING` - Processing
+         *     * `SHIPPED` - Shipped
+         *     * `DELIVERED` - Delivered
+         *     * `CANCELLED` - Cancelled
+         *     * `RETURNED` - Returned
+         * @enum {string}
+         */
+        OrderStatusEnum: "PENDING_PAYMENT" | "CONFIRMED" | "PAID" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED";
+        OrderTimelineEntry: {
+            status: components["schemas"]["OrderStatusEnum"];
+            /** Format: date-time */
+            at: string;
         };
         PaginatedAdminIllnessCategoryList: {
             /** @example 123 */
@@ -1001,6 +1101,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Location"][];
+        };
+        PaginatedPatientOrderCardList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["PatientOrderCard"][];
         };
         PaginatedRemedyCardList: {
             /** @example 123 */
@@ -1088,6 +1203,46 @@ export interface components {
             readonly location: components["schemas"]["Location"];
             readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
         };
+        PatientOrderCard: {
+            /** Format: uuid */
+            readonly id: string;
+            code: string;
+            /** Format: date-time */
+            readonly placed_at: string;
+            readonly item_count: number;
+            total_poisha: number;
+            status: components["schemas"]["OrderStatusEnum"];
+        };
+        PatientOrderDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            code: string;
+            /** Format: date-time */
+            readonly placed_at: string;
+            /** Format: date-time */
+            cancelled_at?: string | null;
+            status: components["schemas"]["OrderStatusEnum"];
+            payment_method: components["schemas"]["PaymentMethodEnum"];
+            readonly shipping_address: components["schemas"]["ShippingAddress"];
+            subtotal_poisha: number;
+            delivery_charge_poisha: number;
+            total_poisha: number;
+            readonly can_cancel: boolean;
+            readonly items: components["schemas"]["PatientOrderItem"][];
+            readonly timeline: components["schemas"]["OrderTimelineEntry"][];
+        };
+        PatientOrderItem: {
+            /** Format: uuid */
+            readonly id: string;
+            remedy_name: string;
+            readonly remedy_name_bn: string;
+            readonly remedy_slug: string | null;
+            readonly potency: (components["schemas"]["PotenciesEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly form: (components["schemas"]["FormEnum"] | components["schemas"]["NullEnum"]) | null;
+            quantity: number;
+            unit_price_poisha: number;
+            line_total_poisha: number;
+        };
         PatientPrice: {
             form: components["schemas"]["FormEnum"];
             price_poisha: number;
@@ -1097,6 +1252,12 @@ export interface components {
          * @enum {string}
          */
         PatientUserTypeEnum: "patient";
+        /**
+         * @description * `COD` - Cod
+         *     * `ONLINE` - Online
+         * @enum {string}
+         */
+        PaymentMethodEnum: "COD" | "ONLINE";
         /**
          * @description * `manage_staff` - manage_staff
          *     * `view_doctors` - view_doctors
@@ -1256,6 +1417,13 @@ export interface components {
          * @enum {string}
          */
         SessionUserTypeEnum: "patient" | "staff";
+        ShippingAddress: {
+            recipient_name: string;
+            phone: string;
+            address_line: string;
+            area_en: string;
+            area_bn: string;
+        };
         SignUpRequest: {
             phone: string;
             password: string;
@@ -2903,6 +3071,229 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Patient"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    orders_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPatientOrderCardList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    orders_create: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientOrderDetail"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientOrderDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    orders_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientOrderDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    orders_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientOrderDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    orders_quote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderQuoteRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderQuoteResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {

@@ -4,12 +4,16 @@ from typing import Any
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.locations.models import Location
 from apps.remedies.choices import Potency, RemedyForm
 from apps.remedies.models import Remedy
 from apps.remedies.serializers import PictureUrlField
+from common.fields import PhoneField
 from common.i18n import localized_text
 
 from .cart import PricedCart, PricedCartItem
+from .checkout import CANCELLABLE_STATUSES
+from .models import Order, OrderItem, OrderStatusHistory
 
 
 class CartRemedySerializer(serializers.ModelSerializer):
@@ -68,5 +72,119 @@ class UpdateCartItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
 
-# Re-export for schema helper clarity.
-_ = extend_schema_field
+class OrderQuoteRequestSerializer(serializers.Serializer):
+    location_id = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+
+
+class OrderQuoteResponseSerializer(serializers.Serializer):
+    subtotal_poisha = serializers.IntegerField()
+    delivery_charge_poisha = serializers.IntegerField()
+    total_poisha = serializers.IntegerField()
+
+
+class CheckoutRequestSerializer(serializers.Serializer):
+    location_id = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all())
+    recipient_name = serializers.CharField(max_length=120)
+    phone = PhoneField()
+    address_line = serializers.CharField(max_length=500)
+    payment_method = serializers.ChoiceField(choices=Order.PaymentMethod.choices)
+
+
+class ShippingAddressSerializer(serializers.Serializer):
+    recipient_name = serializers.CharField()
+    phone = serializers.CharField()
+    address_line = serializers.CharField()
+    area_en = serializers.CharField()
+    area_bn = serializers.CharField()
+
+
+class PatientOrderItemSerializer(serializers.ModelSerializer):
+    remedy_name_bn = serializers.SerializerMethodField()
+    remedy_slug = serializers.SerializerMethodField()
+    potency = serializers.SerializerMethodField()
+    form = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = [
+            "id",
+            "remedy_name",
+            "remedy_name_bn",
+            "remedy_slug",
+            "potency",
+            "form",
+            "quantity",
+            "unit_price_poisha",
+            "line_total_poisha",
+        ]
+
+    def get_remedy_name_bn(self, item: OrderItem) -> str:
+        if item.self_prescription_item:
+            return item.self_prescription_item.remedy.name_bn
+        return ""
+
+    def get_remedy_slug(self, item: OrderItem) -> str | None:
+        if item.self_prescription_item:
+            return item.self_prescription_item.remedy.slug
+        return None
+
+    @extend_schema_field(serializers.ChoiceField(choices=Potency.choices, allow_null=True))
+    def get_potency(self, item: OrderItem) -> str | None:
+        return item.self_prescription_item.potency if item.self_prescription_item else None
+
+    @extend_schema_field(serializers.ChoiceField(choices=RemedyForm.choices, allow_null=True))
+    def get_form(self, item: OrderItem) -> str | None:
+        return item.self_prescription_item.form if item.self_prescription_item else None
+
+
+class OrderTimelineEntrySerializer(serializers.ModelSerializer):
+    status = serializers.ChoiceField(source="to_status", choices=Order.Status.choices)
+    at = serializers.DateTimeField(source="created_at")
+
+    class Meta:
+        model = OrderStatusHistory
+        fields = ["status", "at"]
+
+
+class PatientOrderCardSerializer(serializers.ModelSerializer):
+    item_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ["id", "code", "placed_at", "item_count", "total_poisha", "status"]
+
+    def get_item_count(self, order: Order) -> int:
+        return sum(item.quantity for item in order.items.all())
+
+
+class PatientOrderDetailSerializer(serializers.ModelSerializer):
+    shipping_address = ShippingAddressSerializer(read_only=True)
+    items = PatientOrderItemSerializer(many=True, read_only=True)
+    can_cancel = serializers.SerializerMethodField()
+    timeline = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "code",
+            "placed_at",
+            "cancelled_at",
+            "status",
+            "payment_method",
+            "shipping_address",
+            "subtotal_poisha",
+            "delivery_charge_poisha",
+            "total_poisha",
+            "can_cancel",
+            "items",
+            "timeline",
+        ]
+
+    def get_can_cancel(self, order: Order) -> bool:
+        return order.status in CANCELLABLE_STATUSES
+
+    @extend_schema_field(OrderTimelineEntrySerializer(many=True))
+    def get_timeline(self, order: Order) -> list[dict[str, Any]]:
+        rows = order.history.all()
+        return list(OrderTimelineEntrySerializer(rows, many=True).data)
