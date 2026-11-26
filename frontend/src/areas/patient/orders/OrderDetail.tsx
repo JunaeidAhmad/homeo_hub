@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { components } from "@/api/schema";
 import { useApiClient } from "@/api/use-api-client";
 import { TaskScreen } from "@/areas/patient/TaskScreen";
 import { useSession } from "@/areas/patient/session/SessionProvider";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FormAlert } from "@/components/form/fields";
 import { fill } from "@/i18n/catalog";
 import { formatMoney, numberFormat } from "@/i18n/format";
@@ -26,12 +27,14 @@ export function OrderDetail({ orderId }: { orderId: string }) {
   const api = useApiClient();
   const searchParams = useSearchParams();
   const justPlaced = searchParams.get("placed") === "1";
-  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [order, setOrder] = useState<OrderDetailData | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error" | "missing">("loading");
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
 
   const isGuest =
     session.status === "signedOut" || (session.status === "unavailable" && !session.hasSession);
@@ -58,6 +61,26 @@ export function OrderDetail({ orderId }: { orderId: string }) {
     return () => controller.abort();
   }, [api, orderId, session.status]);
 
+  async function startOnlinePayment() {
+    if (!order || paying) return;
+    setPaying(true);
+    setPayError("");
+    try {
+      const { data } = await api.POST("/api/v1/payments/", {
+        body: { order_id: order.id },
+      });
+      if (data?.gateway_url) {
+        window.location.assign(data.gateway_url);
+        return;
+      }
+      setPayError(t("patient.error.generic"));
+    } catch {
+      setPayError(t("patient.error.generic"));
+    } finally {
+      setPaying(false);
+    }
+  }
+
   async function confirmCancel() {
     if (!order || cancelling) return;
     setCancelling(true);
@@ -68,7 +91,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
       });
       if (data) {
         setOrder(data);
-        dialogRef.current?.close();
+        setCancelOpen(false);
       } else {
         setCancelError(
           response.status === 409
@@ -83,21 +106,40 @@ export function OrderDetail({ orderId }: { orderId: string }) {
     }
   }
 
-  const cancelAction = order?.can_cancel ? (
-    <button
-      type="button"
-      onClick={() => dialogRef.current?.showModal()}
-      className="flex min-h-[54px] w-full items-center justify-center rounded-control border border-danger bg-surface px-5 text-[17px] font-bold text-danger"
-    >
-      {t("patient.orders.cancel")}
-    </button>
-  ) : undefined;
+  const needsPayment = order?.status === "PENDING_PAYMENT";
+  const bottomAction =
+    needsPayment || order?.can_cancel ? (
+      <div className="flex flex-col gap-2">
+        {needsPayment && (
+          <button
+            type="button"
+            disabled={paying}
+            onClick={() => void startOnlinePayment()}
+            className="flex min-h-[54px] w-full items-center justify-center rounded-control bg-primary px-5 text-[17px] font-bold text-surface disabled:opacity-60"
+          >
+            {t("patient.orders.payNow")}
+          </button>
+        )}
+        {order?.can_cancel && (
+          <button
+            type="button"
+            onClick={() => {
+              setCancelError("");
+              setCancelOpen(true);
+            }}
+            className="flex min-h-[54px] w-full items-center justify-center rounded-control border border-danger bg-surface px-5 text-[17px] font-bold text-danger"
+          >
+            {t("patient.orders.cancel")}
+          </button>
+        )}
+      </div>
+    ) : undefined;
 
   return (
     <TaskScreen
       title={order?.code ?? t("patient.orders.title")}
       backHref="/orders"
-      action={cancelAction}
+      action={bottomAction}
     >
       {isGuest ? (
         <div className="flex flex-col items-center gap-4 rounded-panel border border-line bg-surface p-6 text-center">
@@ -121,7 +163,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
         <FormAlert>{t("table.error")}</FormAlert>
       ) : (
         <div className="flex flex-col gap-5">
-          {justPlaced && (
+          {justPlaced && order.status !== "PENDING_PAYMENT" && (
             <div
               role="status"
               className="rounded-panel border border-primary/30 bg-primary/10 px-4 py-3 font-semibold text-primary-deep"
@@ -131,6 +173,17 @@ export function OrderDetail({ orderId }: { orderId: string }) {
               })}
             </div>
           )}
+
+          {order.status === "PENDING_PAYMENT" && (
+            <div
+              role="status"
+              className="rounded-panel border border-amber/30 bg-amber-wash px-4 py-3 font-semibold text-ink"
+            >
+              {t("patient.orders.payNowBanner")}
+            </div>
+          )}
+
+          {payError && <FormAlert>{payError}</FormAlert>}
 
           <section className="flex flex-col gap-4 rounded-panel border border-line bg-surface p-4 desktop:p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -218,37 +271,18 @@ export function OrderDetail({ orderId }: { orderId: string }) {
             </p>
           </section>
 
-          <dialog
-            ref={dialogRef}
-            aria-labelledby="cancel-dialog-title"
-            className="m-auto w-[min(92vw,420px)] rounded-panel border border-line bg-surface p-5 text-ink backdrop:bg-ink/40"
-          >
-            <div className="flex flex-col gap-4">
-              <h2 id="cancel-dialog-title" className="font-display text-2xl font-normal">
-                {t("patient.orders.cancelTitle")}
-              </h2>
-              <p className="text-base text-ink-soft">{t("patient.orders.cancelBody")}</p>
-              {cancelError && <FormAlert>{cancelError}</FormAlert>}
-              <div className="flex flex-wrap justify-end gap-2">
-                <button
-                  type="button"
-                  disabled={cancelling}
-                  onClick={() => dialogRef.current?.close()}
-                  className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold"
-                >
-                  {t("patient.orders.keepOrder")}
-                </button>
-                <button
-                  type="button"
-                  disabled={cancelling}
-                  onClick={() => void confirmCancel()}
-                  className="min-h-11 rounded-control bg-danger px-4 font-bold text-surface disabled:opacity-60"
-                >
-                  {t("patient.orders.confirmCancel")}
-                </button>
-              </div>
-            </div>
-          </dialog>
+          <ConfirmDialog
+            open={cancelOpen}
+            title={t("patient.orders.cancelTitle")}
+            body={t("patient.orders.cancelBody")}
+            confirmLabel={t("patient.orders.confirmCancel")}
+            cancelLabel={t("patient.orders.keepOrder")}
+            tone="danger"
+            pending={cancelling}
+            error={cancelError}
+            onConfirm={() => void confirmCancel()}
+            onClose={() => setCancelOpen(false)}
+          />
         </div>
       )}
     </TaskScreen>

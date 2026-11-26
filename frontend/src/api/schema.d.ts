@@ -333,6 +333,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/payments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_payments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/remedies/": {
         parameters: {
             query?: never;
@@ -1172,6 +1197,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/payments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["payments_start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/{tran_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["payments_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/ipn/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["payments_ipn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/remedies/": {
         parameters: {
             query?: never;
@@ -1241,7 +1314,6 @@ export interface components {
             note: string;
         };
         AdminCancelOrderRequest: {
-            /** @default  */
             reason: string;
         };
         AdminCandidateListing: {
@@ -1415,6 +1487,24 @@ export interface components {
             total_poisha: number;
             status: components["schemas"]["OrderStatusEnum"];
             readonly unassigned_count: number;
+            readonly awaiting_payment_minutes: number | null;
+        };
+        AdminPayment: {
+            /** Format: uuid */
+            readonly id: string;
+            tran_id: string;
+            /** Format: uuid */
+            readonly order_id: string | null;
+            readonly order_code: string | null;
+            readonly patient_name: string;
+            method: components["schemas"]["PaymentMethodEnum"];
+            gateway?: string;
+            amount_poisha: number;
+            status?: components["schemas"]["PaymentStatusEnum"];
+            is_flagged?: boolean;
+            flag_reason?: string;
+            /** Format: date-time */
+            readonly created_at: string;
         };
         AdminPrice: {
             /** Format: uuid */
@@ -1754,6 +1844,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["AdminOrderSummary"][];
         };
+        PaginatedAdminPaymentList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminPayment"][];
+        };
         PaginatedAdminRemedyList: {
             /** @example 123 */
             count: number;
@@ -1976,6 +2081,14 @@ export interface components {
             unit_price_poisha: number;
             line_total_poisha: number;
         };
+        PatientPaymentStatus: {
+            tran_id: string;
+            status?: components["schemas"]["PaymentStatusEnum"];
+            amount_poisha: number;
+            /** Format: uuid */
+            readonly order_id: string | null;
+            readonly order_code: string | null;
+        };
         PatientPrice: {
             form: components["schemas"]["FormEnum"];
             price_poisha: number;
@@ -1991,13 +2104,25 @@ export interface components {
          * @enum {string}
          */
         PaymentMethodEnum: "COD" | "ONLINE";
+        PaymentStartRequestRequest: {
+            /** Format: uuid */
+            order_id: string;
+        };
+        PaymentStartResponse: {
+            readonly tran_id: string;
+            readonly gateway_url: string;
+        };
         /**
-         * @description * `PENDING` - Pending
+         * @description * `INITIATED` - Initiated
+         *     * `PENDING` - Pending
          *     * `SUCCESS` - Success
          *     * `FAILED` - Failed
+         *     * `CANCELLED` - Cancelled
+         *     * `EXPIRED` - Expired
+         *     * `REFUNDED` - Refunded
          * @enum {string}
          */
-        PaymentStatusEnum: "PENDING" | "SUCCESS" | "FAILED";
+        PaymentStatusEnum: "INITIATED" | "PENDING" | "SUCCESS" | "FAILED" | "CANCELLED" | "EXPIRED" | "REFUNDED";
         /**
          * @description * `manage_staff` - manage_staff
          *     * `view_doctors` - view_doctors
@@ -2709,7 +2834,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": components["schemas"]["AdminCancelOrderRequest"];
             };
@@ -2919,6 +3044,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_payments_list: {
+        parameters: {
+            query?: {
+                is_flagged?: boolean;
+                method?: "COD" | "ONLINE";
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminPaymentList"];
                 };
             };
         };
@@ -4977,6 +5133,129 @@ export interface operations {
                 };
             };
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentStartRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentStartResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tran_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientPaymentStatus"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    payments_ipn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

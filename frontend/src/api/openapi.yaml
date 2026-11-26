@@ -597,6 +597,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AdminCancelOrderRequest'
+        required: true
       security:
       - accessToken: []
       responses:
@@ -813,6 +814,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/payments/:
+    get:
+      operationId: admin_payments_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: query
+        name: is_flagged
+        schema:
+          type: boolean
+      - in: query
+        name: method
+        schema:
+          type: string
+          enum:
+          - COD
+          - ONLINE
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminPaymentList'
           description: ''
   /api/v1/admin/remedies/:
     get:
@@ -2886,6 +2949,107 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/payments/:
+    post:
+      operationId: payments_start
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentStartRequestRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStartResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/payments/{tran_id}/:
+    get:
+      operationId: payments_read
+      parameters:
+      - in: path
+        name: tran_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientPaymentStatus'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/payments/ipn/:
+    post:
+      operationId: payments_ipn
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/remedies/:
     get:
       operationId: remedies_list
@@ -3051,8 +3215,10 @@ components:
       properties:
         reason:
           type: string
-          default: ''
+          minLength: 1
           maxLength: 500
+      required:
+      - reason
     AdminCandidateListing:
       type: object
       properties:
@@ -3608,8 +3774,13 @@ components:
         unassigned_count:
           type: integer
           readOnly: true
+        awaiting_payment_minutes:
+          type: integer
+          nullable: true
+          readOnly: true
       required:
       - area
+      - awaiting_payment_minutes
       - code
       - id
       - patient_name
@@ -3617,6 +3788,56 @@ components:
       - status
       - total_poisha
       - unassigned_count
+    AdminPayment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tran_id:
+          type: string
+          maxLength: 64
+        order_id:
+          type: string
+          format: uuid
+          nullable: true
+          readOnly: true
+        order_code:
+          type: string
+          nullable: true
+          readOnly: true
+        patient_name:
+          type: string
+          readOnly: true
+        method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        gateway:
+          type: string
+          maxLength: 40
+        amount_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        is_flagged:
+          type: boolean
+        flag_reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount_poisha
+      - created_at
+      - id
+      - method
+      - order_code
+      - order_id
+      - patient_name
+      - tran_id
     AdminPrice:
       type: object
       properties:
@@ -4477,6 +4698,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdminOrderSummary'
+    PaginatedAdminPaymentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminPayment'
     PaginatedAdminRemedyList:
       type: object
       required:
@@ -5012,6 +5256,32 @@ components:
       - remedy_name_bn
       - remedy_slug
       - unit_price_poisha
+    PatientPaymentStatus:
+      type: object
+      properties:
+        tran_id:
+          type: string
+          maxLength: 64
+        status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+        amount_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        order_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        order_code:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - amount_poisha
+      - order_code
+      - order_id
+      - tran_id
     PatientPrice:
       type: object
       properties:
@@ -5037,16 +5307,44 @@ components:
       description: |-
         * `COD` - Cod
         * `ONLINE` - Online
+    PaymentStartRequestRequest:
+      type: object
+      properties:
+        order_id:
+          type: string
+          format: uuid
+      required:
+      - order_id
+    PaymentStartResponse:
+      type: object
+      properties:
+        tran_id:
+          type: string
+          readOnly: true
+        gateway_url:
+          type: string
+          readOnly: true
+      required:
+      - gateway_url
+      - tran_id
     PaymentStatusEnum:
       enum:
+      - INITIATED
       - PENDING
       - SUCCESS
       - FAILED
+      - CANCELLED
+      - EXPIRED
+      - REFUNDED
       type: string
       description: |-
+        * `INITIATED` - Initiated
         * `PENDING` - Pending
         * `SUCCESS` - Success
         * `FAILED` - Failed
+        * `CANCELLED` - Cancelled
+        * `EXPIRED` - Expired
+        * `REFUNDED` - Refunded
     PermissionEnum:
       enum:
       - manage_staff

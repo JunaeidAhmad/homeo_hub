@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import type { components } from "@/api/schema";
+import { AreaMatchBadge } from "@/components/AreaMatchBadge";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FormAlert, TextField } from "@/components/form/fields";
 import { fill } from "@/i18n/catalog";
 import type { Locale } from "@/i18n/config";
@@ -19,14 +21,6 @@ type OrderItem = components["schemas"]["AdminOrderItem"];
 type Assignment = components["schemas"]["AdminShopAssignment"];
 type AssignmentStatus = components["schemas"]["AssignmentStatusEnum"];
 type Candidate = components["schemas"]["AdminCandidateListing"];
-type AreaMatch = components["schemas"]["AreaMatchEnum"];
-
-const MATCH_CLASS: Record<AreaMatch, string> = {
-  UPAZILA: "bg-mist text-primary font-semibold",
-  DISTRICT: "bg-mist text-primary-deep",
-  DIVISION: "bg-mist text-ink-soft",
-  OTHER: "bg-mist text-ink-muted",
-};
 
 const ASSIGNMENT_STEPS: AssignmentStatus[] = ["ASSIGNED", "PROCESSING", "SHIPPED", "DELIVERED"];
 
@@ -59,8 +53,9 @@ export function OrderDesk({ orderId }: { orderId: string }) {
   const [deliverNote, setDeliverNote] = useState("");
   const [cashError, setCashError] = useState("");
 
-  const cancelDialogRef = useRef<HTMLDialogElement>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [cancelError, setCancelError] = useState("");
 
   const canManage =
     session.status === "signedIn" && session.staff.permissions.includes("manage_orders");
@@ -177,6 +172,11 @@ export function OrderDesk({ orderId }: { orderId: string }) {
   }
 
   function confirmCancel() {
+    if (!cancelReason.trim()) {
+      setCancelError(t("admin.error.required"));
+      return;
+    }
+    setCancelError("");
     void submit(
       () =>
         api.POST("/api/v1/admin/orders/{id}/cancel/", {
@@ -185,7 +185,7 @@ export function OrderDesk({ orderId }: { orderId: string }) {
         }),
       (updated) => {
         setOrder(updated);
-        cancelDialogRef.current?.close();
+        setCancelOpen(false);
         setCancelReason("");
       },
     );
@@ -232,7 +232,8 @@ export function OrderDesk({ orderId }: { orderId: string }) {
                 disabled={pending || !order.can_cancel}
                 onClick={() => {
                   setProblems({ fields: {} });
-                  cancelDialogRef.current?.showModal();
+                  setCancelError("");
+                  setCancelOpen(true);
                 }}
                 className="min-h-11 rounded-control border border-danger bg-surface px-4 font-semibold text-danger disabled:opacity-40"
               >
@@ -363,11 +364,7 @@ export function OrderDesk({ orderId }: { orderId: string }) {
                             <div className="flex flex-col gap-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="font-semibold">{cand.shop_name}</span>
-                                <span
-                                  className={`rounded-control px-2 py-0.5 text-xs ${MATCH_CLASS[cand.area_match]}`}
-                                >
-                                  {t(`admin.orders.match.${cand.area_match}`)}
-                                </span>
+                                <AreaMatchBadge match={cand.area_match} />
                               </div>
                               <span className="text-sm text-ink-soft">
                                 {numberFormat(locale).format(cand.pack_size)}{" "}
@@ -601,42 +598,27 @@ export function OrderDesk({ orderId }: { orderId: string }) {
         </div>
       </dialog>
 
-      {/* Cancel order dialog */}
-      <dialog
-        ref={cancelDialogRef}
-        aria-labelledby="admin-cancel-title"
-        className="m-auto w-[min(92vw,440px)] rounded-panel border border-line bg-surface p-5 text-ink backdrop:bg-ink/40"
+      <ConfirmDialog
+        open={cancelOpen}
+        title={t("admin.orders.cancel")}
+        confirmLabel={t("admin.orders.cancel")}
+        cancelLabel={t("admin.staff.cancel")}
+        tone="danger"
+        pending={pending}
+        error={cancelError}
+        onConfirm={confirmCancel}
+        onClose={() => setCancelOpen(false)}
       >
-        <div className="flex flex-col gap-4">
-          <h2 id="admin-cancel-title" className="font-display text-2xl font-normal">
-            {t("admin.orders.cancel")}
-          </h2>
-          <TextField
-            label={t("admin.orders.cancelReason")}
-            value={cancelReason}
-            onChange={(event) => setCancelReason(event.target.value)}
-            maxLength={500}
-          />
-          <div className="flex flex-wrap justify-end gap-2">
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => cancelDialogRef.current?.close()}
-              className="min-h-11 rounded-control border border-line-strong bg-surface px-4 font-semibold"
-            >
-              {t("admin.staff.cancel")}
-            </button>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={confirmCancel}
-              className="min-h-11 rounded-control bg-danger px-5 font-bold text-surface disabled:opacity-60"
-            >
-              {t("admin.orders.cancel")}
-            </button>
-          </div>
-        </div>
-      </dialog>
+        <TextField
+          label={t("admin.orders.cancelReason")}
+          value={cancelReason}
+          onChange={(event) => {
+            setCancelReason(event.target.value);
+            setCancelError("");
+          }}
+          maxLength={500}
+        />
+      </ConfirmDialog>
     </section>
   );
 }

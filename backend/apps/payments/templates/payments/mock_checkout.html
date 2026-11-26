@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test Payment Gateway — HomeoHub</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: #EEF2ED;
+      color: #13241D;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .card {
+      max-width: 440px;
+      margin: 24px auto;
+      background: #FFFFFF;
+      border: 1px solid #D3DDD6;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .banner {
+      background: #FBEBD3;
+      color: #8A4700;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 1px solid #D3DDD6;
+      text-align: center;
+    }
+    .body {
+      padding: 24px 20px;
+    }
+    .merchant {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1E6B4E;
+      margin: 0 0 6px;
+    }
+    .amount {
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0 0 8px;
+    }
+    .tran {
+      font-size: 13px;
+      color: #4A5852;
+      margin: 0 0 24px;
+      word-break: break-all;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    button {
+      min-height: 52px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .pay {
+      background: #1E6B4E;
+      color: #FFFFFF;
+    }
+    .fail {
+      background: #FFFFFF;
+      color: #A12B2B;
+      border-color: #A12B2B;
+    }
+    .cancel {
+      background: #FFFFFF;
+      color: #13241D;
+      border-color: #B9C7C0;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="banner">TEST GATEWAY — no real money</div>
+    <div class="body">
+      <p class="merchant">HomeoHub</p>
+      <p class="amount">&#2547;{{ amount_taka }}</p>
+      <p class="tran">Transaction: {{ session.tran_id }}</p>
+      <form method="post" class="actions">
+        {% csrf_token %}
+        <button type="submit" name="action" value="SUCCESS" class="pay">Pay successfully</button>
+        <button type="submit" name="action" value="FAILED" class="fail">Fail</button>
+        <button type="submit" name="action" value="CANCELLED" class="cancel">Cancel</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

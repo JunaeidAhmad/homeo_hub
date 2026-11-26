@@ -76,7 +76,7 @@ def checkout(
     payment_method: str,
     idempotency_key: str | None = None,
 ) -> tuple[Order, bool]:
-    if payment_method != Order.PaymentMethod.COD:
+    if payment_method not in (Order.PaymentMethod.COD, Order.PaymentMethod.ONLINE):
         raise PaymentMethodUnsupported()
 
     try:
@@ -112,6 +112,12 @@ def checkout(
         "area_bn": f"{location.upazila_bn}, {location.district_bn}",
     }
 
+    initial_status = (
+        Order.Status.CONFIRMED
+        if payment_method == Order.PaymentMethod.COD
+        else Order.Status.PENDING_PAYMENT
+    )
+
     order: Order | None = None
     for _ in range(5):
         try:
@@ -122,7 +128,7 @@ def checkout(
                     location=location,
                     shipping_address=shipping_address,
                     payment_method=payment_method,
-                    status=Order.Status.CONFIRMED,
+                    status=initial_status,
                     subtotal_poisha=priced.subtotal_poisha,
                     delivery_charge_poisha=delivery,
                     total_poisha=total,
@@ -155,7 +161,7 @@ def checkout(
     OrderStatusHistory.objects.create(
         order=order,
         from_status="",
-        to_status=Order.Status.CONFIRMED,
+        to_status=initial_status,
         by_patient=True,
     )
 

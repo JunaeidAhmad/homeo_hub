@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from typing import Any
 
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -196,6 +197,7 @@ class AdminOrderSummarySerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source="patient.full_name", read_only=True)
     area = serializers.SerializerMethodField()
     unassigned_count = serializers.IntegerField(read_only=True)
+    awaiting_payment_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -208,6 +210,7 @@ class AdminOrderSummarySerializer(serializers.ModelSerializer):
             "total_poisha",
             "status",
             "unassigned_count",
+            "awaiting_payment_minutes",
         ]
 
     def get_area(self, order: Order) -> str:
@@ -215,6 +218,12 @@ class AdminOrderSummarySerializer(serializers.ModelSerializer):
             f"{localized_text(order.location, 'upazila')}, "
             f"{localized_text(order.location, 'district')}"
         )
+
+    def get_awaiting_payment_minutes(self, order: Order) -> int | None:
+        if order.status != Order.Status.PENDING_PAYMENT:
+            return None
+        delta = timezone.now() - order.placed_at
+        return max(0, int(delta.total_seconds() // 60))
 
 
 class AdminOrderPatientSerializer(serializers.Serializer):
@@ -418,4 +427,4 @@ class AdminAssignmentStatusSerializer(serializers.Serializer):
 
 
 class AdminCancelOrderSerializer(serializers.Serializer):
-    reason = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+    reason = serializers.CharField(max_length=500, allow_blank=False)

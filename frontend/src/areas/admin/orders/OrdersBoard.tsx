@@ -24,6 +24,7 @@ type Chip =
 
 const CHIPS: Chip[] = [
   { key: "unassigned", unassigned: true },
+  { key: "PENDING_PAYMENT", status: "PENDING_PAYMENT" },
   { key: "all", status: "" },
   { key: "CONFIRMED", status: "CONFIRMED" },
   { key: "PROCESSING", status: "PROCESSING" },
@@ -97,10 +98,19 @@ export function OrdersBoard() {
       cell: (row) => (
         <div className="flex flex-col gap-1">
           <span className="font-display text-lg">{row.code}</span>
-          {row.unassigned_count > 0 && (
+          {row.unassigned_count > 0 && row.status !== "PENDING_PAYMENT" && (
             <span className="inline-block self-start rounded-control bg-amber-wash px-2 py-0.5 text-xs font-semibold text-amber">
               {fill(t("admin.orders.needsShopCount"), {
                 count: numberFormat(locale).format(row.unassigned_count),
+              })}
+            </span>
+          )}
+          {row.awaiting_payment_minutes !== null && row.awaiting_payment_minutes > 60 && (
+            <span className="inline-block self-start rounded-control bg-amber-wash px-2 py-0.5 text-xs font-semibold text-amber">
+              {fill(t("admin.orders.unpaidHours"), {
+                hours: numberFormat(locale).format(
+                  Math.max(1, Math.floor(row.awaiting_payment_minutes / 60)),
+                ),
               })}
             </span>
           )}

@@ -376,6 +376,10 @@ def cancel_order(
     locked.status = Order.Status.CANCELLED
     locked.cancelled_at = now
     locked.save(update_fields=["status", "cancelled_at", "updated_at"])
+    Payment.objects.filter(
+        order=locked,
+        status__in=[Payment.Status.INITIATED, Payment.Status.PENDING],
+    ).update(status=Payment.Status.CANCELLED, updated_at=now)
     OrderStatusHistory.objects.create(
         order=locked,
         shop_assignment=None,

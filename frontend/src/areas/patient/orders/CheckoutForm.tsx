@@ -152,6 +152,15 @@ function SignedInCheckout({
         }),
       async (order) => {
         await refresh();
+        if (paymentMethod === "ONLINE") {
+          const { data } = await api.POST("/api/v1/payments/", {
+            body: { order_id: order.id },
+          });
+          if (data?.gateway_url) {
+            window.location.assign(data.gateway_url);
+            return;
+          }
+        }
         router.replace(`/orders/${order.id}?placed=1`);
       },
       (problem) => {
@@ -231,12 +240,7 @@ function SignedInCheckout({
             onChange={setPaymentMethod}
             options={[
               { value: "COD", label: t("patient.checkout.cod") },
-              {
-                value: "ONLINE",
-                label: t("patient.checkout.online"),
-                disabled: true,
-                note: t("patient.checkout.comingSoon"),
-              },
+              { value: "ONLINE", label: t("patient.checkout.online") },
             ]}
           />
         </section>
@@ -286,9 +290,16 @@ function SignedInCheckout({
             disabled={pending || !area}
             className="flex min-h-[54px] w-full items-center justify-center rounded-control bg-primary px-5 text-[17px] font-bold text-surface disabled:opacity-60"
           >
-            {fill(t("patient.checkout.placeOrder"), {
-              total: formatMoney(locale, displayTotal),
-            })}
+            {fill(
+              t(
+                paymentMethod === "ONLINE"
+                  ? "patient.checkout.continueToPayment"
+                  : "patient.checkout.placeOrder",
+              ),
+              {
+                total: formatMoney(locale, displayTotal),
+              },
+            )}
           </button>
         </ActionBar>
       </form>
