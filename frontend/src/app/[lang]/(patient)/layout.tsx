@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
 import { CartProvider } from "@/areas/patient/cart/CartProvider";
 import { SessionProvider } from "@/areas/patient/session/SessionProvider";
+import { PageLoading } from "@/components/shell/PageLoading";
 import { messagesFor } from "@/i18n/catalog";
 import { auth } from "@/i18n/messages/auth";
 import { common } from "@/i18n/messages/common";
@@ -14,7 +15,10 @@ export default async function PatientLayout({ children }: { children: ReactNode 
   return (
     <I18nProvider locale={locale} messages={messagesFor(locale, common, patient, auth)}>
       <SessionProvider>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          {/* Pages such as /care/[id] only know their address on request. */}
+          <Suspense fallback={<PageLoading />}>{children}</Suspense>
+        </CartProvider>
       </SessionProvider>
     </I18nProvider>
   );
