@@ -6,6 +6,7 @@ from django.contrib.postgres.constraints import ExclusionConstraint
 from django.contrib.postgres.fields import DateTimeRangeField, RangeOperators
 from django.db import models
 from django.db.models import F, Func, Q, UniqueConstraint, Value
+from django.utils import timezone
 
 
 class VideoAppointment(models.Model):
@@ -137,3 +138,31 @@ class AppointmentEvent(models.Model):
 
     def __str__(self) -> str:
         return f"{self.kind} ({self.appointment_id})"
+
+
+class CallSession(models.Model):
+    """A ringing or live video call session tied to an appointment."""
+
+    class Status(models.TextChoices):
+        RINGING = "RINGING"
+        LIVE = "LIVE"
+        ENDED = "ENDED"
+        MISSED = "MISSED"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    appointment = models.ForeignKey(
+        VideoAppointment,
+        on_delete=models.CASCADE,
+        related_name="calls",
+    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.RINGING)
+    started_at = models.DateTimeField(default=timezone.now)
+    patient_joined_at = models.DateTimeField(null=True, blank=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    duration_seconds = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-started_at", "-id"]
+
+    def __str__(self) -> str:
+        return f"Call {self.pk} ({self.status})"

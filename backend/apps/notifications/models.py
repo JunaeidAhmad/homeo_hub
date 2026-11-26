@@ -30,6 +30,7 @@ class NotificationKind(models.TextChoices):
     CALL_EXPIRED = "CALL_EXPIRED"
     CALL_REMINDER_30 = "CALL_REMINDER_30"
     CALL_REMINDER_5 = "CALL_REMINDER_5"
+    CALL_STARTED = "CALL_STARTED"
 
 
 class Notification(models.Model):

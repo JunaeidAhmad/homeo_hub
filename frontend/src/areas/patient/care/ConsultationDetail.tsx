@@ -18,7 +18,11 @@ import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 
 import { CONSULTATION_STATUS_META, URGENCY_BADGE, type ConsultationStatus } from "./status";
-import { AppointmentPanel } from "./AppointmentPanel";
+import {
+  AppointmentPanel,
+  IncomingCallBanner,
+  useConsultationCall,
+} from "./AppointmentPanel";
 
 type Detail = components["schemas"]["PatientConsultationDetail"];
 type HistoryItem = components["schemas"]["ConsultationHistory"];
@@ -68,6 +72,11 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
 
   const isGuest =
     session.status === "signedOut" || (session.status === "unavailable" && !session.hasSession);
+
+  const callHook = useConsultationCall(
+    caseId,
+    session.status === "signedIn" && Boolean(caseData?.doctor),
+  );
 
   useEffect(() => {
     if (session.status !== "signedIn") return;
@@ -150,8 +159,37 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
     );
   }
 
+  function handleJoinCall() {
+    const currentCall = callHook.callState;
+    if (!currentCall) return;
+    if (callHook.joinedUrl) {
+      window.open(callHook.joinedUrl, "_blank", "noopener");
+      return;
+    }
+    void submit(
+      () =>
+        api.POST("/api/v1/calls/{id}/join/", {
+          params: { path: { id: currentCall.call_id } },
+        }),
+      (joined) => {
+        callHook.setJoinedUrl(joined.join_url);
+        callHook.setCallState((prev) =>
+          prev ? { ...prev, status: joined.status } : prev,
+        );
+        window.open(joined.join_url, "_blank", "noopener");
+      },
+    );
+  }
+
   return (
     <TaskScreen title={caseData.consultation_code} backHref="/care">
+      <IncomingCallBanner
+        callState={callHook.callState}
+        joinedUrl={callHook.joinedUrl}
+        pending={pending}
+        onJoin={handleJoinCall}
+      />
+
       <div className="flex flex-wrap items-center gap-2">
         <span className={`rounded-control px-3 py-1 text-xs font-semibold ${meta.badgeClass}`}>
           {t(meta.labelKey)}
@@ -207,7 +245,18 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
         />
       </section>
 
-      {caseData.doctor && <AppointmentPanel caseId={caseData.id} />}
+      {caseData.doctor && (
+        <AppointmentPanel
+          caseId={caseData.id}
+          latest={callHook.latest}
+          onAppointmentsChange={(updated) =>
+            callHook.setAppointments((prev) => [
+              updated,
+              ...prev.filter((row) => row.id !== updated.id),
+            ])
+          }
+        />
+      )}
 
       {caseData.prescription_summary && (
         <section

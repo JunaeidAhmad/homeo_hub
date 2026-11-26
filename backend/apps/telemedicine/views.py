@@ -22,12 +22,16 @@ from apps.patients.permissions import IsPatient
 from common.serializers import ErrorSerializer
 
 from . import services
-from .models import VideoAppointment
+from .models import CallSession, VideoAppointment
 from .serializers import (
     AppointmentNoteSerializer,
     DoctorAppointmentSerializer,
     DoctorCalendarItemSerializer,
+    DoctorCallStartResponseSerializer,
+    DoctorMeetingLinkSerializer,
     PatientAppointmentSerializer,
+    PatientCallJoinResponseSerializer,
+    PatientCallStatusSerializer,
     ProposeAppointmentSerializer,
     RescheduleRequestSerializer,
 )
@@ -58,7 +62,7 @@ def _parse_bound(raw: str, *, end: bool) -> datetime:
 def _load_doctor_appointment(pk: str) -> VideoAppointment:
     return get_object_or_404(
         VideoAppointment.objects.select_related("consultation", "doctor").prefetch_related(
-            "events"
+            "events", "calls"
         ),
         pk=pk,
     )
@@ -92,7 +96,7 @@ class DoctorConsultationAppointmentsView(APIView):
         services.expire_passed_for(consultation=case)
         appts = (
             VideoAppointment.objects.filter(consultation=case)
-            .prefetch_related("events")
+            .prefetch_related("events", "calls")
             .order_by("-created_at", "-id")
         )
         return Response(DoctorAppointmentSerializer(appts, many=True).data)
@@ -385,3 +389,164 @@ class PatientUpcomingAppointmentView(APIView):
         if appt is None:
             return Response(status=http_status.HTTP_204_NO_CONTENT)
         return Response(PatientAppointmentSerializer(appt).data)
+
+
+class DoctorAppointmentDetailView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_appointments_update",
+        tags=["doctor"],
+        request=DoctorMeetingLinkSerializer,
+        responses={
+            200: DoctorAppointmentSerializer,
+            400: ErrorSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def patch(self, request: Request, pk: str) -> Response:
+        doctor = cast(Doctor, request.user)
+        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        body = DoctorMeetingLinkSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        updated = services.save_meeting_link(
+            appt, doctor, meeting_link=body.validated_data["meeting_link"]
+        )
+        loaded = _load_doctor_appointment(str(updated.pk))
+        return Response(DoctorAppointmentSerializer(loaded).data)
+
+
+class DoctorAppointmentStartCallView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_appointments_start_call",
+        tags=["doctor"],
+        request=None,
+        responses={
+            200: DoctorCallStartResponseSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        doctor = cast(Doctor, request.user)
+        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        call, join_url = services.start_call(appt, doctor)
+        return Response({"call_id": call.pk, "join_url": join_url})
+
+
+class DoctorCallEndView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_calls_end",
+        tags=["doctor"],
+        request=None,
+        responses={
+            200: DoctorAppointmentSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        doctor = cast(Doctor, request.user)
+        call = get_object_or_404(CallSession, pk=pk, appointment__doctor=doctor)
+        ended = services.end_call(call, doctor)
+        loaded = _load_doctor_appointment(str(ended.appointment_id))
+        return Response(DoctorAppointmentSerializer(loaded).data)
+
+
+class DoctorAppointmentNoShowView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_appointments_no_show",
+        tags=["doctor"],
+        request=None,
+        responses={
+            200: DoctorAppointmentSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        doctor = cast(Doctor, request.user)
+        appt = get_object_or_404(VideoAppointment, pk=pk, doctor=doctor)
+        updated = services.mark_no_show(appt, doctor)
+        loaded = _load_doctor_appointment(str(updated.pk))
+        return Response(DoctorAppointmentSerializer(loaded).data)
+
+
+class PatientAppointmentCallView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="appointments_call_status",
+        tags=["telemedicine"],
+        responses={
+            200: PatientCallStatusSerializer,
+            204: OpenApiResponse(description="No ringing or live call"),
+            401: ErrorSerializer,
+            404: ErrorSerializer,
+        },
+    )
+    def get(self, request: Request, pk: str) -> Response:
+        patient = cast(Patient, request.user)
+        appt = get_object_or_404(
+            VideoAppointment.objects.select_related("doctor"),
+            pk=pk,
+            consultation__patient=patient,
+        )
+        call = (
+            appt.calls.filter(status__in=(CallSession.Status.RINGING, CallSession.Status.LIVE))
+            .order_by("-started_at", "-id")
+            .first()
+        )
+        if call is None:
+            return Response(status=http_status.HTTP_204_NO_CONTENT)
+        return Response(
+            {
+                "call_id": call.pk,
+                "status": call.status,
+                "doctor_name": appt.doctor.full_name,
+                "meeting_host": appt.meeting_host,
+                "patient_joined_at": call.patient_joined_at,
+            }
+        )
+
+
+class PatientCallJoinView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="calls_join",
+        tags=["telemedicine"],
+        request=None,
+        responses={
+            200: PatientCallJoinResponseSerializer,
+            401: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        patient = cast(Patient, request.user)
+        call = get_object_or_404(CallSession, pk=pk, appointment__consultation__patient=patient)
+        joined, join_url = services.join_call(call, patient)
+        return Response(
+            {
+                "call_id": joined.pk,
+                "status": joined.status,
+                "join_url": join_url,
+            }
+        )

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from typing import Any
+from urllib.parse import urlparse
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -17,14 +18,19 @@ from apps.patients.models import Patient
 from common.errors import ApiError
 from common.search import normalize_text
 
-from .models import AppointmentEvent, VideoAppointment
+from .models import AppointmentEvent, CallSession, VideoAppointment
 from .reminders import dhaka_time_labels
+from .video import get_video_provider
 
 CaseStatus = DoctorConsultation.Status
 Status = VideoAppointment.Status
 Kind = AppointmentEvent.Kind
+CallStatus = CallSession.Status
 
 PROPOSE_MIN_LEAD = timedelta(minutes=30)
+CALL_EARLY_WINDOW = timedelta(minutes=10)
+CALL_LATE_WINDOW = timedelta(minutes=15)
+NO_SHOW_AFTER = timedelta(minutes=10)
 PROPOSE_ALLOWED_CASE_STATUSES = (
     CaseStatus.IN_REVIEW,
     CaseStatus.AWAITING_PATIENT,
@@ -60,6 +66,35 @@ class InvalidAppointmentState(ApiError):
     status_code = 409
     error_code = "INVALID_APPOINTMENT_STATE"
     default_detail = "That action is not allowed in the appointment's current state."
+
+
+class NoMeetingLink(ApiError):
+    status_code = 409
+    error_code = "NO_MEETING_LINK"
+    default_detail = "Save an HTTPS meeting link before starting the call."
+
+
+class OutsideCallWindow(ApiError):
+    status_code = 409
+    error_code = "OUTSIDE_CALL_WINDOW"
+    default_detail = (
+        "Calls can be started from 10 minutes before until 15 minutes after the scheduled time."
+    )
+
+
+class CallNotActive(ApiError):
+    status_code = 409
+    error_code = "CALL_NOT_ACTIVE"
+    default_detail = "This call is no longer active."
+
+
+class NoShowNotAllowed(ApiError):
+    status_code = 409
+    error_code = "NO_SHOW_NOT_ALLOWED"
+    default_detail = (
+        "No-show can only be marked at least 10 minutes after start "
+        "when the patient has not joined."
+    )
 
 
 def _validate_slot(start_at: datetime, duration_minutes: int) -> datetime:
@@ -444,3 +479,166 @@ def cancel_for_withdrawal(consultation: DoctorConsultation) -> None:
         actor_type="patient",
         note="Consultation withdrawn.",
     )
+
+
+def _validate_meeting_link(raw: str) -> tuple[str, str]:
+    cleaned = raw.strip()
+    if not cleaned or len(cleaned) > 500 or any(ch.isspace() for ch in cleaned):
+        raise ValidationError(
+            {"meeting_link": [ErrorDetail("Enter a valid HTTPS meeting link.", code="invalid")]}
+        )
+    parsed = urlparse(cleaned)
+    if (
+        parsed.scheme.lower() != "https"
+        or not parsed.netloc
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
+        raise ValidationError(
+            {
+                "meeting_link": [
+                    ErrorDetail(
+                        "Use an https:// meeting link with no embedded credentials.",
+                        code="invalid",
+                    )
+                ]
+            }
+        )
+    return cleaned, parsed.hostname[:255]
+
+
+@transaction.atomic
+def save_meeting_link(
+    appointment: VideoAppointment, doctor: Doctor, *, meeting_link: str
+) -> VideoAppointment:
+    appointment = expire_if_passed(appointment)
+    locked = VideoAppointment.objects.select_for_update().get(pk=appointment.pk, doctor=doctor)
+    if locked.status not in (Status.PROPOSED, Status.ACCEPTED):
+        raise InvalidAppointmentState()
+    link, host = _validate_meeting_link(meeting_link)
+    locked.meeting_link = link
+    locked.meeting_host = host
+    get_video_provider().prepare(locked)
+    locked.save(update_fields=["meeting_link", "meeting_host", "updated_at"])
+    return locked
+
+
+@transaction.atomic
+def start_call(appointment: VideoAppointment, doctor: Doctor) -> tuple[CallSession, str]:
+    locked = (
+        VideoAppointment.objects.select_for_update()
+        .select_related("consultation", "consultation__patient", "doctor")
+        .get(pk=appointment.pk, doctor=doctor)
+    )
+    if locked.status not in (Status.ACCEPTED, Status.IN_PROGRESS):
+        raise InvalidAppointmentState()
+    if not locked.meeting_link.strip():
+        raise NoMeetingLink()
+
+    now = timezone.now()
+    if now < locked.start_at - CALL_EARLY_WINDOW or now > locked.start_at + CALL_LATE_WINDOW:
+        raise OutsideCallWindow()
+
+    locked.calls.filter(status=CallStatus.RINGING).update(status=CallStatus.MISSED, ended_at=now)
+    call = CallSession.objects.create(
+        appointment=locked,
+        status=CallStatus.RINGING,
+        started_at=now,
+    )
+    locked.status = Status.IN_PROGRESS
+    locked.save(update_fields=["status", "updated_at"])
+    AppointmentEvent.objects.create(
+        appointment=locked,
+        kind=Kind.CALL_STARTED,
+        actor_type="doctor",
+    )
+
+    patient = locked.consultation.patient
+    case_id = str(locked.consultation_id)
+    case_code = locked.consultation.consultation_code
+    doctor_name = doctor.full_name
+    tag = f"call-{locked.pk}"
+    transaction.on_commit(
+        lambda: notify(
+            NotificationKind.CALL_STARTED,
+            [patient],
+            {"code": case_code, "doctor_name": doctor_name},
+            f"/care/{case_id}",
+            push_tag=tag,
+        )
+    )
+    return call, get_video_provider().join_url(locked, doctor)
+
+
+@transaction.atomic
+def join_call(call: CallSession, patient: Patient) -> tuple[CallSession, str]:
+    locked = (
+        CallSession.objects.select_for_update()
+        .select_related("appointment", "appointment__consultation")
+        .get(pk=call.pk, appointment__consultation__patient=patient)
+    )
+    if locked.status not in (CallStatus.RINGING, CallStatus.LIVE):
+        raise CallNotActive()
+    if locked.patient_joined_at is None:
+        locked.patient_joined_at = timezone.now()
+    if locked.status != CallStatus.LIVE:
+        locked.status = CallStatus.LIVE
+    locked.save(update_fields=["patient_joined_at", "status"])
+    return locked, get_video_provider().join_url(locked.appointment, patient)
+
+
+@transaction.atomic
+def end_call(call: CallSession, doctor: Doctor) -> CallSession:
+    locked = (
+        CallSession.objects.select_for_update()
+        .select_related("appointment")
+        .get(pk=call.pk, appointment__doctor=doctor)
+    )
+    if locked.status not in (CallStatus.RINGING, CallStatus.LIVE):
+        raise CallNotActive()
+
+    now = timezone.now()
+    locked.ended_at = now
+    appt = locked.appointment
+    if locked.patient_joined_at is not None:
+        locked.duration_seconds = max(0, int((now - locked.patient_joined_at).total_seconds()))
+        locked.status = CallStatus.ENDED
+        appt.status = Status.COMPLETED
+    else:
+        locked.duration_seconds = max(0, int((now - locked.started_at).total_seconds()))
+        locked.status = CallStatus.MISSED
+        appt.status = Status.ACCEPTED
+
+    locked.save(update_fields=["status", "ended_at", "duration_seconds"])
+    appt.save(update_fields=["status", "updated_at"])
+    AppointmentEvent.objects.create(
+        appointment=appt,
+        kind=Kind.CALL_ENDED,
+        actor_type="doctor",
+    )
+    return locked
+
+
+@transaction.atomic
+def mark_no_show(appointment: VideoAppointment, doctor: Doctor) -> VideoAppointment:
+    locked = VideoAppointment.objects.select_for_update().get(pk=appointment.pk, doctor=doctor)
+    if locked.status not in (Status.ACCEPTED, Status.IN_PROGRESS):
+        raise NoShowNotAllowed()
+    now = timezone.now()
+    if now < locked.start_at + NO_SHOW_AFTER:
+        raise NoShowNotAllowed()
+    if locked.calls.filter(patient_joined_at__isnull=False).exists():
+        raise NoShowNotAllowed()
+
+    locked.calls.filter(status__in=(CallStatus.RINGING, CallStatus.LIVE)).update(
+        status=CallStatus.MISSED, ended_at=now
+    )
+    locked.status = Status.NO_SHOW
+    locked.save(update_fields=["status", "updated_at"])
+    AppointmentEvent.objects.create(
+        appointment=locked,
+        kind=Kind.NO_SHOW,
+        actor_type="doctor",
+    )
+    return locked

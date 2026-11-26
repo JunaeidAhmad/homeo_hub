@@ -3575,6 +3575,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/appointments/{id}/call/:
+    get:
+      operationId: appointments_call_status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - telemedicine
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCallStatus'
+          description: ''
+        '204':
+          description: No ringing or live call
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/appointments/{id}/cancel/:
     post:
       operationId: appointments_cancel
@@ -4373,6 +4408,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/calls/{id}/join/:
+    post:
+      operationId: calls_join
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - telemedicine
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCallJoinResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/cart/:
     get:
       operationId: cart_read
@@ -5033,6 +5107,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/doctor/appointments/{id}/:
+    patch:
+      operationId: doctor_appointments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorMeetingLinkRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAppointment'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/doctor/appointments/{id}/cancel/:
     post:
       operationId: doctor_appointments_cancel
@@ -5064,6 +5194,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/appointments/{id}/no-show/:
+    post:
+      operationId: doctor_appointments_no_show
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAppointment'
           description: ''
         '401':
           content:
@@ -5121,6 +5296,96 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/appointments/{id}/start/:
+    post:
+      operationId: doctor_appointments_start_call
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorCallStartResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/calls/{id}/end/:
+    post:
+      operationId: doctor_calls_end
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAppointment'
           description: ''
         '401':
           content:
@@ -8685,6 +8950,18 @@ components:
         * `AB-` - AB-
         * `O+` - O+
         * `O-` - O-
+    CallSessionStatusEnum:
+      enum:
+      - RINGING
+      - LIVE
+      - ENDED
+      - MISSED
+      type: string
+      description: |-
+        * `RINGING` - Ringing
+        * `LIVE` - Live
+        * `ENDED` - Ended
+        * `MISSED` - Missed
     Cart:
       type: object
       properties:
@@ -9070,6 +9347,21 @@ components:
           allOf:
           - $ref: '#/components/schemas/AppointmentStatusEnum'
           readOnly: true
+        meeting_link:
+          type: string
+          format: uri
+          readOnly: true
+        meeting_host:
+          type: string
+          readOnly: true
+        active_call:
+          allOf:
+          - $ref: '#/components/schemas/DoctorCallSession'
+          nullable: true
+          readOnly: true
+        has_patient_joined:
+          type: boolean
+          readOnly: true
         events:
           type: array
           items:
@@ -9084,12 +9376,16 @@ components:
           format: date-time
           readOnly: true
       required:
+      - active_call
       - consultation_id
       - created_at
       - duration_minutes
       - end_at
       - events
+      - has_patient_joined
       - id
+      - meeting_host
+      - meeting_link
       - start_at
       - status
       - updated_at
@@ -9134,6 +9430,54 @@ components:
       - patient_name
       - start_at
       - status
+    DoctorCallSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CallSessionStatusEnum'
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        patient_joined_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        ended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        duration_seconds:
+          type: integer
+          readOnly: true
+          nullable: true
+      required:
+      - duration_seconds
+      - ended_at
+      - id
+      - patient_joined_at
+      - started_at
+      - status
+    DoctorCallStartResponse:
+      type: object
+      properties:
+        call_id:
+          type: string
+          format: uuid
+        join_url:
+          type: string
+          format: uri
+      required:
+      - call_id
+      - join_url
     DoctorCertificate:
       type: object
       properties:
@@ -10068,6 +10412,7 @@ components:
       - CALL_EXPIRED
       - CALL_REMINDER_30
       - CALL_REMINDER_5
+      - CALL_STARTED
       type: string
       description: |-
         * `DOCTOR_ASSIGNED` - Doctor Assigned
@@ -10087,6 +10432,7 @@ components:
         * `CALL_EXPIRED` - Call Expired
         * `CALL_REMINDER_30` - Call Reminder 30
         * `CALL_REMINDER_5` - Call Reminder 5
+        * `CALL_STARTED` - Call Started
     NullEnum:
       enum:
       - null
@@ -10774,6 +11120,13 @@ components:
           type: integer
           maximum: 10000000
           minimum: 1
+    PatchedDoctorMeetingLinkRequest:
+      type: object
+      properties:
+        meeting_link:
+          type: string
+          minLength: 1
+          maxLength: 500
     PatchedPatientProfileBasicUpdateRequest:
       type: object
       properties:
@@ -10962,6 +11315,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/AppointmentStatusEnum'
           readOnly: true
+        meeting_host:
+          type: string
+          readOnly: true
         events:
           type: array
           items:
@@ -10984,9 +11340,47 @@ components:
       - end_at
       - events
       - id
+      - meeting_host
       - start_at
       - status
       - updated_at
+    PatientCallJoinResponse:
+      type: object
+      properties:
+        call_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/CallSessionStatusEnum'
+        join_url:
+          type: string
+          format: uri
+      required:
+      - call_id
+      - join_url
+      - status
+    PatientCallStatus:
+      type: object
+      properties:
+        call_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/CallSessionStatusEnum'
+        doctor_name:
+          type: string
+        meeting_host:
+          type: string
+        patient_joined_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - call_id
+      - doctor_name
+      - meeting_host
+      - patient_joined_at
+      - status
     PatientConsultationDetail:
       type: object
       properties:

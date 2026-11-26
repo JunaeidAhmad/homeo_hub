@@ -251,6 +251,7 @@ WEBPUSH_VAPID_PUBLIC_KEY = env.str("WEBPUSH_VAPID_PUBLIC_KEY", default="")
 WEBPUSH_VAPID_PRIVATE_KEY = env.str("WEBPUSH_VAPID_PRIVATE_KEY", default="")
 WEBPUSH_SUBJECT = env.str("WEBPUSH_SUBJECT", default="")
 STAFF_TOTP_REQUIRED = env.bool("STAFF_TOTP_REQUIRED", default=True)
+VIDEO_PROVIDER = env.str("VIDEO_PROVIDER", default="apps.telemedicine.video.PastedLinkProvider")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "HomeoHub API",
@@ -291,6 +292,7 @@ SPECTACULAR_SETTINGS = {
         "QuestionTemplateStatusEnum": "apps.consultations.models.QuestionTemplate.Status",
         "AppointmentStatusEnum": "apps.telemedicine.models.VideoAppointment.Status",
         "AppointmentEventKindEnum": "apps.telemedicine.models.AppointmentEvent.Kind",
+        "CallSessionStatusEnum": "apps.telemedicine.models.CallSession.Status",
     },
 }
 

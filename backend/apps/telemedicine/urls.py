@@ -19,6 +19,26 @@ urlpatterns = [
         name="doctor-appointments-cancel",
     ),
     path(
+        "doctor/appointments/<uuid:pk>/start/",
+        views.DoctorAppointmentStartCallView.as_view(),
+        name="doctor-appointments-start",
+    ),
+    path(
+        "doctor/appointments/<uuid:pk>/no-show/",
+        views.DoctorAppointmentNoShowView.as_view(),
+        name="doctor-appointments-no-show",
+    ),
+    path(
+        "doctor/appointments/<uuid:pk>/",
+        views.DoctorAppointmentDetailView.as_view(),
+        name="doctor-appointments-detail",
+    ),
+    path(
+        "doctor/calls/<uuid:pk>/end/",
+        views.DoctorCallEndView.as_view(),
+        name="doctor-calls-end",
+    ),
+    path(
         "doctor/appointments/",
         views.DoctorCalendarView.as_view(),
         name="doctor-appointments-calendar",
@@ -52,5 +72,15 @@ urlpatterns = [
         "appointments/upcoming/",
         views.PatientUpcomingAppointmentView.as_view(),
         name="appointments-upcoming",
+    ),
+    path(
+        "appointments/<uuid:pk>/call/",
+        views.PatientAppointmentCallView.as_view(),
+        name="appointments-call-status",
+    ),
+    path(
+        "calls/<uuid:pk>/join/",
+        views.PatientCallJoinView.as_view(),
+        name="calls-join",
     ),
 ]

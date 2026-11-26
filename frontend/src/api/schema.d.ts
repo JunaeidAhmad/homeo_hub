@@ -1408,6 +1408,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/appointments/{id}/call/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["appointments_call_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/appointments/{id}/cancel/": {
         parameters: {
             query?: never;
@@ -1778,6 +1794,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/calls/{id}/join/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["calls_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/cart/": {
         parameters: {
             query?: never;
@@ -2050,6 +2082,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor/appointments/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["doctor_appointments_update"];
+        trace?: never;
+    };
     "/api/v1/doctor/appointments/{id}/cancel/": {
         parameters: {
             query?: never;
@@ -2066,6 +2114,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor/appointments/{id}/no-show/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_appointments_no_show"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor/appointments/{id}/repropose/": {
         parameters: {
             query?: never;
@@ -2076,6 +2140,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["doctor_appointments_repropose"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/appointments/{id}/start/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_appointments_start_call"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/calls/{id}/end/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_calls_end"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3376,6 +3472,14 @@ export interface components {
          * @enum {string}
          */
         BloodGroupEnum: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+        /**
+         * @description * `RINGING` - Ringing
+         *     * `LIVE` - Live
+         *     * `ENDED` - Ended
+         *     * `MISSED` - Missed
+         * @enum {string}
+         */
+        CallSessionStatusEnum: "RINGING" | "LIVE" | "ENDED" | "MISSED";
         Cart: {
             /** Format: uuid */
             readonly id: string;
@@ -3512,6 +3616,11 @@ export interface components {
             /** Format: date-time */
             readonly end_at: string;
             readonly status: components["schemas"]["AppointmentStatusEnum"];
+            /** Format: uri */
+            readonly meeting_link: string;
+            readonly meeting_host: string;
+            readonly active_call: components["schemas"]["DoctorCallSession"] | null;
+            readonly has_patient_joined: boolean;
             readonly events: components["schemas"]["AppointmentEvent"][];
             /** Format: date-time */
             readonly created_at: string;
@@ -3531,6 +3640,24 @@ export interface components {
             /** Format: date-time */
             readonly end_at: string;
             readonly status: components["schemas"]["AppointmentStatusEnum"];
+        };
+        DoctorCallSession: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly status: components["schemas"]["CallSessionStatusEnum"];
+            /** Format: date-time */
+            readonly started_at: string;
+            /** Format: date-time */
+            readonly patient_joined_at: string | null;
+            /** Format: date-time */
+            readonly ended_at: string | null;
+            readonly duration_seconds: number | null;
+        };
+        DoctorCallStartResponse: {
+            /** Format: uuid */
+            call_id: string;
+            /** Format: uri */
+            join_url: string;
         };
         DoctorCertificate: {
             /** Format: uuid */
@@ -3854,9 +3981,10 @@ export interface components {
          *     * `CALL_EXPIRED` - Call Expired
          *     * `CALL_REMINDER_30` - Call Reminder 30
          *     * `CALL_REMINDER_5` - Call Reminder 5
+         *     * `CALL_STARTED` - Call Started
          * @enum {string}
          */
-        NotificationKindEnum: "DOCTOR_ASSIGNED" | "QUESTIONS_SENT" | "PATIENT_ANSWERED" | "PRESCRIPTION_READY" | "PAYMENT_RESULT" | "ORDER_STATUS_CHANGED" | "CONSULTATION_WAITING" | "DOCTOR_APPLICATION" | "CALL_PROPOSED" | "CALL_ACCEPTED" | "CALL_REJECTED" | "CALL_RESCHEDULE_REQUESTED" | "CALL_RESCHEDULED" | "CALL_CANCELLED" | "CALL_EXPIRED" | "CALL_REMINDER_30" | "CALL_REMINDER_5";
+        NotificationKindEnum: "DOCTOR_ASSIGNED" | "QUESTIONS_SENT" | "PATIENT_ANSWERED" | "PRESCRIPTION_READY" | "PAYMENT_RESULT" | "ORDER_STATUS_CHANGED" | "CONSULTATION_WAITING" | "DOCTOR_APPLICATION" | "CALL_PROPOSED" | "CALL_ACCEPTED" | "CALL_REJECTED" | "CALL_RESCHEDULE_REQUESTED" | "CALL_RESCHEDULED" | "CALL_CANCELLED" | "CALL_EXPIRED" | "CALL_REMINDER_30" | "CALL_REMINDER_5" | "CALL_STARTED";
         /** @enum {unknown} */
         NullEnum: null;
         OrderQuoteRequestRequest: {
@@ -4222,6 +4350,9 @@ export interface components {
             chamber_address?: string;
             requested_fee_poisha?: number;
         };
+        PatchedDoctorMeetingLinkRequest: {
+            meeting_link?: string;
+        };
         PatchedPatientProfileBasicUpdateRequest: {
             full_name?: string;
             gender?: components["schemas"]["GenderEnum"];
@@ -4289,11 +4420,28 @@ export interface components {
             /** Format: date-time */
             readonly end_at: string;
             readonly status: components["schemas"]["AppointmentStatusEnum"];
+            readonly meeting_host: string;
             readonly events: components["schemas"]["AppointmentEvent"][];
             /** Format: date-time */
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+        };
+        PatientCallJoinResponse: {
+            /** Format: uuid */
+            call_id: string;
+            status: components["schemas"]["CallSessionStatusEnum"];
+            /** Format: uri */
+            join_url: string;
+        };
+        PatientCallStatus: {
+            /** Format: uuid */
+            call_id: string;
+            status: components["schemas"]["CallSessionStatusEnum"];
+            doctor_name: string;
+            meeting_host: string;
+            /** Format: date-time */
+            patient_joined_at: string | null;
         };
         PatientConsultationDetail: {
             /** Format: uuid */
@@ -8110,6 +8258,50 @@ export interface operations {
             };
         };
     };
+    appointments_call_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientCallStatus"];
+                };
+            };
+            /** @description No ringing or live call */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     appointments_cancel: {
         parameters: {
             query?: never;
@@ -9023,6 +9215,51 @@ export interface operations {
             };
         };
     };
+    calls_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientCallJoinResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     cart_read: {
         parameters: {
             query?: never;
@@ -9781,6 +10018,71 @@ export interface operations {
             };
         };
     };
+    doctor_appointments_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedDoctorMeetingLinkRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     doctor_appointments_cancel: {
         parameters: {
             query?: never;
@@ -9846,6 +10148,59 @@ export interface operations {
             };
         };
     };
+    doctor_appointments_no_show: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     doctor_appointments_repropose: {
         parameters: {
             query?: never;
@@ -9875,6 +10230,112 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_appointments_start_call: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorCallStartResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_calls_end: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorAppointment"];
                 };
             };
             401: {

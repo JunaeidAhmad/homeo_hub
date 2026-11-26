@@ -140,6 +140,13 @@ CATALOG: dict[str, NotificationTemplate] = {
         body_bn="পরামর্শ {code}-এর ভিডিও কল শীঘ্রই {time_bn} সময়ে শুরু হবে।",
         sms_mode="never",
     ),
+    NotificationKind.CALL_STARTED: NotificationTemplate(
+        title_en="Dr {doctor_name} is calling",
+        title_bn="ডা. {doctor_name} কল করছেন",
+        body_en="Join your video consultation {code} now.",
+        body_bn="পরামর্শ {code}-এর ভিডিও কলে এখনই যোগ দিন।",
+        sms_mode="never",
+    ),
 }
 
 
