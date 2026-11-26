@@ -170,20 +170,36 @@ Deploy the API first, then the web app. Each needs the other's address, so choos
 
 ### 1. API on Render
 
-In Render: **New → Blueprint**, pick this repository. [`render.yaml`](render.yaml) creates the API (`homeohub-api`)
-and a Key Value instance (Redis), both free plan, in Singapore next to the Neon database. When asked:
+You need a Render Key Value instance (Redis). The free plan allows one per workspace: reuse the one you have, or
+create it first (**New → Key Value**). Its internal URL only works from the same region. [`render.yaml`](render.yaml)
+puts the API in Singapore, next to the Neon database; if your instance is elsewhere, change `region` there before
+creating the service, because it can't be changed later.
+
+Then **New → Blueprint**, pick this repository: it creates the API (`homeohub-api`) on the free plan. When asked:
 
 | Variable | Value |
 |---|---|
 | `DATABASE_URL` | the Neon connection string |
+| `REDIS_URL` | the Key Value instance's internal URL; if another app uses it, add `/1` (`redis://red-xxxx:6379/1`) |
 | `CORS_ALLOWED_ORIGINS` | the web app's address, e.g. `https://homeohub.vercel.app` (**required**, no trailing slash) |
 | `SMS_PROVIDER` | see "Before real users" below |
 | `STORAGE_*` | an S3-compatible bucket; leave empty to refuse uploads for now |
 | `WEBPUSH_*` | leave empty to turn push notifications off |
 
-`SECRET_KEY` and `PROXY_SHARED_SECRET` are generated, `REDIS_URL` comes from the Key Value instance. Render runs
+`SECRET_KEY` and `PROXY_SHARED_SECRET` are generated. Render runs
 [`backend/build.sh`](backend/build.sh) on every deploy: it installs dependencies, collects static files, runs
 migrations and loads the area list and staff roles. Check `https://<api>/api/v1/health/ready` afterwards.
+
+A service made by hand (**New → Web Service**) ignores `render.yaml`. Set it up the same way, or delete it and use
+the Blueprint:
+
+| Setting | Value |
+|---|---|
+| Root Directory | `backend` |
+| Build Command | `./build.sh` |
+| Start Command | `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2` |
+| Health Check Path | `/api/v1/health/live` |
+| Environment | `PYTHON_VERSION` (`3.12.8`), `SECRET_KEY` (32+ random characters), `DATABASE_URL`, `REDIS_URL` (as above), `ALLOWED_HOSTS` (the service's host), `CORS_ALLOWED_ORIGINS`, `PROXY_SHARED_SECRET` |
 
 Create the first staff account from your machine:
 `cd backend && USE_NEON=true .venv/bin/python manage.py create_staff yourname --name "Your Name"`.

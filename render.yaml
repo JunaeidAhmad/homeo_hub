@@ -1,17 +1,13 @@
 # Render blueprint for the Django API. The web app deploys to Vercel
-# (Root Directory: frontend). Database: Neon (DATABASE_URL). Redis: the Render
-# Key Value instance below. See "Deploy" in README.md for the order of steps.
+# (Root Directory: frontend). Database: Neon (DATABASE_URL). Redis: an existing
+# Render Key Value instance (REDIS_URL); the free plan allows one per workspace, so
+# it can be shared with another app. See "Deploy" in README.md for the steps.
 #
-# Both services are in Singapore, next to the Neon database; a region can't be
-# changed after a service is created. Both use the free plan: the API sleeps when
-# idle. Change `plan` for an always-on service.
+# The API is in Singapore, next to the Neon database. Redis's internal URL only
+# works from the same region: if your Key Value instance is elsewhere, change
+# `region` to match BEFORE creating the service (it can't be changed afterwards).
+# Free plan: the API sleeps when idle. Change `plan` for an always-on service.
 services:
-  - type: keyvalue
-    name: homeohub-redis
-    plan: free
-    region: singapore
-    ipAllowList: [] # private network only
-
   - type: web
     name: homeohub-api
     runtime: python
@@ -30,11 +26,10 @@ services:
         generateValue: true
       - key: DATABASE_URL
         sync: false # Neon connection string, set in the dashboard
+      # The Key Value instance's internal URL. When another app already uses it, add a
+      # database number to keep the keys apart, e.g. redis://red-xxxx:6379/1
       - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: homeohub-redis
-          property: connectionString
+        sync: false
       # The service's own onrender.com host is also accepted automatically.
       - key: ALLOWED_HOSTS
         value: homeohub-api.onrender.com
