@@ -1,3 +1,7 @@
+import type { components } from "@/api/schema";
+
+type RemedyForm = components["schemas"]["FormEnum"];
+
 /**
  * A homeopathic vial with its apothecary label: the product's picture when a remedy
  * has no photograph. Small for lists, large for the remedy page.
@@ -6,20 +10,21 @@ export function RemedyVial({
   name,
   nameBn,
   size = "large",
+  form,
 }: {
   name: string;
   nameBn?: string;
   size?: "small" | "large";
+  form?: RemedyForm | null;
 }) {
   const large = size === "large";
+  const glass = form === "LIQUID" ? "border-amber bg-amber-wash" : "border-glass-line bg-glass";
   return (
     <div role="img" aria-label={name} className="flex flex-col items-center">
       <span className={`rounded-t-sm bg-ink ${large ? "h-7 w-21" : "h-2 w-6"}`} />
+      <span className={`border-x-2 ${glass} ${large ? "h-2.5 w-15" : "h-1 w-4"}`} />
       <span
-        className={`border-x-2 border-glass-line bg-glass ${large ? "h-2.5 w-15" : "h-1 w-4"}`}
-      />
-      <span
-        className={`flex items-center justify-center border-2 border-glass-line bg-glass ${
+        className={`flex items-center justify-center border-2 ${glass} ${
           large ? "h-54 w-45 rounded-[30px_30px_20px_20px] px-4" : "h-14 w-11 rounded-lg px-1"
         }`}
       >

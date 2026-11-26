@@ -5,6 +5,8 @@ import uuid
 from django.db import models
 from django.db.models.functions import Lower
 
+from .choices import RemedyForm
+
 
 class Remedy(models.Model):
     class Status(models.TextChoices):
@@ -41,3 +43,27 @@ class Remedy(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+
+class RemedyPrice(models.Model):
+    """Patient price for one remedy in one form (pill or liquid), in integer poisha."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    remedy = models.ForeignKey(Remedy, on_delete=models.CASCADE, related_name="prices")
+    form = models.CharField(max_length=10, choices=RemedyForm.choices)
+    price_poisha = models.PositiveIntegerField()
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["form"]
+        constraints = [
+            models.UniqueConstraint(fields=["remedy", "form"], name="remedy_price_one_per_form"),
+            models.CheckConstraint(
+                condition=models.Q(price_poisha__gt=0),
+                name="remedy_price_positive",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.remedy.name} ({self.form}): {self.price_poisha}"

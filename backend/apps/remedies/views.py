@@ -1,4 +1,5 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from rest_framework import serializers
 from rest_framework.generics import (
     GenericAPIView,
     ListAPIView,
@@ -17,6 +18,7 @@ from common.serializers import ErrorSerializer
 from . import services
 from .selectors import all_remedies, public_remedies
 from .serializers import (
+    AdminPriceInputSerializer,
     AdminRemedySerializer,
     PictureUploadSerializer,
     RemedyCardSerializer,
@@ -155,3 +157,30 @@ class AdminRemedyPictureView(AdminView, GenericAPIView):
     def delete(self, request: Request, pk) -> Response:
         remedy = services.remove_picture(self.get_object())
         return Response(self.get_serializer(remedy).data)
+
+
+class AdminRemedyPricesView(AdminView, GenericAPIView):
+    required_permissions = {"PUT": MANAGE}
+    serializer_class = AdminRemedySerializer
+    filter_backends: list = []
+
+    def get_queryset(self):
+        return all_remedies()
+
+    @extend_schema(
+        operation_id="admin_remedies_prices_set",
+        tags=["admin"],
+        request=AdminPriceInputSerializer(many=True),
+        responses={200: AdminRemedySerializer, 400: ErrorSerializer, **REFUSED},
+    )
+    def put(self, request: Request, pk) -> Response:
+        remedy = self.get_object()
+        body = AdminPriceInputSerializer(data=request.data, many=True)
+        body.is_valid(raise_exception=True)
+        forms = [item["form"] for item in body.validated_data]
+        if len(forms) != len(set(forms)):
+            raise serializers.ValidationError(
+                {"non_field_errors": ["Each form may appear at most once."]}
+            )
+        updated = services.set_prices(remedy, body.validated_data)
+        return Response(self.get_serializer(updated).data)

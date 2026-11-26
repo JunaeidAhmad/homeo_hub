@@ -280,6 +280,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/admin/remedies/{id}/prices/:
+    put:
+      operationId: admin_remedies_prices_set
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminPriceInputRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminRemedy'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/roles/:
     get:
       operationId: admin_roles
@@ -1064,6 +1116,59 @@ components:
       - permissions
       - roles
       - username
+    AdminPrice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        form:
+          $ref: '#/components/schemas/FormEnum'
+        price_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - form
+      - id
+      - price_poisha
+      - updated_at
+    AdminPriceInputRequest:
+      type: object
+      properties:
+        form:
+          $ref: '#/components/schemas/FormEnum'
+        price_poisha:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+        is_active:
+          type: boolean
+          default: true
+      required:
+      - form
+      - price_poisha
+    AdminPriceRequest:
+      type: object
+      properties:
+        form:
+          $ref: '#/components/schemas/FormEnum'
+        price_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+      required:
+      - form
+      - price_poisha
     AdminRemedy:
       type: object
       description: Everything about a remedy, both languages, for the editor.
@@ -1116,6 +1221,11 @@ components:
           format: uri
           nullable: true
           readOnly: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminPrice'
+          readOnly: true
         updated_at:
           type: string
           format: date-time
@@ -1128,6 +1238,7 @@ components:
       - indication_en
       - name
       - picture_url
+      - prices
       - updated_at
     AdminRemedyRequest:
       type: object
@@ -1225,6 +1336,14 @@ components:
           maxLength: 30
       required:
       - phone
+    FormEnum:
+      enum:
+      - PILL
+      - LIQUID
+      type: string
+      description: |-
+        * `PILL` - Pill
+        * `LIQUID` - Liquid
     GenderEnum:
       enum:
       - FEMALE
@@ -1494,6 +1613,18 @@ components:
       - phone_verified
       - preferred_language
       - user_type
+    PatientPrice:
+      type: object
+      properties:
+        form:
+          $ref: '#/components/schemas/FormEnum'
+        price_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - form
+      - price_poisha
     PatientUserTypeEnum:
       enum:
       - patient
@@ -1537,6 +1668,18 @@ components:
           format: binary
       required:
       - picture
+    PotenciesEnum:
+      enum:
+      - 6C
+      - 30C
+      - 200C
+      - 1M
+      type: string
+      description: |-
+        * `6C` - P6C
+        * `30C` - P30C
+        * `200C` - P200C
+        * `1M` - P1M
     PreferredLanguageEnum:
       enum:
       - en
@@ -1599,11 +1742,17 @@ components:
         indication:
           type: string
           readOnly: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientPrice'
+          readOnly: true
       required:
       - id
       - indication
       - name
       - picture_url
+      - prices
       - slug
     RemedyDetail:
       type: object
@@ -1631,6 +1780,11 @@ components:
         indication:
           type: string
           readOnly: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientPrice'
+          readOnly: true
         description:
           type: string
           readOnly: true
@@ -1644,6 +1798,11 @@ components:
           items:
             type: string
           readOnly: true
+        potencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PotenciesEnum'
+          readOnly: true
       required:
       - advice_do
       - advice_dont
@@ -1652,6 +1811,8 @@ components:
       - indication
       - name
       - picture_url
+      - potencies
+      - prices
       - slug
     RemedyStatusEnum:
       enum:

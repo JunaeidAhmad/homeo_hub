@@ -8,7 +8,8 @@ from common.errors import ApiError
 from common.images import process_picture
 from common.search import normalize_text
 
-from .models import Remedy
+from .models import Remedy, RemedyPrice
+from .selectors import all_remedies
 
 
 class RemedyNameTaken(ApiError):
@@ -92,3 +93,18 @@ def remove_picture(remedy: Remedy) -> Remedy:
     remedy.save(update_fields=["picture", "updated_at"])
     _delete_after_commit(storage, old)
     return remedy
+
+
+@transaction.atomic
+def set_prices(remedy: Remedy, entries: list[dict[str, Any]]) -> Remedy:
+    """Upsert patient prices per form in one transaction."""
+    for entry in entries:
+        RemedyPrice.objects.update_or_create(
+            remedy=remedy,
+            form=entry["form"],
+            defaults={
+                "price_poisha": entry["price_poisha"],
+                "is_active": entry.get("is_active", True),
+            },
+        )
+    return all_remedies().get(pk=remedy.pk)

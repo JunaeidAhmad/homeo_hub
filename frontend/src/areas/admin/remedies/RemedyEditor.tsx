@@ -12,6 +12,7 @@ import { useMessages } from "@/i18n/provider";
 import { useStaffSession } from "../session";
 import { useAdminSubmit } from "../use-admin-submit";
 import { PictureField } from "./PictureField";
+import { PriceField } from "./PriceField";
 
 export type Remedy = components["schemas"]["AdminRemedy"];
 export type RemedyStatus = components["schemas"]["RemedyStatusEnum"];
@@ -50,11 +51,13 @@ export function RemedyEditor({
   remedy,
   onSaved,
   onPictureChanged,
+  onPricesSaved,
   onClose,
 }: {
   remedy?: Remedy;
   onSaved: (saved: Remedy) => void;
   onPictureChanged: (remedy: Remedy) => void;
+  onPricesSaved: (remedy: Remedy) => void;
   onClose: () => void;
 }) {
   const { t } = useMessages<AdminMessages>();
@@ -111,16 +114,21 @@ export function RemedyEditor({
       </h2>
 
       {remedy && (
-        <div className="rounded-panel border border-line bg-surface p-4 desktop:p-6">
-          <PictureField remedy={remedy} onChanged={onPictureChanged} />
-          {remedy.status === "ACTIVE" && (
-            <Link
-              href={`/remedies/${remedy.slug}`}
-              className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary underline"
-            >
-              {t("admin.remedy.viewPage")}
-            </Link>
-          )}
+        <div className="grid gap-5 desktop:grid-cols-2">
+          <div className="flex flex-col justify-between rounded-panel border border-line bg-surface p-4 desktop:p-6">
+            <PictureField remedy={remedy} onChanged={onPictureChanged} />
+            {remedy.status === "ACTIVE" && (
+              <Link
+                href={`/remedies/${remedy.slug}`}
+                className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary underline"
+              >
+                {t("admin.remedy.viewPage")}
+              </Link>
+            )}
+          </div>
+          <div className="rounded-panel border border-line bg-surface p-4 desktop:p-6">
+            <PriceField remedy={remedy} onChanged={onPricesSaved} />
+          </div>
         </div>
       )}
 

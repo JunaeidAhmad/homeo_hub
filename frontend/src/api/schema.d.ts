@@ -106,6 +106,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/remedies/{id}/prices/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        put: operations["admin_remedies_prices_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/roles/": {
         parameters: {
             query?: never;
@@ -482,6 +504,26 @@ export interface components {
             readonly last_login: string | null;
             readonly permissions: components["schemas"]["PermissionEnum"][];
         };
+        AdminPrice: {
+            /** Format: uuid */
+            readonly id: string;
+            form: components["schemas"]["FormEnum"];
+            price_poisha: number;
+            is_active?: boolean;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AdminPriceInputRequest: {
+            form: components["schemas"]["FormEnum"];
+            price_poisha: number;
+            /** @default true */
+            is_active: boolean;
+        };
+        AdminPriceRequest: {
+            form: components["schemas"]["FormEnum"];
+            price_poisha: number;
+            is_active?: boolean;
+        };
         /** @description Everything about a remedy, both languages, for the editor. */
         AdminRemedy: {
             /** Format: uuid */
@@ -500,6 +542,7 @@ export interface components {
             advice_dont_bn?: string;
             /** Format: uri */
             readonly picture_url: string | null;
+            readonly prices: components["schemas"]["AdminPrice"][];
             /** Format: date-time */
             readonly updated_at: string;
         };
@@ -539,6 +582,12 @@ export interface components {
         ForgotPasswordRequest: {
             phone: string;
         };
+        /**
+         * @description * `PILL` - Pill
+         *     * `LIQUID` - Liquid
+         * @enum {string}
+         */
+        FormEnum: "PILL" | "LIQUID";
         /**
          * @description * `FEMALE` - Female
          *     * `MALE` - Male
@@ -664,6 +713,10 @@ export interface components {
             readonly location: components["schemas"]["Location"];
             readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
         };
+        PatientPrice: {
+            form: components["schemas"]["FormEnum"];
+            price_poisha: number;
+        };
         /**
          * @description * `patient` - patient
          * @enum {string}
@@ -690,6 +743,14 @@ export interface components {
             /** Format: binary */
             picture: string;
         };
+        /**
+         * @description * `6C` - P6C
+         *     * `30C` - P30C
+         *     * `200C` - P200C
+         *     * `1M` - P1M
+         * @enum {string}
+         */
+        PotenciesEnum: "6C" | "30C" | "200C" | "1M";
         /**
          * @description * `en` - English
          *     * `bn` - Bangla
@@ -720,6 +781,7 @@ export interface components {
             /** Format: uri */
             readonly picture_url: string | null;
             readonly indication: string;
+            readonly prices: components["schemas"]["PatientPrice"][];
         };
         /** @description A remedy in a list, in the language asked for. */
         RemedyDetail: {
@@ -731,9 +793,11 @@ export interface components {
             /** Format: uri */
             readonly picture_url: string | null;
             readonly indication: string;
+            readonly prices: components["schemas"]["PatientPrice"][];
             readonly description: string;
             readonly advice_do: string[];
             readonly advice_dont: string[];
+            readonly potencies: components["schemas"]["PotenciesEnum"][];
         };
         /**
          * @description * `DRAFT` - Draft
@@ -1078,6 +1142,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminRemedy"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_remedies_prices_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminPriceInputRequest"][];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRemedy"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {

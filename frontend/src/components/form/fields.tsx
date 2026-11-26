@@ -113,7 +113,7 @@ export function SegmentedChoice<T extends string>({
 }: {
   legend: string;
   name: string;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; disabled?: boolean; note?: string }[];
   value: T | null;
   onChange: (value: T) => void;
   error?: string;
@@ -130,17 +130,21 @@ export function SegmentedChoice<T extends string>({
         {options.map((option) => (
           <label
             key={option.value}
-            className="flex min-h-13 cursor-pointer items-center justify-center border-line-strong px-1 text-center text-[15px] font-semibold not-first:border-l has-checked:bg-ink has-checked:text-surface has-focus-visible:outline-3 has-focus-visible:-outline-offset-3 has-focus-visible:outline-primary"
+            className={`flex min-h-13 flex-col items-center justify-center border-line-strong px-2 py-1 text-center text-[15px] font-semibold not-first:border-l has-checked:bg-ink has-checked:text-surface has-focus-visible:outline-3 has-focus-visible:-outline-offset-3 has-focus-visible:outline-primary ${
+              option.disabled ? "cursor-not-allowed bg-mist text-ink-muted" : "cursor-pointer"
+            }`}
           >
             <input
               type="radio"
               name={name}
               value={option.value}
               checked={value === option.value}
+              disabled={option.disabled}
               onChange={() => onChange(option.value)}
               className="sr-only"
             />
-            {option.label}
+            <span>{option.label}</span>
+            {option.note && <span className="text-[11px] font-normal">{option.note}</span>}
           </label>
         ))}
       </div>

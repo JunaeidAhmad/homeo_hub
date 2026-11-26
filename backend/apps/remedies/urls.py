@@ -16,4 +16,9 @@ urlpatterns = [
         views.AdminRemedyPictureView.as_view(),
         name="admin-remedy-picture",
     ),
+    path(
+        "admin/remedies/<uuid:pk>/prices/",
+        views.AdminRemedyPricesView.as_view(),
+        name="admin-remedy-prices",
+    ),
 ]

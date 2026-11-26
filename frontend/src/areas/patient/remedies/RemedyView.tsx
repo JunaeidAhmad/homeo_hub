@@ -1,8 +1,7 @@
-import Image from "next/image";
-
 import type { components } from "@/api/schema";
-import { RemedyVial } from "@/components/RemedyVial";
 import type { PatientMessages } from "@/i18n/messages/patient";
+
+import { RemedyPurchase } from "./RemedyPurchase";
 
 type Remedy = components["schemas"]["RemedyDetail"];
 
@@ -29,7 +28,7 @@ function Advice({ title, items, tone }: { title: string; items: string[]; tone: 
   );
 }
 
-/** The remedy page: picture or vial, name, when to use, description, do's and don'ts. */
+/** The remedy page: picture or vial, name, pickers, when to use, description, do's and don'ts. */
 export function RemedyView({
   remedy,
   t,
@@ -38,42 +37,7 @@ export function RemedyView({
   t: (key: keyof PatientMessages) => string;
 }) {
   return (
-    <article className="flex flex-col gap-6">
-      <div className="-mx-4 -mt-6 flex flex-col bg-surface desktop:mx-0 desktop:mt-0 desktop:flex-row desktop:overflow-hidden desktop:rounded-panel desktop:border desktop:border-line">
-        <div className="flex items-center justify-center bg-mist px-4 py-7 desktop:flex-1">
-          {remedy.picture_url ? (
-            <Image
-              unoptimized
-              src={remedy.picture_url}
-              alt={remedy.name}
-              width={600}
-              height={600}
-              className="h-auto max-h-96 w-full object-contain"
-            />
-          ) : (
-            <RemedyVial name={remedy.name} nameBn={remedy.name_bn} />
-          )}
-        </div>
-        <div className="flex flex-col gap-4 px-4 py-6 desktop:flex-1 desktop:p-9">
-          <div className="flex flex-col gap-1">
-            <h1
-              lang="la"
-              className="font-display text-[38px] leading-tight font-normal italic desktop:text-[52px]"
-            >
-              {remedy.name}
-            </h1>
-            {remedy.name_bn && (
-              <span lang="bn" className="font-display text-[19px] text-ink-muted">
-                {remedy.name_bn}
-              </span>
-            )}
-          </div>
-          <p className="text-base leading-relaxed whitespace-pre-line text-ink-soft">
-            {remedy.indication}
-          </p>
-        </div>
-      </div>
-
+    <RemedyPurchase remedy={remedy}>
       <section
         aria-labelledby="about-remedy"
         className="flex flex-col gap-5 rounded-panel border border-line bg-surface px-4 py-5 desktop:p-9"
@@ -92,6 +56,6 @@ export function RemedyView({
           <Advice title={t("patient.remedy.dont")} items={remedy.advice_dont} tone="text-danger" />
         </div>
       </section>
-    </article>
+    </RemedyPurchase>
   );
 }

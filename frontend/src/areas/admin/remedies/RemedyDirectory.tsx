@@ -5,6 +5,7 @@ import { useCallback, useId, useState } from "react";
 import { SearchableTable, type Column } from "@/components/SearchableTable";
 import { useListQuery, type ListParams } from "@/hooks/use-list-query";
 import { fill } from "@/i18n/catalog";
+import { formatMoney } from "@/i18n/format";
 import type { AdminMessages } from "@/i18n/messages/admin";
 import { useMessages } from "@/i18n/provider";
 
@@ -19,7 +20,7 @@ const STATUS_CLASS: Record<RemedyStatus, string> = {
 
 /** All remedies, with the editor. */
 export function RemedyDirectory() {
-  const { t } = useMessages<AdminMessages>();
+  const { locale, t } = useMessages<AdminMessages>();
   const { api } = useStaffSession();
   const [status, setStatus] = useState<RemedyStatus | "">("");
   const [editing, setEditing] = useState<{ remedy?: Remedy } | null>(null);
@@ -56,6 +57,21 @@ export function RemedyDirectory() {
       ),
     },
     { key: "bangla", header: t("admin.remedy.nameBn"), cell: (row) => row.name_bn || "—" },
+    {
+      key: "prices",
+      header: t("admin.remedy.prices"),
+      cell: (row) => {
+        const pill = row.prices.find((p) => p.form === "PILL" && p.is_active);
+        const liquid = row.prices.find((p) => p.form === "LIQUID" && p.is_active);
+        if (!pill && !liquid) return <span className="text-ink-muted">—</span>;
+        return (
+          <span className="font-display">
+            {pill ? formatMoney(locale, pill.price_poisha) : "—"} ·{" "}
+            {liquid ? formatMoney(locale, liquid.price_poisha) : "—"}
+          </span>
+        );
+      },
+    },
     {
       key: "status",
       header: t("admin.remedy.status"),
@@ -112,6 +128,11 @@ export function RemedyDirectory() {
             setNotice("");
           }}
           onPictureChanged={(remedy) => {
+            setEditing({ remedy });
+            list.retry();
+          }}
+          onPricesSaved={(remedy) => {
+            setNotice(fill(t("admin.remedy.pricesSaved"), { name: remedy.name }));
             setEditing({ remedy });
             list.retry();
           }}
