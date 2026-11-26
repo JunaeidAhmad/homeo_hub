@@ -10,6 +10,8 @@ from apps.billing.services import create_invoice_for_prescription
 from apps.consultations.models import DoctorConsultation
 from apps.consultations.services import InvalidConsultationTransition, move_to_prescribed
 from apps.doctors.models import Doctor
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify
 from apps.remedies.models import Remedy
 from common.errors import ApiError
 from common.search import normalize_text
@@ -209,5 +211,19 @@ def issue_prescription(
                     position=pos,
                 )
                 pos += 1
+
+    patient_obj = locked.patient
+    case_id = str(locked.pk)
+    case_code = locked.consultation_code
+    rx_id = str(prescription.pk)
+    transaction.on_commit(
+        lambda: notify(
+            NotificationKind.PRESCRIPTION_READY,
+            [patient_obj],
+            {"code": case_code},
+            f"/care/{case_id}/prescription",
+            dedupe_key=f"rx-ready:{rx_id}",
+        )
+    )
 
     return prescription

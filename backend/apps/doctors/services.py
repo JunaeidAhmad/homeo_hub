@@ -17,7 +17,10 @@ from apps.accounts.errors import InvalidCredentials
 from apps.accounts.models import OtpChallenge
 from apps.accounts.sms import send_sms
 from apps.locations.models import Location
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify, staff_with_permission
 from apps.patients.permissions import PhoneNotVerified
+from apps.staff.roles import Perm
 from common.errors import ApiError
 from common.i18n import current_language
 from common.phone import InvalidPhone, normalize_phone
@@ -157,7 +160,18 @@ def verify_sign_up(verification_id: UUID, code: str) -> tokens.Session:
         verified.append(doctor)
 
     otp.verify(verification_id, code, OtpChallenge.Purpose.DOCTOR_SIGNUP, on_match=mark_verified)
-    return _sign_in(verified[0])
+    doc = verified[0]
+    doc_id = str(doc.pk)
+    doc_name = doc.full_name
+    staff_targets = staff_with_permission(Perm.MANAGE_DOCTORS)
+    if staff_targets:
+        notify(
+            NotificationKind.DOCTOR_APPLICATION,
+            staff_targets,
+            {"name": doc_name},
+            f"/admin/doctors/{doc_id}",
+        )
+    return _sign_in(doc)
 
 
 def log_in(login_input: str, password: str) -> tokens.Session:
@@ -259,6 +273,20 @@ def resubmit(doctor: Doctor) -> Doctor:
     locked.rejection_reason = ""
     locked.submitted_at = timezone.now()
     locked.save(update_fields=["status", "rejection_reason", "submitted_at", "updated_at"])
+    doc_id = str(locked.pk)
+    doc_name = locked.full_name
+
+    def _notify_resubmit() -> None:
+        staff_targets = staff_with_permission(Perm.MANAGE_DOCTORS)
+        if staff_targets:
+            notify(
+                NotificationKind.DOCTOR_APPLICATION,
+                staff_targets,
+                {"name": doc_name},
+                f"/admin/doctors/{doc_id}",
+            )
+
+    transaction.on_commit(_notify_resubmit)
     return locked
 
 

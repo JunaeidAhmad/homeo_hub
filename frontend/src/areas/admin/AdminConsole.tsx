@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { FormAlert } from "@/components/form/fields";
+import { Bell } from "@/components/notifications/Bell";
 import { SideNavShell } from "@/components/shell/SideNavShell";
 import type { AdminMessages } from "@/i18n/messages/admin";
 import { useMessages } from "@/i18n/provider";
@@ -85,6 +86,13 @@ export function AdminConsole({ children }: { children: ReactNode }) {
         href,
         label: t(label),
       }))}
+      headerActions={
+        <Bell
+          api={session.api}
+          unreadPath="/api/v1/admin/notifications/unread-count/"
+          href="/admin/notifications"
+        />
+      }
       footer={<AccountFooter staff={staff} />}
     >
       {/* Keyed by person, so one staff member's page state never shows to the next. */}

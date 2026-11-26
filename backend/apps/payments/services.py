@@ -11,6 +11,8 @@ from django.utils import timezone
 from apps.billing.models import ConsultationInvoice
 from apps.consultations.models import DoctorConsultation
 from apps.consultations.services import move_to_completed
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify
 from apps.orders.models import Order, OrderStatusHistory
 from apps.patients.models import Patient
 from common.errors import ApiError
@@ -141,6 +143,7 @@ def _apply_validation(
     if validation.status not in VALID_GATEWAY_STATUSES:
         payment.status = Payment.Status.FAILED
         payment.save(update_fields=["status", "updated_at"])
+        _schedule_payment_notification(payment, succeeded=False)
         return payment
 
     if (
@@ -207,7 +210,45 @@ def _apply_validation(
             "updated_at",
         ]
     )
+    _schedule_payment_notification(payment, succeeded=True)
     return payment
+
+
+def _schedule_payment_notification(payment: Payment, *, succeeded: bool) -> None:
+    patient_obj = payment.patient
+    taka = (
+        f"৳{payment.amount_poisha // 100}"
+        if payment.amount_poisha % 100 == 0
+        else f"৳{payment.amount_poisha / 100:.2f}"
+    )
+    if payment.invoice is not None:
+        link = f"/care/{payment.invoice.consultation_id}/prescription"
+        label_en = "your consultation"
+        label_bn = "আপনার পরামর্শের"
+    elif payment.order is not None:
+        link = f"/orders/{payment.order_id}"
+        label_en = f"order {payment.order.code}"
+        label_bn = f"অর্ডার {payment.order.code}"
+    else:
+        return
+
+    if succeeded:
+        msg_en = f"Payment of {taka} for {label_en} succeeded."
+        msg_bn = f"{label_bn} জন্য {taka} পেমেন্ট সম্পন্ন হয়েছে।"
+    else:
+        msg_en = f"Payment of {taka} for {label_en} did not succeed."
+        msg_bn = f"{label_bn} জন্য {taka} পেমেন্ট সফল হয়নি।"
+
+    dedupe = f"pay:{payment.pk}:{payment.status}"
+    transaction.on_commit(
+        lambda: notify(
+            NotificationKind.PAYMENT_RESULT,
+            [patient_obj],
+            {"message_en": msg_en, "message_bn": msg_bn},
+            link,
+            dedupe_key=dedupe,
+        )
+    )
 
 
 @transaction.atomic

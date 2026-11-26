@@ -7,6 +7,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import { AccountPanel } from "@/areas/patient/auth/AccountPanel";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 import { FormAlert } from "@/components/form/fields";
+import { PushOptInCard } from "@/components/notifications/PushOptInCard";
 import { useDescribeErrorWith } from "@/hooks/use-describe-error";
 import { useSubmitWith } from "@/hooks/use-submit";
 import { fill } from "@/i18n/catalog";
@@ -221,6 +222,11 @@ export function ProfileOverview() {
           </section>
         </>
       )}
+
+      <PushOptInCard
+        api={api}
+        subscribePath="/api/v1/notifications/push-subscriptions/"
+      />
 
       <AccountPanel />
     </div>

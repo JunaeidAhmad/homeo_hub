@@ -14,7 +14,10 @@ from rest_framework.exceptions import ErrorDetail, ValidationError
 from apps.accounts.sms import send_sms
 from apps.doctors.models import Doctor
 from apps.illnesses.models import Illness
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify, staff_with_permission
 from apps.patients.models import Patient
+from apps.staff.roles import Perm
 from common.errors import ApiError
 from common.private_files import store_private
 from common.search import normalize_text
@@ -181,6 +184,21 @@ def submit(
         actor_name=locked_patient.full_name,
         initial=True,
     )
+
+    case_id = str(consultation.pk)
+    case_code = consultation.consultation_code
+
+    def _notify_waiting() -> None:
+        staff_targets = staff_with_permission(Perm.ASSIGN_CASES)
+        if staff_targets:
+            notify(
+                NotificationKind.CONSULTATION_WAITING,
+                staff_targets,
+                {"code": case_code},
+                f"/admin/cases/{case_id}",
+            )
+
+    transaction.on_commit(_notify_waiting)
     return consultation
 
 
@@ -332,15 +350,18 @@ def assign(
     )
     locked.save(update_fields=["assigned_doctor", "assigned_at", "status", "updated_at"])
 
-    patient_phone = locked.patient.phone
+    patient_obj = locked.patient
     doctor_phone = locked_doctor.phone
+    case_id = str(locked.pk)
     case_code = locked.consultation_code
     doc_name = locked_doctor.full_name
 
     def _notify() -> None:
-        _send_consultation_sms(
-            patient_phone,
-            f"HomeoHub: Your consultation {case_code} has been assigned to {doc_name}.",
+        notify(
+            NotificationKind.DOCTOR_ASSIGNED,
+            [patient_obj],
+            {"code": case_code, "doctor_name": doc_name},
+            f"/care/{case_id}",
         )
         _send_consultation_sms(
             doctor_phone,
@@ -518,12 +539,16 @@ def send_questions(
     )
     locked.save(update_fields=["status", "opened_at", "updated_at"])
 
-    patient_phone = locked.patient.phone
+    patient_obj = locked.patient
+    case_id = str(locked.pk)
     case_code = locked.consultation_code
+    qset_id = str(qset.pk)
     transaction.on_commit(
-        lambda: _send_consultation_sms(
-            patient_phone,
-            f"HomeoHub: Your doctor has follow-up questions for case {case_code}.",
+        lambda: notify(
+            NotificationKind.QUESTIONS_SENT,
+            [patient_obj],
+            {"code": case_code},
+            f"/care/{case_id}/questions/{qset_id}",
         )
     )
     return qset
@@ -715,12 +740,15 @@ def submit_answers(
         locked_case.save(update_fields=["status", "updated_at"])
 
     if locked_case.assigned_doctor:
-        doctor_phone = locked_case.assigned_doctor.phone
+        assigned_doctor = locked_case.assigned_doctor
+        case_id = str(locked_case.pk)
         case_code = locked_case.consultation_code
         transaction.on_commit(
-            lambda: _send_consultation_sms(
-                doctor_phone,
-                f"HomeoHub: Patient replied to questions for case {case_code}.",
+            lambda: notify(
+                NotificationKind.PATIENT_ANSWERED,
+                [assigned_doctor],
+                {"code": case_code},
+                f"/doctor/cases/{case_id}",
             )
         )
 

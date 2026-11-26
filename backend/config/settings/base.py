@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.consultations",
     "apps.prescriptions",
     "apps.billing",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
@@ -244,6 +245,9 @@ PLATFORM_FEE_MODE = env.str("PLATFORM_FEE_MODE", default="FIXED")
 PLATFORM_FEE_VALUE = env.int("PLATFORM_FEE_VALUE", default=0)
 PAYMENT_GATEWAY = env.str("PAYMENT_GATEWAY", default="apps.payments.gateways.mock.MockGateway")
 WEB_APP_URL = env.str("WEB_APP_URL", default="http://localhost:3000")
+WEBPUSH_VAPID_PUBLIC_KEY = env.str("WEBPUSH_VAPID_PUBLIC_KEY", default="")
+WEBPUSH_VAPID_PRIVATE_KEY = env.str("WEBPUSH_VAPID_PRIVATE_KEY", default="")
+WEBPUSH_SUBJECT = env.str("WEBPUSH_SUBJECT", default="")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "HomeoHub API",
@@ -279,6 +283,7 @@ SPECTACULAR_SETTINGS = {
         "AdviceKindEnum": "apps.prescriptions.models.PrescriptionAdvice.Kind",
         "InvoiceStatusEnum": "apps.billing.models.ConsultationInvoice.Status",
         "UnavailableReasonEnum": "apps.prescriptions.serializers.UNAVAILABLE_REASON_CHOICES",
+        "NotificationKindEnum": "apps.notifications.models.NotificationKind",
     },
 }
 

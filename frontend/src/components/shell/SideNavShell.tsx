@@ -22,11 +22,13 @@ const MENU_ICON = "M4 6h16M4 12h16M4 18h16";
 export function SideNavShell({
   areaName,
   items,
+  headerActions,
   footer,
   children,
 }: {
   areaName: string;
   items: SideNavItem[];
+  headerActions?: ReactNode;
   /** Shown under the navigation, e.g. who is signed in. */
   footer?: ReactNode;
   children: ReactNode;
@@ -67,6 +69,7 @@ export function SideNavShell({
           <span className="min-w-0 flex-1 truncate font-display text-xl">
             {areaName}
           </span>
+          {headerActions}
           <div className="desktop:hidden">
             <LanguageSwitch />
           </div>

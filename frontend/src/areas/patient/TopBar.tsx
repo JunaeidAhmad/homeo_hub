@@ -13,8 +13,10 @@ import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 import { isCurrentPath } from "@/lib/nav";
 
+import { useSession } from "./session/SessionProvider";
 import { useCart } from "./cart/CartProvider";
 import { PATIENT_TABS } from "./nav";
+import { Bell } from "@/components/notifications/Bell";
 
 const CART_ICON =
   "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0";
@@ -34,6 +36,7 @@ export function TopBar({
 }) {
   const pathname = usePathname();
   const { locale, t } = useMessages<CommonMessages & PatientMessages>();
+  const session = useSession();
   const { cart } = useCart();
   const count = cart?.item_count ?? 0;
   const countText = numberFormat(locale).format(count);
@@ -65,6 +68,12 @@ export function TopBar({
             <LanguageSwitch />
           </>
         )}
+        <Bell
+          api={session.api}
+          unreadPath="/api/v1/notifications/unread-count/"
+          href="/notifications"
+          enabled={session.status === "signedIn"}
+        />
         <Link href="/cart" aria-label={cartAriaLabel} className={`${iconLink} relative`}>
           <Icon path={CART_ICON} strokeWidth={2} />
           {count > 0 && (
@@ -103,6 +112,12 @@ export function TopBar({
           })}
         </nav>
         <LanguageSwitch />
+        <Bell
+          api={session.api}
+          unreadPath="/api/v1/notifications/unread-count/"
+          href="/notifications"
+          enabled={session.status === "signedIn"}
+        />
         <Link
           href="/cart"
           aria-label={cartAriaLabel}

@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils import timezone
 
+from apps.notifications.models import NotificationKind
+from apps.notifications.services import notify
 from apps.payments.models import Payment
 from apps.shops.models import ShopRemedy
 from common.errors import ApiError
@@ -137,6 +139,33 @@ def sync_order_status(order: Order, actor: User | None = None) -> Order:
             to_status=target,
             changed_by=actor,
             by_patient=False,
+        )
+        _ORDER_STATUS_LABELS = {
+            Order.Status.PENDING_PAYMENT: ("awaiting payment", "পেমেন্টের অপেক্ষায়"),
+            Order.Status.CONFIRMED: ("confirmed", "নিশ্চিত"),
+            Order.Status.PAID: ("paid", "পরিশোধিত"),
+            Order.Status.PROCESSING: ("packing", "প্যাকিং হচ্ছে"),
+            Order.Status.SHIPPED: ("shipped", "পাঠানো হয়েছে"),
+            Order.Status.DELIVERED: ("delivered", "ডেলিভারি সম্পন্ন"),
+            Order.Status.CANCELLED: ("cancelled", "বাতিল"),
+            Order.Status.RETURNED: ("returned", "ফেরত"),
+        }
+        status_en, status_bn = _ORDER_STATUS_LABELS.get(target, (target.lower(), target))
+        patient_obj = order.patient
+        order_id = str(order.pk)
+        order_code = order.code
+        transaction.on_commit(
+            lambda: notify(
+                NotificationKind.ORDER_STATUS_CHANGED,
+                [patient_obj],
+                {
+                    "code": order_code,
+                    "order_status": target,
+                    "status_en": status_en,
+                    "status_bn": status_bn,
+                },
+                f"/orders/{order_id}",
+            )
         )
     return order
 

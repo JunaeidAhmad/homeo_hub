@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { FormAlert } from "@/components/form/fields";
+import { Bell } from "@/components/notifications/Bell";
 import { SideNavShell } from "@/components/shell/SideNavShell";
 import type { DoctorMessages } from "@/i18n/messages/doctor";
 import { useMessages } from "@/i18n/provider";
@@ -109,6 +110,13 @@ export function DoctorConsole({ children }: { children: ReactNode }) {
     <SideNavShell
       areaName={t("doctor.area")}
       items={navItems}
+      headerActions={
+        <Bell
+          api={session.api}
+          unreadPath="/api/v1/doctor/notifications/unread-count/"
+          href="/doctor/notifications"
+        />
+      }
       footer={<AccountFooter doctor={doctor} />}
     >
       <div key={doctor.id}>
