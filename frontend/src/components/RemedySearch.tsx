@@ -60,7 +60,7 @@ export function RemedySearch({
   customOptionLabel?: (name: string) => string;
   client?: ApiClient;
 }) {
-  const { t } = useMessages<CommonMessages>();
+  const { locale, t } = useMessages<CommonMessages>();
   const defaultClient = useApiClient();
   const id = useId();
   const listId = `${id}-list`;
@@ -206,7 +206,7 @@ export function RemedySearch({
                     <span lang="la" className="font-display italic">
                       {remedy.name}
                     </span>
-                    {remedy.name_bn && (
+                    {locale === "bn" && remedy.name_bn && (
                       <span lang="bn" className="text-sm text-ink-muted">
                         {remedy.name_bn}
                       </span>

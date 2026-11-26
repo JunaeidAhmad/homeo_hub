@@ -10,7 +10,7 @@ import { Pager } from "@/components/Pager";
 import { RemedyVial } from "@/components/RemedyVial";
 import { useListQuery, type ListParams } from "@/hooks/use-list-query";
 import { fill } from "@/i18n/catalog";
-import { formatMoney } from "@/i18n/format";
+import { formatMoney, remedyName } from "@/i18n/format";
 import type { CommonMessages } from "@/i18n/messages/common";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
@@ -75,6 +75,7 @@ export function RemedyList() {
                 remedy.prices.length > 0
                   ? Math.min(...remedy.prices.map((entry) => entry.price_poisha))
                   : null;
+              const label = remedyName(locale, remedy.name, remedy.name_bn);
               return (
                 <li key={remedy.id}>
                   <Link
@@ -92,18 +93,16 @@ export function RemedyList() {
                           className="size-full object-contain"
                         />
                       ) : (
-                        <RemedyVial name={remedy.name} size="small" />
+                        <RemedyVial name={label.text} size="small" />
                       )}
                     </span>
                     <span className="flex min-w-0 flex-col gap-0.5">
-                      <span lang="la" className="font-display text-xl leading-tight italic">
-                        {remedy.name}
+                      <span
+                        lang={label.lang}
+                        className={`font-display text-xl leading-tight ${label.style}`}
+                      >
+                        {label.text}
                       </span>
-                      {remedy.name_bn && (
-                        <span lang="bn" className="text-sm text-ink-muted">
-                          {remedy.name_bn}
-                        </span>
-                      )}
                       {lowest !== null && (
                         <span className="font-display text-[15px] font-semibold text-primary-deep">
                           {fill(t("patient.remedy.fromPrice"), {

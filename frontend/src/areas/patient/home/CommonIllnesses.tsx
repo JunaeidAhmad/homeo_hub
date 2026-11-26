@@ -69,38 +69,23 @@ export function CommonIllnesses() {
           </div>
 
           <ul className="grid grid-cols-2 gap-2.5 desktop:grid-cols-4">
-            {tiles.map((illness) => {
-              // Bangla name large on top, English below, whichever language the page is in.
-              const bangla = locale === "bn" ? illness.name : illness.other_name;
-              const english = locale === "bn" ? illness.other_name : illness.name;
-              return (
-                <li key={illness.id} className="flex">
-                  <Link
-                    href={`/remedies?illness=${encodeURIComponent(illness.slug)}`}
-                    className="flex min-h-23 w-full flex-col gap-0.5 rounded-[10px] border border-line bg-surface p-3.5 text-ink hover:border-line-strong"
-                  >
-                    <span
-                      lang={bangla ? "bn" : "en"}
-                      className="font-display text-[22px] leading-[1.35]"
-                    >
-                      {bangla || english}
-                    </span>
-                    {bangla && english && (
-                      <span lang="en" className="text-[15px] font-semibold">
-                        {english}
-                      </span>
-                    )}
-                    <span className="mt-auto text-[13px] text-ink-muted">
-                      {illness.remedy_count === 1
-                        ? t("patient.home.remedyCountOne")
-                        : fill(t("patient.home.remedyCount"), {
-                            count: nf.format(illness.remedy_count),
-                          })}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
+            {tiles.map((illness) => (
+              <li key={illness.id} className="flex">
+                <Link
+                  href={`/remedies?illness=${encodeURIComponent(illness.slug)}`}
+                  className="flex min-h-23 w-full flex-col gap-0.5 rounded-[10px] border border-line bg-surface p-3.5 text-ink hover:border-line-strong"
+                >
+                  <span className="font-display text-[22px] leading-[1.35]">{illness.name}</span>
+                  <span className="mt-auto text-[13px] text-ink-muted">
+                    {illness.remedy_count === 1
+                      ? t("patient.home.remedyCountOne")
+                      : fill(t("patient.home.remedyCount"), {
+                          count: nf.format(illness.remedy_count),
+                        })}
+                  </span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </>
       )}

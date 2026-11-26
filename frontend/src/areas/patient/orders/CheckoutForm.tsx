@@ -15,7 +15,7 @@ import { FormAlert, SegmentedChoice, TextAreaField, TextField } from "@/componen
 import { useDescribeErrorWith } from "@/hooks/use-describe-error";
 import { useSubmitWith } from "@/hooks/use-submit";
 import { fill } from "@/i18n/catalog";
-import { formatMoney, numberFormat } from "@/i18n/format";
+import { formatMoney, numberFormat, remedyName } from "@/i18n/format";
 import type { CommonMessages } from "@/i18n/messages/common";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
@@ -248,20 +248,23 @@ function SignedInCheckout({
         <section className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-4 desktop:p-6">
           <h2 className="font-display text-2xl font-normal">{t("patient.checkout.summary")}</h2>
           <ul className="flex flex-col gap-2 border-b border-line pb-3 text-sm">
-            {cart.items.map((item) => (
-              <li key={item.id} className="flex items-baseline justify-between gap-2">
-                <span className="text-ink-soft">
-                  <span lang="la" className="font-display italic">
-                    {item.remedy.name}
-                  </span>{" "}
-                  ({item.potency} · {t(`patient.remedy.form.${item.form}`)}) ×{" "}
-                  {numberFormat(locale).format(item.quantity)}
-                </span>
-                <span className="font-semibold">
-                  {formatMoney(locale, item.line_total_poisha)}
-                </span>
-              </li>
-            ))}
+            {cart.items.map((item) => {
+              const label = remedyName(locale, item.remedy.name, item.remedy.name_bn);
+              return (
+                <li key={item.id} className="flex items-baseline justify-between gap-2">
+                  <span className="text-ink-soft">
+                    <span lang={label.lang} className={`font-display ${label.style}`}>
+                      {label.text}
+                    </span>{" "}
+                    ({item.potency} · {t(`patient.remedy.form.${item.form}`)}) ×{" "}
+                    {numberFormat(locale).format(item.quantity)}
+                  </span>
+                  <span className="font-semibold">
+                    {formatMoney(locale, item.line_total_poisha)}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="flex flex-col gap-1.5 text-base">

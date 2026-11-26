@@ -10,7 +10,7 @@ import { ActionBar } from "@/areas/patient/ActionBar";
 import { useCart } from "@/areas/patient/cart/CartProvider";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 import { RemedyVial } from "@/components/RemedyVial";
-import { formatMoney } from "@/i18n/format";
+import { formatMoney, remedyName } from "@/i18n/format";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 
@@ -29,6 +29,7 @@ export function RemedyPurchase({
   children: ReactNode;
 }) {
   const { locale, t } = useMessages<PatientMessages>();
+  const label = remedyName(locale, remedy.name, remedy.name_bn);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -93,28 +94,23 @@ export function RemedyPurchase({
             <Image
               unoptimized
               src={remedy.picture_url}
-              alt={remedy.name}
+              alt={label.text}
               width={600}
               height={600}
               className="h-auto max-h-96 w-full object-contain"
             />
           ) : (
-            <RemedyVial name={remedy.name} nameBn={remedy.name_bn} form={choice.form} />
+            <RemedyVial name={label.text} nameLang={label.lang} form={choice.form} />
           )}
         </div>
         <div className="flex flex-col gap-4 px-4 py-6 desktop:flex-1 desktop:p-9">
           <div className="flex flex-col gap-1">
             <h1
-              lang="la"
-              className="font-display text-[38px] leading-tight font-normal italic desktop:text-[52px]"
+              lang={label.lang}
+              className={`font-display text-[38px] leading-tight font-normal desktop:text-[52px] ${label.style}`}
             >
-              {remedy.name}
+              {label.text}
             </h1>
-            {remedy.name_bn && (
-              <span lang="bn" className="font-display text-[19px] text-ink-muted">
-                {remedy.name_bn}
-              </span>
-            )}
           </div>
           <p className="text-base leading-relaxed whitespace-pre-line text-ink-soft">
             {remedy.indication}

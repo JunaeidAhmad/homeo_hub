@@ -13,7 +13,7 @@ const WARNING_ICON =
   "M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01";
 
 export default async function Home() {
-  const { locale, t } = await getTranslator(common, patient);
+  const { t } = await getTranslator(common, patient);
   return (
     <div className="flex flex-col gap-10 desktop:gap-14">
       <section
@@ -28,16 +28,10 @@ export default async function Home() {
           >
             {t("patient.home.title")}
           </h1>
-          <p
-            lang={locale === "bn" ? "en" : "bn"}
-            className="font-display text-[21px] leading-normal text-ink-muted"
-          >
-            {t("patient.home.titleOther")}
-          </p>
         </div>
 
-        <div className="flex flex-col overflow-hidden rounded-panel border border-line-strong desktop:flex-1">
-          <div className="flex flex-col gap-4 bg-primary-deep px-4.5 py-5.5 text-surface">
+        <div className="flex flex-col gap-4 desktop:flex-1">
+          <div className="flex flex-col gap-4 rounded-panel bg-primary-deep px-4.5 py-5.5 text-surface">
             <div className="flex flex-col gap-1.5">
               <h2 className="font-display text-[27px] leading-tight font-normal">
                 {t("patient.home.selfCareTitle")}
@@ -48,7 +42,7 @@ export default async function Home() {
             </div>
             <IllnessPicker />
           </div>
-          <div className="flex flex-col gap-3.5 bg-surface px-4.5 py-5.5">
+          <div className="flex flex-col gap-3.5 rounded-panel border border-line-strong bg-surface px-4.5 py-5.5">
             <div className="flex flex-col gap-1.5">
               <h2 className="font-display text-[27px] leading-tight font-normal">
                 {t("patient.home.doctorTitle")}

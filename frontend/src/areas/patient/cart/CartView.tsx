@@ -8,7 +8,7 @@ import { TaskScreen } from "@/areas/patient/TaskScreen";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 import { FormAlert } from "@/components/form/fields";
 import { RemedyVial } from "@/components/RemedyVial";
-import { formatMoney, numberFormat } from "@/i18n/format";
+import { formatMoney, numberFormat, remedyName } from "@/i18n/format";
 import type { CommonMessages } from "@/i18n/messages/common";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
@@ -101,6 +101,7 @@ export function CartView() {
           {actionError && <FormAlert>{actionError}</FormAlert>}
           <ul className="flex flex-col gap-3">
             {items.map((item) => {
+              const label = remedyName(locale, item.remedy.name, item.remedy.name_bn);
               const busy = busyId === item.id;
               const max = cart?.max_quantity ?? 10;
               return (
@@ -128,7 +129,7 @@ export function CartView() {
                           className="size-full object-contain"
                         />
                       ) : (
-                        <RemedyVial name={item.remedy.name} size="small" form={item.form} />
+                        <RemedyVial name={label.text} size="small" form={item.form} />
                       )}
                     </Link>
                     <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -137,8 +138,11 @@ export function CartView() {
                           href={`/remedies/${item.remedy.slug}`}
                           className="min-w-0 hover:underline"
                         >
-                          <span lang="la" className="font-display text-xl leading-tight italic">
-                            {item.remedy.name}
+                          <span
+                            lang={label.lang}
+                            className={`font-display text-xl leading-tight ${label.style}`}
+                          >
+                            {label.text}
                           </span>
                         </Link>
                         {item.available && (

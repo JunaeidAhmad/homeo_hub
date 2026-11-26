@@ -9,6 +9,7 @@ import type { components } from "@/api/schema";
 import { useCart } from "@/areas/patient/cart/CartProvider";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 import { RemedyVial } from "@/components/RemedyVial";
+import { remedyName } from "@/i18n/format";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 
@@ -31,7 +32,8 @@ export function SelfCareCard({
   illnessSlug: string;
   illnessId?: string;
 }) {
-  const { t } = useMessages<PatientMessages>();
+  const { locale, t } = useMessages<PatientMessages>();
+  const label = remedyName(locale, remedy.name, remedy.name_bn);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -92,20 +94,18 @@ export function SelfCareCard({
               className="size-full object-contain"
             />
           ) : (
-            <RemedyVial name={remedy.name} size="small" form={choice.form} />
+            <RemedyVial name={label.text} size="small" form={choice.form} />
           )}
         </Link>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <Link href={href} className="hover:underline">
-            <span lang="la" className="font-display text-xl leading-tight italic">
-              {remedy.name}
+            <span
+              lang={label.lang}
+              className={`font-display text-xl leading-tight ${label.style}`}
+            >
+              {label.text}
             </span>
           </Link>
-          {remedy.name_bn && (
-            <span lang="bn" className="text-sm text-ink-muted">
-              {remedy.name_bn}
-            </span>
-          )}
           <p className="mt-1 line-clamp-2 text-[15px] leading-snug text-ink-soft">
             {remedy.indication}
           </p>

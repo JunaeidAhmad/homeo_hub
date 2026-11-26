@@ -8,12 +8,12 @@ type RemedyForm = components["schemas"]["FormEnum"];
  */
 export function RemedyVial({
   name,
-  nameBn,
+  nameLang = "la",
   size = "large",
   form,
 }: {
   name: string;
-  nameBn?: string;
+  nameLang?: string;
   size?: "small" | "large";
   form?: RemedyForm | null;
 }) {
@@ -33,14 +33,14 @@ export function RemedyVial({
           <span className="flex w-full flex-col items-center gap-1 border border-ink bg-surface p-[3px] text-center">
             <span className="flex w-full flex-col items-center gap-1 border border-ink px-1.5 py-2.5">
               <span className="text-[11px] font-semibold text-primary">HomeoHub</span>
-              <span lang="la" className="font-display text-[17px] leading-tight italic">
+              <span
+                lang={nameLang}
+                className={`font-display text-[17px] leading-tight ${
+                  nameLang === "la" ? "italic" : ""
+                }`}
+              >
                 {name}
               </span>
-              {nameBn && (
-                <span lang="bn" className="font-display text-xs text-ink-muted">
-                  {nameBn}
-                </span>
-              )}
             </span>
           </span>
         ) : (

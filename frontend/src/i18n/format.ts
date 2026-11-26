@@ -61,3 +61,14 @@ export function poishaToTakaInput(poisha: number): string {
   if (poisha % 100 === 0) return String(poisha / 100);
   return (poisha / 100).toFixed(2).replace(/0$/, "");
 }
+
+/**
+ * A remedy's name in the page's language: Bangla on Bangla pages when it has one,
+ * the Latin name otherwise. `lang` and `style` go on the element showing it
+ * (only Latin names are set in italics).
+ */
+export function remedyName(locale: Locale, name: string, nameBn?: string) {
+  return locale === "bn" && nameBn
+    ? { text: nameBn, lang: "bn", style: "" }
+    : { text: name, lang: "la", style: "italic" };
+}

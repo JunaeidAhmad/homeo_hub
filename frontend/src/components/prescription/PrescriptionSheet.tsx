@@ -93,7 +93,7 @@ export function PrescriptionSheet({
                           {item.remedy_name}
                         </span>
                       )}
-                      {item.remedy_name_bn && (
+                      {locale === "bn" && item.remedy_name_bn && (
                         <span lang="bn" className="font-display text-sm text-ink-muted">
                           {item.remedy_name_bn}
                         </span>

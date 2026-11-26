@@ -11,7 +11,7 @@ import { useSession } from "@/areas/patient/session/SessionProvider";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { FormAlert } from "@/components/form/fields";
 import { fill } from "@/i18n/catalog";
-import { formatMoney, numberFormat } from "@/i18n/format";
+import { formatMoney, numberFormat, remedyName } from "@/i18n/format";
 import type { CommonMessages } from "@/i18n/messages/common";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
@@ -200,37 +200,40 @@ export function OrderDetail({ orderId }: { orderId: string }) {
           <section className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-4 desktop:p-6">
             <h2 className="font-display text-xl font-normal">{t("patient.orders.itemsHeading")}</h2>
             <ul className="flex flex-col gap-3">
-              {order.items.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-start justify-between gap-3 border-b border-line pb-3 last:border-b-0 last:pb-0"
-                >
-                  <div className="flex flex-col gap-0.5">
-                    {item.remedy_slug ? (
-                      <Link
-                        href={`/remedies/${item.remedy_slug}`}
-                        lang="la"
-                        className="font-display text-lg italic hover:underline"
-                      >
-                        {item.remedy_name}
-                      </Link>
-                    ) : (
-                      <span lang="la" className="font-display text-lg italic">
-                        {item.remedy_name}
+              {order.items.map((item) => {
+                const label = remedyName(locale, item.remedy_name, item.remedy_name_bn);
+                return (
+                  <li
+                    key={item.id}
+                    className="flex items-start justify-between gap-3 border-b border-line pb-3 last:border-b-0 last:pb-0"
+                  >
+                    <div className="flex flex-col gap-0.5">
+                      {item.remedy_slug ? (
+                        <Link
+                          href={`/remedies/${item.remedy_slug}`}
+                          lang={label.lang}
+                          className={`font-display text-lg hover:underline ${label.style}`}
+                        >
+                          {label.text}
+                        </Link>
+                      ) : (
+                        <span lang={label.lang} className={`font-display text-lg ${label.style}`}>
+                          {label.text}
+                        </span>
+                      )}
+                      <span className="text-sm text-ink-soft">
+                        {item.potency ? `${item.potency} · ` : ""}
+                        {item.form ? t(`patient.remedy.form.${item.form}`) : ""} ×{" "}
+                        {numberFormat(locale).format(item.quantity)} (
+                        {formatMoney(locale, item.unit_price_poisha)})
                       </span>
-                    )}
-                    <span className="text-sm text-ink-soft">
-                      {item.potency ? `${item.potency} · ` : ""}
-                      {item.form ? t(`patient.remedy.form.${item.form}`) : ""} ×{" "}
-                      {numberFormat(locale).format(item.quantity)} (
-                      {formatMoney(locale, item.unit_price_poisha)})
+                    </div>
+                    <span className="font-display text-lg whitespace-nowrap">
+                      {formatMoney(locale, item.line_total_poisha)}
                     </span>
-                  </div>
-                  <span className="font-display text-lg whitespace-nowrap">
-                    {formatMoney(locale, item.line_total_poisha)}
-                  </span>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="flex flex-col gap-1.5 border-t border-line pt-3 text-base">

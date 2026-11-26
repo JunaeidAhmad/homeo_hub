@@ -606,7 +606,7 @@ export function PrescriptionEditor({
                     >
                       {line.remedy_name}
                     </p>
-                    {line.remedy_name_bn && (
+                    {locale === "bn" && line.remedy_name_bn && (
                       <p lang="bn" className="text-xs text-ink-muted">
                         {line.remedy_name_bn}
                       </p>

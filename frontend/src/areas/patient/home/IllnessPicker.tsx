@@ -40,7 +40,7 @@ export function IllnessPicker() {
               <optgroup key={category.id} label={category.name}>
                 {category.illnesses.map((illness) => (
                   <option key={illness.id} value={illness.slug}>
-                    {illness.other_name ? `${illness.name} · ${illness.other_name}` : illness.name}
+                    {illness.name}
                   </option>
                 ))}
               </optgroup>
