@@ -11,7 +11,7 @@ from .roles import Perm
 
 # For the few endpoints every signed-in staff member may use.
 ANY_STAFF: Literal["any_staff"] = "any_staff"
-Requirement = Perm | Literal["any_staff"]
+Requirement = Perm | tuple[Perm, ...] | Literal["any_staff"]
 
 
 def is_staff_member(user: Any) -> bool:
@@ -27,7 +27,10 @@ class StaffAccess(BasePermission):
         needed: Requirement | None = view.required_permissions.get(request.method)
         if needed is None:
             return False  # a method nobody declared is closed to everyone
-        return needed == ANY_STAFF or request.user.has_perm(Perm(needed).full)
+        if needed == ANY_STAFF:
+            return True
+        perms = needed if isinstance(needed, tuple) else (needed,)
+        return any(request.user.has_perm(Perm(perm).full) for perm in perms)
 
 
 class AdminView(APIView):
@@ -35,6 +38,9 @@ class AdminView(APIView):
 
     class RemedyList(AdminView, ListCreateAPIView):
         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+    A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+    (any one of them grants access), or ``ANY_STAFF``.
     """
 
     permission_classes = [StaffAccess]

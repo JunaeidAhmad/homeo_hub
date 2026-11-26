@@ -33,13 +33,19 @@ class StaffSerializer(serializers.ModelSerializer):
         return roles_of(user)
 
 
+class AdminMeShopSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(read_only=True)
+
+
 class AdminMeSerializer(StaffSerializer):
     """The signed-in staff member, with what they are allowed to do."""
 
     permissions = serializers.SerializerMethodField()
+    shops = serializers.SerializerMethodField()
 
     class Meta(StaffSerializer.Meta):
-        fields = [*StaffSerializer.Meta.fields, "permissions"]
+        fields = [*StaffSerializer.Meta.fields, "permissions", "shops"]
         read_only_fields = fields
 
     @staticmethod
@@ -48,6 +54,13 @@ class AdminMeSerializer(StaffSerializer):
     )
     def get_permissions(user: User) -> list[str]:
         return permissions_of(user)
+
+    @staticmethod
+    @extend_schema_field(AdminMeShopSerializer(many=True))
+    def get_shops(user: User) -> list[dict[str, str]]:
+        from apps.shops.selectors import shops_for
+
+        return [{"id": str(shop.id), "name": shop.name} for shop in shops_for(user)]
 
 
 class StaffCreateSerializer(serializers.Serializer):

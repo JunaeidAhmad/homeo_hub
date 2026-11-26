@@ -21,6 +21,7 @@ class Perm(StrEnum):
     MANAGE_ORDERS = "manage_orders"
     VIEW_PAYMENTS = "view_payments"
     MANAGE_PAYMENTS = "manage_payments"
+    MANAGE_SHOPS = "manage_shops"
     MANAGE_OWN_SHOP = "manage_own_shop"
 
     @property
@@ -42,6 +43,7 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.MANAGE_ORDERS: "Fulfil orders and record deliveries",
     Perm.VIEW_PAYMENTS: "See payments and invoices",
     Perm.MANAGE_PAYMENTS: "Manage payments and refunds",
+    Perm.MANAGE_SHOPS: "Register shops and edit any shop's price list",
     Perm.MANAGE_OWN_SHOP: "Maintain their own shop's price list",
 }
 
