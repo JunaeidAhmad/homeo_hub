@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
 import type { components } from "@/api/schema";
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { CodeField, isCompleteCode } from "@/components/auth/CodeField";
 import { FormAlert, Heading, SubmitBar, TextField } from "@/components/form/fields";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
@@ -397,6 +398,7 @@ export function StaffSignIn() {
           </form>
         )}
       </main>
+      <DisclaimerFooter />
     </div>
   );
 }

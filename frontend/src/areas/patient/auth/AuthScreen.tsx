@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { Logo } from "@/components/Logo";
 import type { AuthMessages } from "@/i18n/messages/auth";
@@ -31,6 +32,7 @@ export function AuthScreen({ children }: { children: ReactNode }) {
         <main className="flex w-full flex-1 flex-col px-4 pt-6 desktop:max-w-[640px] desktop:px-14 desktop:py-12">
           {children}
         </main>
+        <DisclaimerFooter />
       </div>
     </div>
   );

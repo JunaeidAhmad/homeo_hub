@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { Icon } from "@/components/Icon";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { Logo } from "@/components/Logo";
@@ -109,9 +110,12 @@ export function SideNavShell({
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-[1100px] px-4 py-6 desktop:px-8 desktop:py-10">
-        {children}
-      </main>
+      <div className="flex min-w-0 flex-col">
+        <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-6 desktop:px-8 desktop:py-10">
+          {children}
+        </main>
+        <DisclaimerFooter />
+      </div>
     </div>
   );
 }

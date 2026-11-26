@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { FormAlert, Heading, SubmitBar, TextField } from "@/components/form/fields";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { Logo } from "@/components/Logo";
@@ -101,6 +102,7 @@ export function DoctorSignIn() {
           </Link>
         </p>
       </main>
+      <DisclaimerFooter />
     </div>
   );
 }

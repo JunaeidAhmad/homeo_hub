@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { FormAlert } from "@/components/form/fields";
 import { Bell } from "@/components/notifications/Bell";
 import { SideNavShell } from "@/components/shell/SideNavShell";
@@ -56,25 +57,28 @@ export function AdminConsole({ children }: { children: ReactNode }) {
 
   if (session.status !== "signedIn") {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-3 px-4">
-        {session.status === "unavailable" ? (
-          <>
-            <FormAlert>{t("admin.unavailable")}</FormAlert>
-            <button type="button" onClick={session.retry} className={BUTTON}>
-              {t("admin.retry")}
-            </button>
-            {signedOut && (
-              <button type="button" onClick={() => router.replace("/admin/signin")} className={BUTTON}>
-                {t("admin.signin")}
+      <div className="flex min-h-dvh flex-col">
+        <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-3 px-4">
+          {session.status === "unavailable" ? (
+            <>
+              <FormAlert>{t("admin.unavailable")}</FormAlert>
+              <button type="button" onClick={session.retry} className={BUTTON}>
+                {t("admin.retry")}
               </button>
-            )}
-          </>
-        ) : (
-          <p role="status" className="text-center text-ink-muted">
-            {t("admin.loading")}
-          </p>
-        )}
-      </main>
+              {signedOut && (
+                <button type="button" onClick={() => router.replace("/admin/signin")} className={BUTTON}>
+                  {t("admin.signin")}
+                </button>
+              )}
+            </>
+          ) : (
+            <p role="status" className="text-center text-ink-muted">
+              {t("admin.loading")}
+            </p>
+          )}
+        </main>
+        <DisclaimerFooter />
+      </div>
     );
   }
 

@@ -4,6 +4,8 @@ export const common = defineCatalog({
   en: {
     "app.tagline": "Natural · Holistic · Healing · Cure",
     "app.description": "Homeopathy care: self care and doctor consultations.",
+    "app.disclaimer":
+      "Homeopathic care is an alternative/complementary practice and does not replace conventional medical diagnosis or emergency care.",
     "lang.label": "Language",
     "nav.main": "Main",
     "nav.menu": "Menu",
@@ -53,6 +55,8 @@ export const common = defineCatalog({
     "app.tagline": "প্রাকৃতিক · সামগ্রিক · নিরাময় · আরোগ্য",
     "app.description":
       "হোমিওপ্যাথি চিকিৎসা: নিজে ওষুধ বেছে নেওয়া এবং ডাক্তারের পরামর্শ।",
+    "app.disclaimer":
+      "হোমিওপ্যাথি একটি বিকল্প/পরিপূরক চিকিৎসা পদ্ধতি; এটি প্রচলিত চিকিৎসার রোগনির্ণয় বা জরুরি চিকিৎসাসেবার বিকল্প নয়।",
     "lang.label": "ভাষা",
     "nav.main": "প্রধান মেনু",
     "nav.menu": "মেনু",

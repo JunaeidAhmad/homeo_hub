@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import type { components } from "@/api/schema";
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { CodeField, isCompleteCode } from "@/components/auth/CodeField";
 import { pendingFrom, usePendingCode } from "@/components/auth/pending-code";
 import { ResendCode } from "@/components/auth/ResendCode";
@@ -333,6 +334,7 @@ export function DoctorSignUp() {
           </div>
         )}
       </main>
+      <DisclaimerFooter />
     </div>
   );
 }

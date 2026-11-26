@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { TabBar } from "@/areas/patient/TabBar";
 import { TopBar } from "@/areas/patient/TopBar";
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 
 /** Browse pages (Home, Remedies, My care, Orders, Profile): top bar + bottom tab bar. */
 export default function BrowseLayout({ children }: { children: ReactNode }) {
@@ -11,6 +12,7 @@ export default function BrowseLayout({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 desktop:px-6 desktop:py-12">
         {children}
       </main>
+      <DisclaimerFooter />
       <TabBar />
     </div>
   );

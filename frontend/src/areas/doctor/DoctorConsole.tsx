@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { DisclaimerFooter } from "@/components/DisclaimerFooter";
 import { FormAlert } from "@/components/form/fields";
 import { Bell } from "@/components/notifications/Bell";
 import { SideNavShell } from "@/components/shell/SideNavShell";
@@ -74,29 +75,32 @@ export function DoctorConsole({ children }: { children: ReactNode }) {
 
   if (session.status !== "signedIn") {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-3 px-4">
-        {session.status === "unavailable" ? (
-          <>
-            <FormAlert>{t("doctor.unavailable")}</FormAlert>
-            <button type="button" onClick={session.retry} className={BUTTON}>
-              {t("doctor.retry")}
-            </button>
-            {signedOut && (
-              <button
-                type="button"
-                onClick={() => router.replace("/doctor/signin")}
-                className={BUTTON}
-              >
-                {t("doctor.signin")}
+      <div className="flex min-h-dvh flex-col">
+        <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-3 px-4">
+          {session.status === "unavailable" ? (
+            <>
+              <FormAlert>{t("doctor.unavailable")}</FormAlert>
+              <button type="button" onClick={session.retry} className={BUTTON}>
+                {t("doctor.retry")}
               </button>
-            )}
-          </>
-        ) : (
-          <p role="status" className="text-center text-ink-muted">
-            {t("doctor.loading")}
-          </p>
-        )}
-      </main>
+              {signedOut && (
+                <button
+                  type="button"
+                  onClick={() => router.replace("/doctor/signin")}
+                  className={BUTTON}
+                >
+                  {t("doctor.signin")}
+                </button>
+              )}
+            </>
+          ) : (
+            <p role="status" className="text-center text-ink-muted">
+              {t("doctor.loading")}
+            </p>
+          )}
+        </main>
+        <DisclaimerFooter />
+      </div>
     );
   }
 
