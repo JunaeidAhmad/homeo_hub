@@ -3473,6 +3473,105 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/consultations/{id}/question-sets/{set_pk}/:
+    get:
+      operationId: consultations_question_set_read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: set_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - consultations
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSet'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/consultations/{id}/question-sets/{set_pk}/answers/:
+    post:
+      operationId: consultations_question_set_answer
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: set_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - consultations
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnswerBatchSubmitRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerBatchSubmitRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSet'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/consultations/{id}/withdraw/:
     post:
       operationId: consultations_withdraw
@@ -3740,6 +3839,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DoctorConsultationDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/consultations/{id}/question-sets/:
+    post:
+      operationId: doctor_consultations_send_questions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionSetCreateRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSet'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '401':
           content:
@@ -5993,6 +6149,37 @@ components:
           default: OWNER
       required:
       - user_id
+    Answer:
+      type: object
+      properties:
+        value:
+          readOnly: true
+        file_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        file_name:
+          type: string
+          readOnly: true
+        answered_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - answered_at
+      - file_name
+      - file_url
+      - value
+    AnswerBatchSubmitRequest:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionAnswerInputRequest'
+      required:
+      - answers
     AreaMatchEnum:
       enum:
       - UPAZILA
@@ -6479,6 +6666,11 @@ components:
           items:
             $ref: '#/components/schemas/ConsultationHistory'
           readOnly: true
+        question_sets:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionSet'
+          readOnly: true
         patient_history:
           type: array
           items:
@@ -6497,6 +6689,7 @@ components:
       - opened_at
       - patient
       - patient_history
+      - question_sets
       - status
       - submitted_at
       - symptom_notes
@@ -7783,6 +7976,11 @@ components:
           items:
             $ref: '#/components/schemas/ConsultationHistory'
           readOnly: true
+        question_sets:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionSet'
+          readOnly: true
       required:
       - assigned_at
       - cancel_reason
@@ -7797,6 +7995,7 @@ components:
       - id
       - illness
       - opened_at
+      - question_sets
       - status
       - submitted_at
       - symptom_notes
@@ -8372,6 +8571,176 @@ components:
       - id
       - name
       - slug
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        sort_order:
+          type: integer
+          readOnly: true
+        question_type:
+          allOf:
+          - $ref: '#/components/schemas/QuestionTypeEnum'
+          readOnly: true
+        prompt:
+          type: string
+          readOnly: true
+        help_text:
+          type: string
+          readOnly: true
+        required:
+          type: boolean
+          readOnly: true
+        options:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        scale_min:
+          type: integer
+          readOnly: true
+        scale_max:
+          type: integer
+          readOnly: true
+        answer:
+          allOf:
+          - $ref: '#/components/schemas/Answer'
+          nullable: true
+          readOnly: true
+      required:
+      - answer
+      - help_text
+      - id
+      - options
+      - prompt
+      - question_type
+      - required
+      - scale_max
+      - scale_min
+      - sort_order
+    QuestionAnswerInputRequest:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        value:
+          nullable: true
+      required:
+      - question_id
+    QuestionCreateInputRequest:
+      type: object
+      properties:
+        question_type:
+          $ref: '#/components/schemas/QuestionTypeEnum'
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        help_text:
+          type: string
+          default: ''
+          maxLength: 300
+        required:
+          type: boolean
+          default: true
+        options:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 200
+        scale_min:
+          type: integer
+          maximum: 9
+          minimum: 1
+          default: 1
+        scale_max:
+          type: integer
+          maximum: 10
+          minimum: 2
+          default: 5
+      required:
+      - prompt
+      - question_type
+    QuestionSet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        round_number:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+        answered_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+          readOnly: true
+      required:
+      - answered_at
+      - id
+      - note
+      - questions
+      - round_number
+      - sent_at
+      - title
+    QuestionSetCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          default: ''
+          maxLength: 160
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionCreateInputRequest'
+      required:
+      - questions
+    QuestionTypeEnum:
+      enum:
+      - TEXT
+      - LONG_TEXT
+      - YES_NO
+      - SINGLE_CHOICE
+      - MULTI_CHOICE
+      - NUMBER
+      - SCALE
+      - PHOTO
+      type: string
+      description: |-
+        * `TEXT` - Text
+        * `LONG_TEXT` - Long Text
+        * `YES_NO` - Yes No
+        * `SINGLE_CHOICE` - Single Choice
+        * `MULTI_CHOICE` - Multi Choice
+        * `NUMBER` - Number
+        * `SCALE` - Scale
+        * `PHOTO` - Photo
     RankedRemedyCard:
       type: object
       description: A remedy in a list, in the language asked for.

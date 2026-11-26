@@ -13,6 +13,7 @@ import type { DoctorMessages } from "@/i18n/messages/doctor";
 import { useMessages } from "@/i18n/provider";
 
 import { DOCTOR_STATUS_BADGE } from "./DoctorQueue";
+import { QuestionsPanel } from "./QuestionsPanel";
 import { useDoctorSession } from "./session";
 
 type CaseDetail = components["schemas"]["DoctorConsultationDetail"];
@@ -295,9 +296,22 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
   );
 
   const questionsPanel = (
-    <div className="rounded-panel border border-line bg-surface p-4 text-sm text-ink-soft">
-      {t("doctor.case.questionsSoon")}
-    </div>
+    <QuestionsPanel
+      caseId={caseData.id}
+      caseStatus={caseData.status}
+      questionSets={caseData.question_sets}
+      onSent={(created) =>
+        setCaseData((now) =>
+          now
+            ? {
+                ...now,
+                status: "AWAITING_PATIENT",
+                question_sets: [...now.question_sets, created],
+              }
+            : now,
+        )
+      }
+    />
   );
 
   const prescriptionPanel = (

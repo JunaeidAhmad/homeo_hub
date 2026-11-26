@@ -104,3 +104,90 @@ class ConsultationStatusHistory(models.Model):
     def __str__(self) -> str:
         previous = self.from_status or "NEW"
         return f"{self.consultation.consultation_code}: {previous} -> {self.to_status}"
+
+
+class QuestionSet(models.Model):
+    """A batch of follow-up questions sent by the assigned doctor to the patient."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    consultation = models.ForeignKey(
+        DoctorConsultation,
+        on_delete=models.CASCADE,
+        related_name="question_sets",
+    )
+    created_by = models.ForeignKey(
+        "doctors.Doctor",
+        on_delete=models.PROTECT,
+        related_name="question_sets",
+    )
+    round_number = models.PositiveSmallIntegerField()
+    title = models.CharField(max_length=160, blank=True, default="")
+    note = models.TextField(blank=True, default="")
+    sent_at = models.DateTimeField(auto_now_add=True)
+    answered_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["round_number", "sent_at", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["consultation", "round_number"],
+                name="question_set_round_unique",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.consultation.consultation_code} round {self.round_number}"
+
+
+class Question(models.Model):
+    """A single structured or free-text prompt inside a QuestionSet."""
+
+    class Type(models.TextChoices):
+        TEXT = "TEXT"
+        LONG_TEXT = "LONG_TEXT"
+        YES_NO = "YES_NO"
+        SINGLE_CHOICE = "SINGLE_CHOICE"
+        MULTI_CHOICE = "MULTI_CHOICE"
+        NUMBER = "NUMBER"
+        SCALE = "SCALE"
+        PHOTO = "PHOTO"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question_set = models.ForeignKey(
+        QuestionSet,
+        on_delete=models.CASCADE,
+        related_name="questions",
+    )
+    sort_order = models.PositiveSmallIntegerField()
+    question_type = models.CharField(max_length=16, choices=Type.choices)
+    prompt = models.TextField()
+    help_text = models.CharField(max_length=300, blank=True, default="")
+    required = models.BooleanField(default=True)
+    options = models.JSONField(default=list, blank=True)
+    scale_min = models.PositiveSmallIntegerField(default=1)
+    scale_max = models.PositiveSmallIntegerField(default=5)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+
+    def __str__(self) -> str:
+        return f"Q{self.sort_order}: {self.prompt[:40]}"
+
+
+class Answer(models.Model):
+    """The patient's submitted response to one question."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question = models.OneToOneField(
+        Question,
+        on_delete=models.CASCADE,
+        related_name="answer",
+    )
+    value_json = models.JSONField(null=True, blank=True)
+    file = models.CharField(max_length=255, blank=True, default="")
+    file_name = models.CharField(max_length=255, blank=True, default="")
+    content_type = models.CharField(max_length=100, blank=True, default="")
+    answered_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"Answer to {self.question_id}"

@@ -1408,6 +1408,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/consultations/{id}/question-sets/{set_pk}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["consultations_question_set_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/consultations/{id}/question-sets/{set_pk}/answers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["consultations_question_set_answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/consultations/{id}/withdraw/": {
         parameters: {
             query?: never;
@@ -1530,6 +1562,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["doctor_consultations_open"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/consultations/{id}/question-sets/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_consultations_send_questions"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2344,6 +2392,17 @@ export interface components {
             /** @default OWNER */
             role: components["schemas"]["ShopStaffRoleEnum"];
         };
+        Answer: {
+            readonly value: unknown;
+            /** Format: uri */
+            readonly file_url: string | null;
+            readonly file_name: string;
+            /** Format: date-time */
+            readonly answered_at: string;
+        };
+        AnswerBatchSubmitRequest: {
+            answers: components["schemas"]["QuestionAnswerInputRequest"][];
+        };
         /**
          * @description * `UPAZILA` - UPAZILA
          *     * `DISTRICT` - DISTRICT
@@ -2526,6 +2585,7 @@ export interface components {
             /** Format: date-time */
             readonly closed_at: string | null;
             readonly history: components["schemas"]["ConsultationHistory"][];
+            readonly question_sets: components["schemas"]["QuestionSet"][];
             readonly patient_history: components["schemas"]["DoctorHistorySummary"][];
         };
         DoctorConsultationSummary: {
@@ -3072,6 +3132,7 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
             readonly history: components["schemas"]["ConsultationHistory"][];
+            readonly question_sets: components["schemas"]["QuestionSet"][];
         };
         PatientConsultationSummary: {
             /** Format: uuid */
@@ -3271,6 +3332,68 @@ export interface components {
             slug: string;
             readonly name: string;
         };
+        Question: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly sort_order: number;
+            readonly question_type: components["schemas"]["QuestionTypeEnum"];
+            readonly prompt: string;
+            readonly help_text: string;
+            readonly required: boolean;
+            readonly options: string[];
+            readonly scale_min: number;
+            readonly scale_max: number;
+            readonly answer: components["schemas"]["Answer"] | null;
+        };
+        QuestionAnswerInputRequest: {
+            /** Format: uuid */
+            question_id: string;
+            value?: unknown;
+        };
+        QuestionCreateInputRequest: {
+            question_type: components["schemas"]["QuestionTypeEnum"];
+            prompt: string;
+            /** @default  */
+            help_text: string;
+            /** @default true */
+            required: boolean;
+            options?: string[];
+            /** @default 1 */
+            scale_min: number;
+            /** @default 5 */
+            scale_max: number;
+        };
+        QuestionSet: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly round_number: number;
+            readonly title: string;
+            readonly note: string;
+            /** Format: date-time */
+            readonly sent_at: string;
+            /** Format: date-time */
+            readonly answered_at: string | null;
+            readonly questions: components["schemas"]["Question"][];
+        };
+        QuestionSetCreateRequest: {
+            /** @default  */
+            title: string;
+            /** @default  */
+            note: string;
+            questions: components["schemas"]["QuestionCreateInputRequest"][];
+        };
+        /**
+         * @description * `TEXT` - Text
+         *     * `LONG_TEXT` - Long Text
+         *     * `YES_NO` - Yes No
+         *     * `SINGLE_CHOICE` - Single Choice
+         *     * `MULTI_CHOICE` - Multi Choice
+         *     * `NUMBER` - Number
+         *     * `SCALE` - Scale
+         *     * `PHOTO` - Photo
+         * @enum {string}
+         */
+        QuestionTypeEnum: "TEXT" | "LONG_TEXT" | "YES_NO" | "SINGLE_CHOICE" | "MULTI_CHOICE" | "NUMBER" | "SCALE" | "PHOTO";
         /** @description A remedy in a list, in the language asked for. */
         RankedRemedyCard: {
             /** Format: uuid */
@@ -6728,6 +6851,103 @@ export interface operations {
             };
         };
     };
+    consultations_question_set_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                set_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionSet"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    consultations_question_set_answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                set_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["AnswerBatchSubmitRequest"];
+                "application/json": components["schemas"]["AnswerBatchSubmitRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionSet"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     consultations_withdraw: {
         parameters: {
             query?: never;
@@ -7026,6 +7246,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DoctorConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultations_send_questions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionSetCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionSet"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {

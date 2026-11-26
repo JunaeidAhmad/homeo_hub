@@ -1,10 +1,15 @@
+import json
+from collections.abc import Mapping
 from typing import Any, cast
 
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status as http_status
+from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.generics import ListAPIView
+from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,15 +20,17 @@ from apps.patients.models import Patient
 from apps.patients.permissions import IsPatient
 from apps.staff.permissions import AdminView
 from apps.staff.roles import Perm
+from common.parsers import SafeJSONParser
 from common.search import KeywordSearchFilter
 from common.serializers import ErrorSerializer
 
 from . import selectors, services
-from .models import DoctorConsultation
+from .models import DoctorConsultation, QuestionSet
 from .serializers import (
     AdminAssignDoctorSerializer,
     AdminConsultationDetailSerializer,
     AdminConsultationSummarySerializer,
+    AnswerBatchSubmitSerializer,
     AssignableDoctorSerializer,
     ConsultationSubmitSerializer,
     ConsultationWithdrawSerializer,
@@ -31,6 +38,8 @@ from .serializers import (
     DoctorConsultationSummarySerializer,
     PatientConsultationDetailSerializer,
     PatientConsultationSummarySerializer,
+    QuestionSetCreateSerializer,
+    QuestionSetSerializer,
 )
 
 ADMIN_REFUSED = {401: ErrorSerializer, 403: ErrorSerializer}
@@ -328,3 +337,107 @@ class DoctorConsultationOpenView(APIView):
         return Response(
             DoctorConsultationDetailSerializer(detail, context={"request": request}).data
         )
+
+
+class DoctorQuestionSetCreateView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_consultations_send_questions",
+        tags=["doctor"],
+        request=QuestionSetCreateSerializer,
+        responses={
+            201: QuestionSetSerializer,
+            400: ErrorSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        body = QuestionSetCreateSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        case = get_object_or_404(selectors.cases_for_doctor(cast(Doctor, request.user)), pk=pk)
+        qset = services.send_questions(case, cast(Doctor, request.user), **body.validated_data)
+        loaded = get_object_or_404(
+            QuestionSet.objects.prefetch_related("questions__answer"), pk=qset.pk
+        )
+        return Response(
+            QuestionSetSerializer(loaded, context={"request": request}).data,
+            status=http_status.HTTP_201_CREATED,
+        )
+
+
+class PatientQuestionSetDetailView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="consultations_question_set_read",
+        tags=["consultations"],
+        responses={
+            200: QuestionSetSerializer,
+            401: ErrorSerializer,
+            404: ErrorSerializer,
+        },
+    )
+    def get(self, request: Request, pk: str, set_pk: str) -> Response:
+        qset = get_object_or_404(
+            QuestionSet.objects.prefetch_related("questions__answer"),
+            pk=set_pk,
+            consultation_id=pk,
+            consultation__patient=cast(Patient, request.user),
+        )
+        return Response(QuestionSetSerializer(qset, context={"request": request}).data)
+
+
+class PatientQuestionSetAnswersView(APIView):
+    permission_classes = [IsPatient]
+    parser_classes = [MultiPartParser, SafeJSONParser]
+
+    @extend_schema(
+        operation_id="consultations_question_set_answer",
+        tags=["consultations"],
+        request=AnswerBatchSubmitSerializer,
+        responses={
+            200: QuestionSetSerializer,
+            400: ErrorSerializer,
+            401: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str, set_pk: str) -> Response:
+        qset = get_object_or_404(
+            QuestionSet.objects.prefetch_related("questions"),
+            pk=set_pk,
+            consultation_id=pk,
+            consultation__patient=cast(Patient, request.user),
+        )
+        raw_answers: Any = (
+            request.data.get("answers", []) if isinstance(request.data, Mapping) else []
+        )
+        if isinstance(raw_answers, str):
+            try:
+                raw_answers = json.loads(raw_answers)
+            except json.JSONDecodeError as err:
+                raise ValidationError(
+                    {"answers": [ErrorDetail("Malformed answers payload.", code="invalid")]}
+                ) from err
+        body = AnswerBatchSubmitSerializer(data={"answers": raw_answers})
+        body.is_valid(raise_exception=True)
+        files = {
+            str(key): value
+            for key, value in request.FILES.items()
+            if isinstance(value, UploadedFile)
+        }
+        updated = services.submit_answers(
+            qset,
+            cast(Patient, request.user),
+            raw_answers=body.validated_data["answers"],
+            files=files,
+        )
+        loaded = get_object_or_404(
+            QuestionSet.objects.prefetch_related("questions__answer"), pk=updated.pk
+        )
+        return Response(QuestionSetSerializer(loaded, context={"request": request}).data)

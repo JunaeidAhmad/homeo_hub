@@ -9,10 +9,11 @@ from apps.locations.models import Location
 from apps.locations.serializers import LocationSerializer
 from apps.patients.models import Patient, PatientProfile
 from common.i18n import localized_text
+from common.private_files import signed_link
 from common.serializers import LocalizedField
 
 from . import selectors
-from .models import ConsultationStatusHistory, DoctorConsultation
+from .models import Answer, ConsultationStatusHistory, DoctorConsultation, Question, QuestionSet
 
 
 def _area_label(location: Location) -> str:
@@ -52,6 +53,100 @@ class ConsultationHistorySerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class AnswerSerializer(serializers.ModelSerializer):
+    value = serializers.JSONField(source="value_json", read_only=True)
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Answer
+        fields = ["value", "file_url", "file_name", "answered_at"]
+        read_only_fields = fields
+
+    @extend_schema_field({"type": "string", "format": "uri", "nullable": True})
+    def get_file_url(self, obj: Answer) -> str | None:
+        if not obj.file:
+            return None
+        request = self.context.get("request")
+        return signed_link(request, obj.file) if request else None
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = serializers.ListField(child=serializers.CharField(), read_only=True)
+    answer = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Question
+        fields = [
+            "id",
+            "sort_order",
+            "question_type",
+            "prompt",
+            "help_text",
+            "required",
+            "options",
+            "scale_min",
+            "scale_max",
+            "answer",
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(AnswerSerializer(allow_null=True))
+    def get_answer(self, obj: Question) -> dict[str, Any] | None:
+        answer = getattr(obj, "answer", None)
+        if answer is None:
+            return None
+        return dict(AnswerSerializer(answer, context=self.context).data)
+
+
+class QuestionSetSerializer(serializers.ModelSerializer):
+    questions = QuestionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = QuestionSet
+        fields = ["id", "round_number", "title", "note", "sent_at", "answered_at", "questions"]
+        read_only_fields = fields
+
+
+class QuestionCreateInputSerializer(serializers.ModelSerializer):
+    prompt = serializers.CharField(max_length=1000)
+    options = serializers.ListField(
+        child=serializers.CharField(max_length=200), required=False, default=list
+    )
+    scale_min = serializers.IntegerField(min_value=1, max_value=9, required=False, default=1)
+    scale_max = serializers.IntegerField(min_value=2, max_value=10, required=False, default=5)
+
+    class Meta:
+        model = Question
+        fields = [
+            "question_type",
+            "prompt",
+            "help_text",
+            "required",
+            "options",
+            "scale_min",
+            "scale_max",
+        ]
+        extra_kwargs = {
+            "help_text": {"max_length": 300, "required": False, "allow_blank": True, "default": ""},
+            "required": {"required": False, "default": True},
+        }
+
+
+class QuestionSetCreateSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=160, required=False, allow_blank=True, default="")
+    note = serializers.CharField(max_length=1000, required=False, allow_blank=True, default="")
+    questions = QuestionCreateInputSerializer(many=True)
+
+
+class QuestionAnswerInputSerializer(serializers.Serializer):
+    question_id = serializers.UUIDField()
+    value = serializers.JSONField(required=False, allow_null=True)
+
+
+class AnswerBatchSubmitSerializer(serializers.Serializer):
+    answers = QuestionAnswerInputSerializer(many=True)
+
+
 class PatientConsultationSummarySerializer(serializers.ModelSerializer):
     doctor_name = serializers.SerializerMethodField()
 
@@ -77,6 +172,7 @@ class PatientConsultationDetailSerializer(serializers.ModelSerializer):
     illness = ConsultationIllnessSerializer(read_only=True)
     doctor = ConsultationDoctorSummarySerializer(source="assigned_doctor", read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
+    question_sets = QuestionSetSerializer(many=True, read_only=True)
 
     class Meta:
         model = DoctorConsultation
@@ -100,6 +196,7 @@ class PatientConsultationDetailSerializer(serializers.ModelSerializer):
             "cancel_reason",
             "updated_at",
             "history",
+            "question_sets",
         ]
         read_only_fields = fields
 
@@ -383,6 +480,7 @@ class DoctorConsultationDetailSerializer(serializers.ModelSerializer):
     illness = ConsultationIllnessSerializer(read_only=True)
     patient = DoctorPatientProfileSerializer(read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
+    question_sets = QuestionSetSerializer(many=True, read_only=True)
     patient_history = serializers.SerializerMethodField()
 
     class Meta:
@@ -404,6 +502,7 @@ class DoctorConsultationDetailSerializer(serializers.ModelSerializer):
             "opened_at",
             "closed_at",
             "history",
+            "question_sets",
             "patient_history",
         ]
         read_only_fields = fields

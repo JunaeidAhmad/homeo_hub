@@ -265,6 +265,7 @@ SPECTACULAR_SETTINGS = {
         "ConsultationStatusEnum": "apps.consultations.models.DoctorConsultation.Status",
         "UrgencyEnum": "apps.consultations.models.DoctorConsultation.Urgency",
         "DurationUnitEnum": "apps.consultations.models.DoctorConsultation.DurationUnit",
+        "QuestionTypeEnum": "apps.consultations.models.Question.Type",
         "BloodGroupEnum": "apps.patients.models.PatientProfile.BloodGroup",
         "MaritalStatusEnum": "apps.patients.models.PatientProfile.MaritalStatus",
         "ThermalPreferenceEnum": "apps.patients.models.PatientProfile.ThermalPreference",

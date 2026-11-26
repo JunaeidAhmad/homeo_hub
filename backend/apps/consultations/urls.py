@@ -19,6 +19,16 @@ urlpatterns = [
         name="consultations-withdraw",
     ),
     path(
+        "consultations/<uuid:pk>/question-sets/<uuid:set_pk>/",
+        views.PatientQuestionSetDetailView.as_view(),
+        name="consultations-question-set-detail",
+    ),
+    path(
+        "consultations/<uuid:pk>/question-sets/<uuid:set_pk>/answers/",
+        views.PatientQuestionSetAnswersView.as_view(),
+        name="consultations-question-set-answers",
+    ),
+    path(
         "admin/doctor-consultations/",
         views.AdminConsultationListView.as_view(),
         name="admin-consultations-list",
@@ -52,5 +62,10 @@ urlpatterns = [
         "doctor/consultations/<uuid:pk>/open/",
         views.DoctorConsultationOpenView.as_view(),
         name="doctor-consultations-open",
+    ),
+    path(
+        "doctor/consultations/<uuid:pk>/question-sets/",
+        views.DoctorQuestionSetCreateView.as_view(),
+        name="doctor-consultations-question-sets",
     ),
 ]

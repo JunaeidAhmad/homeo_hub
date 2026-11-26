@@ -9,8 +9,10 @@ import { useSession } from "@/areas/patient/session/SessionProvider";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { FormAlert, TextField } from "@/components/form/fields";
+import { AnswerView } from "@/components/questions/AnswerView";
 import { useDescribeErrorWith } from "@/hooks/use-describe-error";
 import { useSubmitWith } from "@/hooks/use-submit";
+import { fill } from "@/i18n/catalog";
 import { numberFormat } from "@/i18n/format";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
@@ -197,6 +199,67 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
           }
         />
       </section>
+
+      {caseData.question_sets.some((qset) => !qset.answered_at) && (
+        <section className="flex flex-col gap-3 rounded-panel border border-amber/40 bg-amber-wash p-4">
+          <h2 className="text-base font-semibold text-ink">
+            {t("patient.care.questionsWaiting")}
+          </h2>
+          <div className="flex flex-col gap-2">
+            {caseData.question_sets
+              .filter((qset) => !qset.answered_at)
+              .map((qset) => (
+                <Link
+                  key={qset.id}
+                  href={`/care/${caseData.id}/questions/${qset.id}`}
+                  className="inline-flex min-h-12 items-center justify-center rounded-control bg-primary px-5 text-base font-bold text-surface"
+                >
+                  {fill(t("patient.care.answerRound"), {
+                    round: numberFormat(locale).format(qset.round_number),
+                  })}
+                  {qset.title ? ` · ${qset.title}` : ""}
+                </Link>
+              ))}
+          </div>
+        </section>
+      )}
+
+      {caseData.question_sets.some((qset) => Boolean(qset.answered_at)) && (
+        <section className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-4">
+          {caseData.question_sets
+            .filter((qset) => Boolean(qset.answered_at))
+            .map((qset) => (
+              <div key={qset.id} className="flex flex-col gap-2 border-b border-line pb-3 last:border-b-0 last:pb-0">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-semibold text-ink">
+                    {fill(t("patient.care.questionSetRound"), {
+                      round: numberFormat(locale).format(qset.round_number),
+                    })}
+                  </p>
+                  <span className="rounded-control bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary-deep">
+                    {t("patient.care.answeredLabel")}
+                  </span>
+                </div>
+                <ol className="flex flex-col gap-2">
+                  {qset.questions.map((question) => (
+                    <li key={question.id} className="flex flex-col gap-1">
+                      <p className="text-sm font-medium text-ink">{question.prompt}</p>
+                      <AnswerView
+                        question={question}
+                        labels={{
+                          yes: t("patient.care.yes"),
+                          no: t("patient.care.no"),
+                          viewPhoto: t("patient.care.viewPhoto"),
+                          skipped: t("patient.care.noAnswer"),
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+        </section>
+      )}
 
       <section className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-4">
         <h2 className="text-base font-semibold text-ink">{t("patient.care.details")}</h2>
