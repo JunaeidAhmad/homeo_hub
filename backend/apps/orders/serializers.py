@@ -5,15 +5,17 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.locations.models import Location
+from apps.payments.models import Payment
 from apps.remedies.choices import Potency, RemedyForm
 from apps.remedies.models import Remedy
 from apps.remedies.serializers import PictureUrlField
+from apps.shops.models import ShopRemedy
 from common.fields import PhoneField
 from common.i18n import localized_text
 
 from .cart import PricedCart, PricedCartItem
-from .checkout import CANCELLABLE_STATUSES
-from .models import Order, OrderItem, OrderStatusHistory
+from .fulfilment import CandidateListing, can_cancel_order, expected_cod, next_statuses_for
+from .models import Order, OrderItem, OrderStatusHistory, ShopAssignment
 
 
 class CartRemedySerializer(serializers.ModelSerializer):
@@ -182,9 +184,238 @@ class PatientOrderDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_can_cancel(self, order: Order) -> bool:
-        return order.status in CANCELLABLE_STATUSES
+        return can_cancel_order(order)
 
     @extend_schema_field(OrderTimelineEntrySerializer(many=True))
     def get_timeline(self, order: Order) -> list[dict[str, Any]]:
-        rows = order.history.all()
+        rows = [row for row in order.history.all() if row.shop_assignment_id is None]
         return list(OrderTimelineEntrySerializer(rows, many=True).data)
+
+
+class AdminOrderSummarySerializer(serializers.ModelSerializer):
+    patient_name = serializers.CharField(source="patient.full_name", read_only=True)
+    area = serializers.SerializerMethodField()
+    unassigned_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "code",
+            "placed_at",
+            "patient_name",
+            "area",
+            "total_poisha",
+            "status",
+            "unassigned_count",
+        ]
+
+    def get_area(self, order: Order) -> str:
+        return (
+            f"{localized_text(order.location, 'upazila')}, "
+            f"{localized_text(order.location, 'district')}"
+        )
+
+
+class AdminOrderPatientSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    full_name = serializers.CharField(read_only=True)
+    phone = serializers.CharField(read_only=True)
+
+
+class AdminOrderItemSerializer(PatientOrderItemSerializer):
+    shop_assignment_id = serializers.UUIDField(read_only=True, allow_null=True)
+    shop_name = serializers.SerializerMethodField()
+    shop_unit_price_poisha = serializers.IntegerField(read_only=True, allow_null=True)
+    pack_label = serializers.SerializerMethodField()
+
+    class Meta(PatientOrderItemSerializer.Meta):
+        fields = [
+            *PatientOrderItemSerializer.Meta.fields,
+            "shop_assignment_id",
+            "shop_name",
+            "shop_unit_price_poisha",
+            "pack_label",
+        ]
+
+    def get_shop_name(self, item: OrderItem) -> str | None:
+        if item.shop_assignment:
+            return item.shop_assignment.shop.name
+        return None
+
+    def get_pack_label(self, item: OrderItem) -> str | None:
+        if item.shop_remedy:
+            return f"{item.shop_remedy.pack_size} {item.shop_remedy.unit}"
+        return None
+
+
+class AdminAssignmentLineSerializer(serializers.ModelSerializer):
+    potency = serializers.SerializerMethodField()
+    form = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ["id", "remedy_name", "potency", "form", "quantity", "shop_unit_price_poisha"]
+
+    @extend_schema_field(serializers.ChoiceField(choices=Potency.choices, allow_null=True))
+    def get_potency(self, item: OrderItem) -> str | None:
+        return item.self_prescription_item.potency if item.self_prescription_item else None
+
+    @extend_schema_field(serializers.ChoiceField(choices=RemedyForm.choices, allow_null=True))
+    def get_form(self, item: OrderItem) -> str | None:
+        return item.self_prescription_item.form if item.self_prescription_item else None
+
+
+class AdminShopAssignmentSerializer(serializers.ModelSerializer):
+    shop_id = serializers.UUIDField(source="shop.id", read_only=True)
+    shop_name = serializers.CharField(source="shop.name", read_only=True)
+    expected_cod_poisha = serializers.SerializerMethodField()
+    next_statuses = serializers.SerializerMethodField()
+    items = AdminAssignmentLineSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ShopAssignment
+        fields = [
+            "id",
+            "shop_id",
+            "shop_name",
+            "status",
+            "shop_total_poisha",
+            "expected_cod_poisha",
+            "cod_collected_poisha",
+            "next_statuses",
+            "items",
+        ]
+
+    def get_expected_cod_poisha(self, assignment: ShopAssignment) -> int:
+        return expected_cod(assignment)
+
+    @extend_schema_field(
+        serializers.ListField(child=serializers.ChoiceField(choices=ShopAssignment.Status.choices))
+    )
+    def get_next_statuses(self, assignment: ShopAssignment) -> list[str]:
+        return next_statuses_for(assignment)
+
+
+class AdminOrderHistorySerializer(serializers.ModelSerializer):
+    changed_by_name = serializers.SerializerMethodField()
+    shop_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderStatusHistory
+        fields = [
+            "id",
+            "from_status",
+            "to_status",
+            "changed_by_name",
+            "by_patient",
+            "shop_name",
+            "note",
+            "created_at",
+        ]
+
+    def get_changed_by_name(self, entry: OrderStatusHistory) -> str | None:
+        if entry.changed_by:
+            return entry.changed_by.first_name or entry.changed_by.username
+        return None
+
+    def get_shop_name(self, entry: OrderStatusHistory) -> str | None:
+        if entry.shop_assignment:
+            return entry.shop_assignment.shop.name
+        return None
+
+
+class AdminOrderPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = [
+            "id",
+            "tran_id",
+            "method",
+            "gateway",
+            "amount_poisha",
+            "status",
+            "shop_assignment_id",
+            "created_at",
+        ]
+
+
+class AdminOrderDetailSerializer(serializers.ModelSerializer):
+    patient = AdminOrderPatientSerializer(read_only=True)
+    shipping_address = ShippingAddressSerializer(read_only=True)
+    items = AdminOrderItemSerializer(many=True, read_only=True)
+    assignments = AdminShopAssignmentSerializer(many=True, read_only=True)
+    history = serializers.SerializerMethodField()
+    payments = AdminOrderPaymentSerializer(many=True, read_only=True)
+    can_cancel = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = [
+            "id",
+            "code",
+            "placed_at",
+            "cancelled_at",
+            "status",
+            "payment_method",
+            "patient",
+            "shipping_address",
+            "subtotal_poisha",
+            "delivery_charge_poisha",
+            "total_poisha",
+            "can_cancel",
+            "items",
+            "assignments",
+            "history",
+            "payments",
+        ]
+
+    def get_can_cancel(self, order: Order) -> bool:
+        return can_cancel_order(order)
+
+    @extend_schema_field(AdminOrderHistorySerializer(many=True))
+    def get_history(self, order: Order) -> list[dict[str, Any]]:
+        rows = sorted(order.history.all(), key=lambda row: row.created_at, reverse=True)
+        return list(AdminOrderHistorySerializer(rows, many=True).data)
+
+
+class AdminCandidateListingSerializer(serializers.Serializer):
+    shop_remedy_id = serializers.UUIDField(source="shop_remedy.id", read_only=True)
+    shop_id = serializers.UUIDField(source="shop_remedy.shop.id", read_only=True)
+    shop_name = serializers.CharField(source="shop_remedy.shop.name", read_only=True)
+    area_name = serializers.SerializerMethodField()
+    area_match = serializers.ChoiceField(
+        choices=[
+            ("UPAZILA", "UPAZILA"),
+            ("DISTRICT", "DISTRICT"),
+            ("DIVISION", "DIVISION"),
+            ("OTHER", "OTHER"),
+        ],
+        read_only=True,
+    )
+    pack_size = serializers.IntegerField(source="shop_remedy.pack_size", read_only=True)
+    unit = serializers.ChoiceField(
+        source="shop_remedy.unit", choices=ShopRemedy.Unit.choices, read_only=True
+    )
+    price_poisha = serializers.IntegerField(source="shop_remedy.price_poisha", read_only=True)
+    free_stock = serializers.IntegerField(read_only=True)
+
+    def get_area_name(self, candidate: CandidateListing) -> str:
+        loc = candidate.shop_remedy.shop.location
+        return f"{localized_text(loc, 'upazila')}, {localized_text(loc, 'district')}"
+
+
+class AdminAssignLineSerializer(serializers.Serializer):
+    shop_remedy_id = serializers.PrimaryKeyRelatedField(
+        source="shop_remedy", queryset=ShopRemedy.objects.all()
+    )
+
+
+class AdminAssignmentStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=ShopAssignment.Status.choices)
+    cash_collected_poisha = serializers.IntegerField(min_value=0, required=False, allow_null=True)
+    note = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+
+
+class AdminCancelOrderSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")

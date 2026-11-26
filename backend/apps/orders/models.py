@@ -112,6 +112,40 @@ class Order(models.Model):
         return self.code
 
 
+class ShopAssignment(models.Model):
+    class Status(models.TextChoices):
+        ASSIGNED = "ASSIGNED"
+        PROCESSING = "PROCESSING"
+        SHIPPED = "SHIPPED"
+        DELIVERED = "DELIVERED"
+        RETURNED = "RETURNED"
+        CANCELLED = "CANCELLED"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="assignments")
+    shop = models.ForeignKey("shops.Shop", on_delete=models.PROTECT, related_name="assignments")
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ASSIGNED)
+    shop_total_poisha = models.PositiveIntegerField(default=0)
+    cod_collected_poisha = models.PositiveIntegerField(null=True, blank=True)
+    status_changed_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["order", "shop"],
+                name="shop_assignment_unique_order_shop",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.order.code} -> {self.shop.name} ({self.status})"
+
+
 class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
@@ -121,6 +155,20 @@ class OrderItem(models.Model):
         null=True,
         blank=True,
     )
+    shop_assignment = models.ForeignKey(
+        ShopAssignment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="items",
+    )
+    shop_remedy = models.ForeignKey(
+        "shops.ShopRemedy",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
+    shop_unit_price_poisha = models.PositiveIntegerField(null=True, blank=True)
     remedy_name = models.CharField(max_length=150)
     unit_price_poisha = models.PositiveIntegerField()
     quantity = models.PositiveSmallIntegerField()
@@ -137,6 +185,13 @@ class OrderItem(models.Model):
 class OrderStatusHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="history")
+    shop_assignment = models.ForeignKey(
+        ShopAssignment,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="history",
+    )
     from_status = models.CharField(max_length=20, blank=True, default="")
     to_status = models.CharField(max_length=20, choices=Order.Status.choices)
     changed_by = models.ForeignKey(

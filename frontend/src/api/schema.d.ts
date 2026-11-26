@@ -199,6 +199,140 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/orders/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_orders_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/orders/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_orders_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/orders/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_orders_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/orders/{id}/items/{item_id}/assign/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_order_item_assign"];
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        delete: operations["admin_order_item_unassign"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/orders/{id}/items/{item_id}/candidates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_order_item_candidates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/remedies/": {
         parameters: {
             query?: never;
@@ -335,6 +469,31 @@ export interface paths {
         get: operations["admin_roles"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/shop-assignments/{id}/status/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_shop_assignment_status"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1062,6 +1221,42 @@ export interface components {
             /** @default 1 */
             quantity: number;
         };
+        AdminAssignLineRequest: {
+            /** Format: uuid */
+            shop_remedy_id: string;
+        };
+        AdminAssignmentLine: {
+            /** Format: uuid */
+            readonly id: string;
+            remedy_name: string;
+            readonly potency: (components["schemas"]["PotenciesEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly form: (components["schemas"]["FormEnum"] | components["schemas"]["NullEnum"]) | null;
+            quantity: number;
+            shop_unit_price_poisha?: number | null;
+        };
+        AdminAssignmentStatusRequest: {
+            status: components["schemas"]["AssignmentStatusEnum"];
+            cash_collected_poisha?: number | null;
+            /** @default  */
+            note: string;
+        };
+        AdminCancelOrderRequest: {
+            /** @default  */
+            reason: string;
+        };
+        AdminCandidateListing: {
+            /** Format: uuid */
+            readonly shop_remedy_id: string;
+            /** Format: uuid */
+            readonly shop_id: string;
+            readonly shop_name: string;
+            readonly area_name: string;
+            readonly area_match: components["schemas"]["AreaMatchEnum"];
+            readonly pack_size: number;
+            readonly unit: components["schemas"]["ShopUnitEnum"];
+            readonly price_poisha: number;
+            readonly free_stock: number;
+        };
         AdminIllness: {
             /** Format: uuid */
             readonly id: string;
@@ -1140,6 +1335,87 @@ export interface components {
             readonly id: string;
             readonly name: string;
         };
+        AdminOrderDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            code: string;
+            /** Format: date-time */
+            readonly placed_at: string;
+            /** Format: date-time */
+            cancelled_at?: string | null;
+            status: components["schemas"]["OrderStatusEnum"];
+            payment_method: components["schemas"]["PaymentMethodEnum"];
+            readonly patient: components["schemas"]["AdminOrderPatient"];
+            readonly shipping_address: components["schemas"]["ShippingAddress"];
+            subtotal_poisha: number;
+            delivery_charge_poisha: number;
+            total_poisha: number;
+            readonly can_cancel: boolean;
+            readonly items: components["schemas"]["AdminOrderItem"][];
+            readonly assignments: components["schemas"]["AdminShopAssignment"][];
+            readonly history: components["schemas"]["AdminOrderHistory"][];
+            readonly payments: components["schemas"]["AdminOrderPayment"][];
+        };
+        AdminOrderHistory: {
+            /** Format: uuid */
+            readonly id: string;
+            from_status?: string;
+            to_status: components["schemas"]["OrderStatusEnum"];
+            readonly changed_by_name: string | null;
+            by_patient?: boolean;
+            readonly shop_name: string | null;
+            note?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        AdminOrderItem: {
+            /** Format: uuid */
+            readonly id: string;
+            remedy_name: string;
+            readonly remedy_name_bn: string;
+            readonly remedy_slug: string | null;
+            readonly potency: (components["schemas"]["PotenciesEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly form: (components["schemas"]["FormEnum"] | components["schemas"]["NullEnum"]) | null;
+            quantity: number;
+            unit_price_poisha: number;
+            line_total_poisha: number;
+            /** Format: uuid */
+            readonly shop_assignment_id: string | null;
+            readonly shop_name: string | null;
+            readonly shop_unit_price_poisha: number | null;
+            readonly pack_label: string | null;
+        };
+        AdminOrderPatient: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly full_name: string;
+            readonly phone: string;
+        };
+        AdminOrderPayment: {
+            /** Format: uuid */
+            readonly id: string;
+            tran_id: string;
+            method: components["schemas"]["PaymentMethodEnum"];
+            gateway?: string;
+            amount_poisha: number;
+            status?: components["schemas"]["PaymentStatusEnum"];
+            /** Format: uuid */
+            readonly shop_assignment_id: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        AdminOrderSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            code: string;
+            /** Format: date-time */
+            readonly placed_at: string;
+            readonly patient_name: string;
+            readonly area: string;
+            total_poisha: number;
+            status: components["schemas"]["OrderStatusEnum"];
+            readonly unassigned_count: number;
+        };
         AdminPrice: {
             /** Format: uuid */
             readonly id: string;
@@ -1217,6 +1493,19 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        AdminShopAssignment: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly shop_id: string;
+            readonly shop_name: string;
+            status?: components["schemas"]["AssignmentStatusEnum"];
+            shop_total_poisha?: number;
+            readonly expected_cod_poisha: number;
+            cod_collected_poisha?: number | null;
+            readonly next_statuses: components["schemas"]["AssignmentStatusEnum"][];
+            readonly items: components["schemas"]["AdminAssignmentLine"][];
+        };
         AdminShopRemedy: {
             /** Format: uuid */
             readonly id: string;
@@ -1277,6 +1566,24 @@ export interface components {
             /** @default OWNER */
             role: components["schemas"]["ShopStaffRoleEnum"];
         };
+        /**
+         * @description * `UPAZILA` - UPAZILA
+         *     * `DISTRICT` - DISTRICT
+         *     * `DIVISION` - DIVISION
+         *     * `OTHER` - OTHER
+         * @enum {string}
+         */
+        AreaMatchEnum: "UPAZILA" | "DISTRICT" | "DIVISION" | "OTHER";
+        /**
+         * @description * `ASSIGNED` - Assigned
+         *     * `PROCESSING` - Processing
+         *     * `SHIPPED` - Shipped
+         *     * `DELIVERED` - Delivered
+         *     * `RETURNED` - Returned
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        AssignmentStatusEnum: "ASSIGNED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "RETURNED" | "CANCELLED";
         Cart: {
             /** Format: uuid */
             readonly id: string;
@@ -1431,6 +1738,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["AdminIllness"][];
+        };
+        PaginatedAdminOrderSummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminOrderSummary"][];
         };
         PaginatedAdminRemedyList: {
             /** @example 123 */
@@ -1669,6 +1991,13 @@ export interface components {
          * @enum {string}
          */
         PaymentMethodEnum: "COD" | "ONLINE";
+        /**
+         * @description * `PENDING` - Pending
+         *     * `SUCCESS` - Success
+         *     * `FAILED` - Failed
+         * @enum {string}
+         */
+        PaymentStatusEnum: "PENDING" | "SUCCESS" | "FAILED";
         /**
          * @description * `manage_staff` - manage_staff
          *     * `view_doctors` - view_doctors
@@ -2296,6 +2625,304 @@ export interface operations {
             };
         };
     };
+    admin_orders_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+                status?: string;
+                unassigned?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminOrderSummaryList"];
+                };
+            };
+        };
+    };
+    admin_orders_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrderDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_orders_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AdminCancelOrderRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrderDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_order_item_assign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminAssignLineRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrderDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_order_item_unassign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrderDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_order_item_candidates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminCandidateListing"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     admin_remedies_list: {
         parameters: {
             query?: {
@@ -2595,6 +3222,71 @@ export interface operations {
                 };
             };
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_shop_assignment_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminAssignmentStatusRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOrderDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

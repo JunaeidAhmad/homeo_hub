@@ -1,21 +1,32 @@
+from django.contrib.auth.models import User
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import status as http_status
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.illnesses.selectors import public_illnesses
 from apps.patients.models import Patient
 from apps.patients.permissions import IsPatient, IsVerifiedPatient
+from apps.staff.permissions import AdminView
+from apps.staff.roles import Perm
 from common.serializers import ErrorSerializer
 
 from . import cart as cart_service
 from . import checkout as checkout_service
+from . import fulfilment
 from .cart import IllnessNotFound
-from .models import Cart, CartItem, Order
+from .models import Cart, CartItem, Order, OrderItem, ShopAssignment
 from .serializers import (
     AddCartItemSerializer,
+    AdminAssignLineSerializer,
+    AdminAssignmentStatusSerializer,
+    AdminCancelOrderSerializer,
+    AdminCandidateListingSerializer,
+    AdminOrderDetailSerializer,
+    AdminOrderSummarySerializer,
     CartSerializer,
     CheckoutRequestSerializer,
     OrderQuoteRequestSerializer,
@@ -24,6 +35,8 @@ from .serializers import (
     PatientOrderDetailSerializer,
     UpdateCartItemSerializer,
 )
+
+ADMIN_REFUSED = {401: ErrorSerializer, 403: ErrorSerializer}
 
 
 class CartView(GenericAPIView):
@@ -149,8 +162,21 @@ class OrderQuoteView(GenericAPIView):
 def _patient_orders_queryset(patient: Patient):
     return (
         Order.objects.filter(patient=patient)
-        .prefetch_related("items__self_prescription_item__remedy", "history")
+        .prefetch_related("items__self_prescription_item__remedy", "assignments", "history")
         .distinct()
+    )
+
+
+def _admin_orders_queryset():
+    return Order.objects.select_related("patient", "location").prefetch_related(
+        "items__self_prescription_item__remedy",
+        "items__shop_assignment__shop",
+        "items__shop_remedy",
+        "assignments__shop",
+        "assignments__items__self_prescription_item",
+        "history__changed_by",
+        "history__shop_assignment__shop",
+        "payments",
     )
 
 
@@ -268,3 +294,203 @@ class OrderCancelView(GenericAPIView):
         cancelled = checkout_service.cancel_by_patient(order)
         refreshed = _patient_orders_queryset(request.user).get(pk=cancelled.pk)
         return Response(PatientOrderDetailSerializer(refreshed).data)
+
+
+# --- Admin fulfilment endpoints ----------------------------------------------------
+
+
+@extend_schema_view(
+    get=extend_schema(
+        operation_id="admin_orders_list",
+        tags=["admin"],
+        parameters=[
+            OpenApiParameter("status", str),
+            OpenApiParameter("unassigned", bool),
+        ],
+    )
+)
+class AdminOrderListView(AdminView, ListAPIView):
+    required_permissions = {"GET": Perm.VIEW_ORDERS}
+    serializer_class = AdminOrderSummarySerializer
+    search_fields = ["code", "patient__full_name", "patient__phone"]
+    ordering_fields = ["placed_at", "total_poisha"]
+    ordering = ["-placed_at"]
+
+    def get_queryset(self):
+        qs = (
+            Order.objects.select_related("patient", "location")
+            .annotate(
+                unassigned_count=Count(
+                    "items",
+                    filter=Q(items__shop_assignment__isnull=True),
+                    distinct=True,
+                )
+            )
+            .distinct()
+        )
+        status_param = self.request.query_params.get("status", "")
+        if status_param.strip():
+            statuses = [s.strip() for s in status_param.split(",") if s.strip()]
+            if statuses:
+                qs = qs.filter(status__in=statuses)
+        unassigned = self.request.query_params.get("unassigned", "").lower()
+        if unassigned in ("true", "1"):
+            qs = qs.filter(unassigned_count__gt=0).exclude(
+                status__in=[Order.Status.CANCELLED, Order.Status.RETURNED]
+            )
+        return qs
+
+
+@extend_schema_view(
+    get=extend_schema(
+        operation_id="admin_orders_read",
+        tags=["admin"],
+        responses={200: AdminOrderDetailSerializer, 404: ErrorSerializer, **ADMIN_REFUSED},
+    )
+)
+class AdminOrderDetailView(AdminView, RetrieveAPIView):
+    required_permissions = {"GET": Perm.VIEW_ORDERS}
+    serializer_class = AdminOrderDetailSerializer
+    filter_backends: list = []
+
+    def get_queryset(self):
+        return _admin_orders_queryset()
+
+
+class AdminOrderItemCandidatesView(AdminView, GenericAPIView):
+    required_permissions = {"GET": Perm.VIEW_ORDERS}
+    serializer_class = AdminCandidateListingSerializer
+    pagination_class = None
+    filter_backends: list = []
+
+    @extend_schema(
+        operation_id="admin_order_item_candidates",
+        tags=["admin"],
+        responses={
+            200: AdminCandidateListingSerializer(many=True),
+            404: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def get(self, request: Request, pk, item_id) -> Response:
+        order = get_object_or_404(Order.objects.select_related("location"), pk=pk)
+        item = get_object_or_404(
+            OrderItem.objects.select_related("self_prescription_item"),
+            pk=item_id,
+            order=order,
+        )
+        candidates = fulfilment.candidate_listings(order, item)
+        return Response(self.get_serializer(candidates, many=True).data)
+
+
+class AdminOrderItemAssignView(AdminView, GenericAPIView):
+    required_permissions = {"POST": Perm.MANAGE_ORDERS, "DELETE": Perm.MANAGE_ORDERS}
+    serializer_class = AdminOrderDetailSerializer
+    filter_backends: list = []
+
+    @extend_schema(
+        operation_id="admin_order_item_assign",
+        tags=["admin"],
+        request=AdminAssignLineSerializer,
+        responses={
+            200: AdminOrderDetailSerializer,
+            400: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def post(self, request: Request, pk, item_id) -> Response:
+        order = get_object_or_404(Order, pk=pk)
+        item = get_object_or_404(OrderItem, pk=item_id, order=order)
+        body = AdminAssignLineSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        assert isinstance(request.user, User)
+        updated = fulfilment.assign_line(
+            order, item, body.validated_data["shop_remedy"], request.user
+        )
+        refreshed = _admin_orders_queryset().get(pk=updated.pk)
+        return Response(AdminOrderDetailSerializer(refreshed).data)
+
+    @extend_schema(
+        operation_id="admin_order_item_unassign",
+        tags=["admin"],
+        request=None,
+        responses={
+            200: AdminOrderDetailSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def delete(self, request: Request, pk, item_id) -> Response:
+        order = get_object_or_404(Order, pk=pk)
+        item = get_object_or_404(OrderItem, pk=item_id, order=order)
+        assert isinstance(request.user, User)
+        updated = fulfilment.unassign_line(item, request.user)
+        refreshed = _admin_orders_queryset().get(pk=updated.pk)
+        return Response(AdminOrderDetailSerializer(refreshed).data)
+
+
+class AdminShopAssignmentStatusView(AdminView, GenericAPIView):
+    required_permissions = {"POST": Perm.MANAGE_ORDERS}
+    serializer_class = AdminOrderDetailSerializer
+    filter_backends: list = []
+
+    @extend_schema(
+        operation_id="admin_shop_assignment_status",
+        tags=["admin"],
+        request=AdminAssignmentStatusSerializer,
+        responses={
+            200: AdminOrderDetailSerializer,
+            400: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def post(self, request: Request, pk) -> Response:
+        assignment = get_object_or_404(ShopAssignment, pk=pk)
+        body = AdminAssignmentStatusSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        assert isinstance(request.user, User)
+        updated = fulfilment.advance_assignment(
+            assignment,
+            body.validated_data["status"],
+            request.user,
+            cash_collected_poisha=body.validated_data.get("cash_collected_poisha"),
+            note=body.validated_data.get("note", ""),
+        )
+        refreshed = _admin_orders_queryset().get(pk=updated.pk)
+        return Response(AdminOrderDetailSerializer(refreshed).data)
+
+
+class AdminOrderCancelView(AdminView, GenericAPIView):
+    required_permissions = {"POST": Perm.MANAGE_ORDERS}
+    serializer_class = AdminOrderDetailSerializer
+    filter_backends: list = []
+
+    @extend_schema(
+        operation_id="admin_orders_cancel",
+        tags=["admin"],
+        request=AdminCancelOrderSerializer,
+        responses={
+            200: AdminOrderDetailSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+            **ADMIN_REFUSED,
+        },
+    )
+    def post(self, request: Request, pk) -> Response:
+        order = get_object_or_404(Order, pk=pk)
+        body = AdminCancelOrderSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        assert isinstance(request.user, User)
+        updated = fulfilment.cancel_order(
+            order,
+            actor=request.user,
+            by_patient=False,
+            reason=body.validated_data.get("reason", ""),
+        )
+        refreshed = _admin_orders_queryset().get(pk=updated.pk)
+        return Response(AdminOrderDetailSerializer(refreshed).data)

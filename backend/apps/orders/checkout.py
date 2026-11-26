@@ -164,19 +164,7 @@ def checkout(
     return order, True
 
 
-@transaction.atomic
 def cancel_by_patient(order: Order) -> Order:
-    locked = Order.objects.select_for_update().get(pk=order.pk)
-    if locked.status not in CANCELLABLE_STATUSES:
-        raise OrderNotCancellable()
-    prev = locked.status
-    locked.status = Order.Status.CANCELLED
-    locked.cancelled_at = timezone.now()
-    locked.save(update_fields=["status", "cancelled_at", "updated_at"])
-    OrderStatusHistory.objects.create(
-        order=locked,
-        from_status=prev,
-        to_status=Order.Status.CANCELLED,
-        by_patient=True,
-    )
-    return locked
+    from .fulfilment import cancel_order
+
+    return cancel_order(order, actor=None, by_patient=True)

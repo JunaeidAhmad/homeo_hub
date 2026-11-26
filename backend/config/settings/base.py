@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.selfcare",
     "apps.orders",
     "apps.shops",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [
@@ -233,6 +234,8 @@ SPECTACULAR_SETTINGS = {
         "CartStatusEnum": "apps.orders.models.Cart.Status",
         "OrderStatusEnum": "apps.orders.models.Order.Status",
         "PaymentMethodEnum": "apps.orders.models.Order.PaymentMethod",
+        "AssignmentStatusEnum": "apps.orders.models.ShopAssignment.Status",
+        "PaymentStatusEnum": "apps.payments.models.Payment.Status",
         "ShopStaffRoleEnum": "apps.shops.models.ShopStaff.Role",
         "ShopUnitEnum": "apps.shops.models.ShopRemedy.Unit",
     },
