@@ -30,7 +30,7 @@ class AssignableDoctorRow:
 def consultations_for_patient(patient: Patient) -> QuerySet[DoctorConsultation]:
     return (
         DoctorConsultation.objects.filter(patient=patient)
-        .select_related("illness", "illness__category", "assigned_doctor")
+        .select_related("illness", "illness__category", "assigned_doctor", "invoice")
         .prefetch_related("history", "question_sets__questions__answer")
     )
 

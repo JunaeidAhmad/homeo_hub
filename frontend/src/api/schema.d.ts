@@ -1456,6 +1456,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor-consultations/{id}/prescription/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["patient_prescription_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor/application/": {
         parameters: {
             query?: never;
@@ -1562,6 +1578,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["doctor_consultations_open"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/consultations/{id}/prescription/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_prescription_read"];
+        put?: never;
+        post: operations["doctor_prescription_issue"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2392,6 +2424,12 @@ export interface components {
             /** @default OWNER */
             role: components["schemas"]["ShopStaffRoleEnum"];
         };
+        /**
+         * @description * `DO` - Do
+         *     * `DONT` - Dont
+         * @enum {string}
+         */
+        AdviceKindEnum: "DO" | "DONT";
         Answer: {
             readonly value: unknown;
             /** Format: uri */
@@ -2524,6 +2562,14 @@ export interface components {
             readonly slug: string;
             readonly name: string;
         };
+        ConsultationInvoice: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor_fee_poisha: number;
+            readonly platform_fee_poisha: number;
+            readonly total_poisha: number;
+            readonly status: components["schemas"]["InvoiceStatusEnum"];
+        };
         /**
          * @description * `SUBMITTED` - Submitted
          *     * `ASSIGNED` - Assigned
@@ -2531,11 +2577,13 @@ export interface components {
          *     * `AWAITING_PATIENT` - Awaiting Patient
          *     * `RESPONDED` - Responded
          *     * `PRESCRIBED` - Prescribed
+         *     * `COMPLETED` - Completed
+         *     * `CLOSED_UNPAID` - Closed Unpaid
          *     * `CLOSED` - Closed
          *     * `CANCELLED` - Cancelled
          * @enum {string}
          */
-        ConsultationStatusEnum: "SUBMITTED" | "ASSIGNED" | "IN_REVIEW" | "AWAITING_PATIENT" | "RESPONDED" | "PRESCRIBED" | "CLOSED" | "CANCELLED";
+        ConsultationStatusEnum: "SUBMITTED" | "ASSIGNED" | "IN_REVIEW" | "AWAITING_PATIENT" | "RESPONDED" | "PRESCRIBED" | "COMPLETED" | "CLOSED_UNPAID" | "CLOSED" | "CANCELLED";
         ConsultationSubmitRequest: {
             /** Format: uuid */
             illness_id?: string | null;
@@ -2670,6 +2718,54 @@ export interface components {
             readonly food_aversions: string;
             readonly weather_modalities: string;
         };
+        DoctorPrescriptionDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly version: number;
+            /** Format: uuid */
+            readonly previous_id: string | null;
+            readonly status: components["schemas"]["PrescriptionStatusEnum"];
+            /** Format: date */
+            readonly report_after_date: string | null;
+            readonly doctor_notes: string;
+            /** Format: date-time */
+            readonly issued_at: string;
+            readonly items: components["schemas"]["DoctorPrescriptionItem"][];
+            readonly advice: components["schemas"]["PrescriptionAdvice"][];
+        };
+        DoctorPrescriptionItem: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly position: number;
+            /** Format: uuid */
+            readonly remedy_id: string | null;
+            readonly remedy_name: string;
+            readonly remedy_name_bn: string;
+            readonly is_catalog: boolean;
+            readonly potency: components["schemas"]["PotenciesEnum"];
+            readonly form: components["schemas"]["FormEnum"];
+            readonly dosage: string;
+            readonly frequency: string;
+            readonly duration: string;
+        };
+        DoctorPrescriptionVersion: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly version: number;
+            /** Format: uuid */
+            readonly previous_id: string | null;
+            readonly previous_version: number | null;
+            readonly status: components["schemas"]["PrescriptionStatusEnum"];
+            /** Format: date-time */
+            readonly issued_at: string;
+            readonly item_count: number;
+        };
+        DoctorPrescriptionWorkspace: {
+            consultation_status: components["schemas"]["ConsultationStatusEnum"];
+            doctor: components["schemas"]["PrescriptionDoctor"];
+            latest: components["schemas"]["DoctorPrescriptionDetail"] | null;
+            versions: components["schemas"]["DoctorPrescriptionVersion"][];
+        };
         DoctorSignUpRequest: {
             phone: string;
             password: string;
@@ -2732,6 +2828,15 @@ export interface components {
          * @enum {string}
          */
         IllnessStatusEnum: "ACTIVE" | "INACTIVE";
+        /**
+         * @description * `UNPAID` - Unpaid
+         *     * `PAID` - Paid
+         *     * `WAIVED` - Waived
+         *     * `VOID` - Void
+         *     * `CLOSED` - Closed
+         * @enum {string}
+         */
+        InvoiceStatusEnum: "UNPAID" | "PAID" | "WAIVED" | "VOID" | "CLOSED";
         Live: {
             status: components["schemas"]["LiveStatusEnum"];
         };
@@ -2749,6 +2854,19 @@ export interface components {
             readonly upazila: string;
             /** @description Upazila, district, division: one line for a picker to show. */
             readonly display_name: string;
+        };
+        /** @description Strict locked view: never touches items, advice, or doctor_notes. */
+        LockedPrescription: {
+            /** @default true */
+            locked: boolean;
+            summary: components["schemas"]["LockedPrescriptionSummary"];
+            invoice: components["schemas"]["ConsultationInvoice"];
+        };
+        LockedPrescriptionSummary: {
+            doctor_name: string;
+            /** Format: date-time */
+            issued_at: string;
+            remedy_count: number;
         };
         LogInRequest: {
             phone: string;
@@ -3133,6 +3251,7 @@ export interface components {
             readonly updated_at: string;
             readonly history: components["schemas"]["ConsultationHistory"][];
             readonly question_sets: components["schemas"]["QuestionSet"][];
+            readonly prescription_summary: components["schemas"]["PatientPrescriptionBanner"] | null;
         };
         PatientConsultationSummary: {
             /** Format: uuid */
@@ -3195,6 +3314,46 @@ export interface components {
             readonly order_id: string | null;
             readonly order_code: string | null;
         };
+        PatientPrescriptionBanner: {
+            /** Format: date-time */
+            issued_at: string;
+            remedy_count: number;
+            unlocked: boolean;
+            total_poisha: number;
+            invoice_status: string;
+        };
+        PatientPrescriptionDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor: components["schemas"]["PrescriptionDoctor"];
+            readonly version: number;
+            /** Format: date-time */
+            readonly issued_at: string;
+            /** Format: date */
+            readonly report_after_date: string | null;
+            readonly items: components["schemas"]["PatientPrescriptionItem"][];
+            readonly advice: components["schemas"]["PrescriptionAdvice"][];
+        };
+        PatientPrescriptionItem: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly position: number;
+            /** Format: uuid */
+            readonly remedy_id: string | null;
+            readonly remedy_name: string;
+            readonly remedy_name_bn: string;
+            readonly remedy_slug: string | null;
+            readonly is_catalog: boolean;
+            readonly potency: components["schemas"]["PotenciesEnum"];
+            readonly form: components["schemas"]["FormEnum"];
+            readonly dosage: string;
+            readonly frequency: string;
+            readonly duration: string;
+            readonly buyable: boolean;
+            readonly unit_price_poisha: number | null;
+            readonly unavailable_reason: components["schemas"]["UnavailableReasonEnum"] | null;
+        };
+        PatientPrescriptionResponse: components["schemas"]["LockedPrescription"] | components["schemas"]["UnlockedPrescription"];
         PatientPrice: {
             form: components["schemas"]["FormEnum"];
             price_poisha: number;
@@ -3305,6 +3464,50 @@ export interface components {
          * @enum {string}
          */
         PreferredLanguageEnum: "en" | "bn";
+        PrescriptionAdvice: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["AdviceKindEnum"];
+            readonly text: string;
+            readonly position: number;
+        };
+        PrescriptionAdviceInputRequest: {
+            kind: components["schemas"]["AdviceKindEnum"];
+            text: string;
+        };
+        PrescriptionDoctor: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor_code: string | null;
+            readonly full_name: string;
+            readonly registration_no: string;
+            readonly qualifications: string;
+        };
+        PrescriptionIssueRequest: {
+            items: components["schemas"]["PrescriptionItemInputRequest"][];
+            advice?: components["schemas"]["PrescriptionAdviceInputRequest"][];
+            /** Format: date */
+            report_after_date?: string | null;
+            /** @default  */
+            doctor_notes: string;
+        };
+        PrescriptionItemInputRequest: {
+            /** Format: uuid */
+            remedy_id?: string | null;
+            /** @default  */
+            remedy_name: string;
+            potency: components["schemas"]["PotenciesEnum"];
+            form: components["schemas"]["FormEnum"];
+            dosage: string;
+            frequency: string;
+            duration: string;
+        };
+        /**
+         * @description * `ACTIVE` - Active
+         *     * `SUPERSEDED` - Superseded
+         * @enum {string}
+         */
+        PrescriptionStatusEnum: "ACTIVE" | "SUPERSEDED";
         ProfileCompleteness: {
             filled: number;
             total: number;
@@ -3565,6 +3768,14 @@ export interface components {
          * @enum {string}
          */
         ThermalPreferenceEnum: "CHILLY" | "HOT" | "AMBIVALENT";
+        /** @enum {string} */
+        UnavailableReasonEnum: "NOT_LISTED" | "NO_PRICE";
+        UnlockedPrescription: {
+            /** @default false */
+            locked: boolean;
+            prescription: components["schemas"]["PatientPrescriptionDetail"];
+            invoice: components["schemas"]["ConsultationInvoice"];
+        };
         /**
          * @description * `ROUTINE` - Routine
          *     * `SOON` - Soon
@@ -3609,7 +3820,7 @@ export interface operations {
                 /** @description Number of results to return per page. */
                 page_size?: number;
                 q?: string;
-                status?: "ASSIGNED" | "AWAITING_PATIENT" | "CANCELLED" | "CLOSED" | "IN_REVIEW" | "PRESCRIBED" | "RESPONDED" | "SUBMITTED";
+                status?: "ASSIGNED" | "AWAITING_PATIENT" | "CANCELLED" | "CLOSED" | "CLOSED_UNPAID" | "COMPLETED" | "IN_REVIEW" | "PRESCRIBED" | "RESPONDED" | "SUBMITTED";
             };
             header?: never;
             path?: never;
@@ -7005,6 +7216,43 @@ export interface operations {
             };
         };
     };
+    patient_prescription_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientPrescriptionResponse"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     doctor_application_update: {
         parameters: {
             query?: never;
@@ -7150,7 +7398,7 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string;
-                status?: "ASSIGNED" | "AWAITING_PATIENT" | "CANCELLED" | "CLOSED" | "IN_REVIEW" | "PRESCRIBED" | "RESPONDED" | "SUBMITTED";
+                status?: "ASSIGNED" | "AWAITING_PATIENT" | "CANCELLED" | "CLOSED" | "CLOSED_UNPAID" | "COMPLETED" | "IN_REVIEW" | "PRESCRIBED" | "RESPONDED" | "SUBMITTED";
             };
             header?: never;
             path?: never;
@@ -7246,6 +7494,116 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DoctorConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_prescription_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorPrescriptionWorkspace"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_prescription_issue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrescriptionIssueRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorPrescriptionWorkspace"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             401: {

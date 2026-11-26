@@ -41,6 +41,8 @@ paths:
           - AWAITING_PATIENT
           - CANCELLED
           - CLOSED
+          - CLOSED_UNPAID
+          - COMPLETED
           - IN_REVIEW
           - PRESCRIBED
           - RESPONDED
@@ -3622,6 +3624,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/doctor-consultations/{id}/prescription/:
+    get:
+      operationId: patient_prescription_read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - consultations
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientPrescriptionResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/doctor/application/:
     patch:
       operationId: doctor_application_update
@@ -3751,6 +3786,8 @@ paths:
           - AWAITING_PATIENT
           - CANCELLED
           - CLOSED
+          - CLOSED_UNPAID
+          - COMPLETED
           - IN_REVIEW
           - PRESCRIBED
           - RESPONDED
@@ -3839,6 +3876,101 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DoctorConsultationDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/consultations/{id}/prescription/:
+    get:
+      operationId: doctor_prescription_read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorPrescriptionWorkspace'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: doctor_prescription_issue
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrescriptionIssueRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorPrescriptionWorkspace'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '401':
           content:
@@ -6149,6 +6281,14 @@ components:
           default: OWNER
       required:
       - user_id
+    AdviceKindEnum:
+      enum:
+      - DO
+      - DONT
+      type: string
+      description: |-
+        * `DO` - Do
+        * `DONT` - Dont
     Answer:
       type: object
       properties:
@@ -6506,6 +6646,32 @@ components:
       - id
       - name
       - slug
+    ConsultationInvoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_fee_poisha:
+          type: integer
+          readOnly: true
+        platform_fee_poisha:
+          type: integer
+          readOnly: true
+        total_poisha:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceStatusEnum'
+          readOnly: true
+      required:
+      - doctor_fee_poisha
+      - id
+      - platform_fee_poisha
+      - status
+      - total_poisha
     ConsultationStatusEnum:
       enum:
       - SUBMITTED
@@ -6514,6 +6680,8 @@ components:
       - AWAITING_PATIENT
       - RESPONDED
       - PRESCRIBED
+      - COMPLETED
+      - CLOSED_UNPAID
       - CLOSED
       - CANCELLED
       type: string
@@ -6524,6 +6692,8 @@ components:
         * `AWAITING_PATIENT` - Awaiting Patient
         * `RESPONDED` - Responded
         * `PRESCRIBED` - Prescribed
+        * `COMPLETED` - Completed
+        * `CLOSED_UNPAID` - Closed Unpaid
         * `CLOSED` - Closed
         * `CANCELLED` - Cancelled
     ConsultationSubmitRequest:
@@ -6992,6 +7162,168 @@ components:
       - thermal_preference
       - weather_modalities
       - weight_kg
+    DoctorPrescriptionDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        previous_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PrescriptionStatusEnum'
+          readOnly: true
+        report_after_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        doctor_notes:
+          type: string
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorPrescriptionItem'
+          readOnly: true
+        advice:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptionAdvice'
+          readOnly: true
+      required:
+      - advice
+      - doctor_notes
+      - id
+      - issued_at
+      - items
+      - previous_id
+      - report_after_date
+      - status
+      - version
+    DoctorPrescriptionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+        remedy_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        remedy_name:
+          type: string
+          readOnly: true
+        remedy_name_bn:
+          type: string
+          readOnly: true
+        is_catalog:
+          type: boolean
+          readOnly: true
+        potency:
+          allOf:
+          - $ref: '#/components/schemas/PotenciesEnum'
+          readOnly: true
+        form:
+          allOf:
+          - $ref: '#/components/schemas/FormEnum'
+          readOnly: true
+        dosage:
+          type: string
+          readOnly: true
+        frequency:
+          type: string
+          readOnly: true
+        duration:
+          type: string
+          readOnly: true
+      required:
+      - dosage
+      - duration
+      - form
+      - frequency
+      - id
+      - is_catalog
+      - position
+      - potency
+      - remedy_id
+      - remedy_name
+      - remedy_name_bn
+    DoctorPrescriptionVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        previous_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        previous_version:
+          type: integer
+          nullable: true
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PrescriptionStatusEnum'
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        item_count:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - issued_at
+      - item_count
+      - previous_id
+      - previous_version
+      - status
+      - version
+    DoctorPrescriptionWorkspace:
+      type: object
+      properties:
+        consultation_status:
+          $ref: '#/components/schemas/ConsultationStatusEnum'
+        doctor:
+          $ref: '#/components/schemas/PrescriptionDoctor'
+        latest:
+          allOf:
+          - $ref: '#/components/schemas/DoctorPrescriptionDetail'
+          nullable: true
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorPrescriptionVersion'
+      required:
+      - consultation_status
+      - doctor
+      - latest
+      - versions
     DoctorSignUpRequest:
       type: object
       properties:
@@ -7125,6 +7457,20 @@ components:
       description: |-
         * `ACTIVE` - Active
         * `INACTIVE` - Inactive
+    InvoiceStatusEnum:
+      enum:
+      - UNPAID
+      - PAID
+      - WAIVED
+      - VOID
+      - CLOSED
+      type: string
+      description: |-
+        * `UNPAID` - Unpaid
+        * `PAID` - Paid
+        * `WAIVED` - Waived
+        * `VOID` - Void
+        * `CLOSED` - Closed
     Live:
       type: object
       properties:
@@ -7164,6 +7510,34 @@ components:
       - division
       - id
       - upazila
+    LockedPrescription:
+      type: object
+      description: 'Strict locked view: never touches items, advice, or doctor_notes.'
+      properties:
+        locked:
+          type: boolean
+          default: true
+        summary:
+          $ref: '#/components/schemas/LockedPrescriptionSummary'
+        invoice:
+          $ref: '#/components/schemas/ConsultationInvoice'
+      required:
+      - invoice
+      - summary
+    LockedPrescriptionSummary:
+      type: object
+      properties:
+        doctor_name:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        remedy_count:
+          type: integer
+      required:
+      - doctor_name
+      - issued_at
+      - remedy_count
     LogInRequest:
       type: object
       properties:
@@ -7981,6 +8355,11 @@ components:
           items:
             $ref: '#/components/schemas/QuestionSet'
           readOnly: true
+        prescription_summary:
+          allOf:
+          - $ref: '#/components/schemas/PatientPrescriptionBanner'
+          nullable: true
+          readOnly: true
       required:
       - assigned_at
       - cancel_reason
@@ -7995,6 +8374,7 @@ components:
       - id
       - illness
       - opened_at
+      - prescription_summary
       - question_sets
       - status
       - submitted_at
@@ -8215,6 +8595,144 @@ components:
       - order_code
       - order_id
       - tran_id
+    PatientPrescriptionBanner:
+      type: object
+      properties:
+        issued_at:
+          type: string
+          format: date-time
+        remedy_count:
+          type: integer
+        unlocked:
+          type: boolean
+        total_poisha:
+          type: integer
+        invoice_status:
+          type: string
+      required:
+      - invoice_status
+      - issued_at
+      - remedy_count
+      - total_poisha
+      - unlocked
+    PatientPrescriptionDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor:
+          allOf:
+          - $ref: '#/components/schemas/PrescriptionDoctor'
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        report_after_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientPrescriptionItem'
+          readOnly: true
+        advice:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptionAdvice'
+          readOnly: true
+      required:
+      - advice
+      - doctor
+      - id
+      - issued_at
+      - items
+      - report_after_date
+      - version
+    PatientPrescriptionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+        remedy_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        remedy_name:
+          type: string
+          readOnly: true
+        remedy_name_bn:
+          type: string
+          readOnly: true
+        remedy_slug:
+          type: string
+          nullable: true
+          readOnly: true
+        is_catalog:
+          type: boolean
+          readOnly: true
+        potency:
+          allOf:
+          - $ref: '#/components/schemas/PotenciesEnum'
+          readOnly: true
+        form:
+          allOf:
+          - $ref: '#/components/schemas/FormEnum'
+          readOnly: true
+        dosage:
+          type: string
+          readOnly: true
+        frequency:
+          type: string
+          readOnly: true
+        duration:
+          type: string
+          readOnly: true
+        buyable:
+          type: boolean
+          readOnly: true
+        unit_price_poisha:
+          type: integer
+          nullable: true
+          readOnly: true
+        unavailable_reason:
+          allOf:
+          - $ref: '#/components/schemas/UnavailableReasonEnum'
+          nullable: true
+          readOnly: true
+      required:
+      - buyable
+      - dosage
+      - duration
+      - form
+      - frequency
+      - id
+      - is_catalog
+      - position
+      - potency
+      - remedy_id
+      - remedy_name
+      - remedy_name_bn
+      - remedy_slug
+      - unavailable_reason
+      - unit_price_poisha
+    PatientPrescriptionResponse:
+      oneOf:
+      - $ref: '#/components/schemas/LockedPrescription'
+      - $ref: '#/components/schemas/UnlockedPrescription'
     PatientPrice:
       type: object
       properties:
@@ -8484,6 +9002,128 @@ components:
       description: |-
         * `en` - English
         * `bn` - Bangla
+    PrescriptionAdvice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/AdviceKindEnum'
+          readOnly: true
+        text:
+          type: string
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - kind
+      - position
+      - text
+    PrescriptionAdviceInputRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/AdviceKindEnum'
+        text:
+          type: string
+          minLength: 1
+          maxLength: 300
+      required:
+      - kind
+      - text
+    PrescriptionDoctor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_code:
+          type: string
+          readOnly: true
+          nullable: true
+        full_name:
+          type: string
+          readOnly: true
+        registration_no:
+          type: string
+          readOnly: true
+        qualifications:
+          type: string
+          readOnly: true
+      required:
+      - doctor_code
+      - full_name
+      - id
+      - qualifications
+      - registration_no
+    PrescriptionIssueRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptionItemInputRequest'
+        advice:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrescriptionAdviceInputRequest'
+        report_after_date:
+          type: string
+          format: date
+          nullable: true
+        doctor_notes:
+          type: string
+          default: ''
+          maxLength: 5000
+      required:
+      - items
+    PrescriptionItemInputRequest:
+      type: object
+      properties:
+        remedy_id:
+          type: string
+          format: uuid
+          nullable: true
+        remedy_name:
+          type: string
+          default: ''
+          maxLength: 150
+        potency:
+          $ref: '#/components/schemas/PotenciesEnum'
+        form:
+          $ref: '#/components/schemas/FormEnum'
+        dosage:
+          type: string
+          minLength: 1
+          maxLength: 100
+        frequency:
+          type: string
+          minLength: 1
+          maxLength: 100
+        duration:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - dosage
+      - duration
+      - form
+      - frequency
+      - potency
+    PrescriptionStatusEnum:
+      enum:
+      - ACTIVE
+      - SUPERSEDED
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `SUPERSEDED` - Superseded
     ProfileCompleteness:
       type: object
       properties:
@@ -9188,6 +9828,24 @@ components:
         * `CHILLY` - Chilly
         * `HOT` - Hot
         * `AMBIVALENT` - Ambivalent
+    UnavailableReasonEnum:
+      type: string
+      enum:
+      - NOT_LISTED
+      - NO_PRICE
+    UnlockedPrescription:
+      type: object
+      properties:
+        locked:
+          type: boolean
+          default: false
+        prescription:
+          $ref: '#/components/schemas/PatientPrescriptionDetail'
+        invoice:
+          $ref: '#/components/schemas/ConsultationInvoice'
+      required:
+      - invoice
+      - prescription
     UrgencyEnum:
       enum:
       - ROUTINE

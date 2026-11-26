@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "apps.payments",
     "apps.doctors",
     "apps.consultations",
+    "apps.prescriptions",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [
@@ -238,6 +240,8 @@ REFRESH_COOKIE_SECURE = True
 # Shared with the web app, which sends it when naming the visitor it is forwarding for.
 PROXY_SHARED_SECRET = env.str("PROXY_SHARED_SECRET", default="")
 DELIVERY_CHARGE_POISHA = env.int("DELIVERY_CHARGE_POISHA", default=6000)
+PLATFORM_FEE_MODE = env.str("PLATFORM_FEE_MODE", default="FIXED")
+PLATFORM_FEE_VALUE = env.int("PLATFORM_FEE_VALUE", default=0)
 PAYMENT_GATEWAY = env.str("PAYMENT_GATEWAY", default="apps.payments.gateways.mock.MockGateway")
 WEB_APP_URL = env.str("WEB_APP_URL", default="http://localhost:3000")
 
@@ -271,6 +275,9 @@ SPECTACULAR_SETTINGS = {
         "ThermalPreferenceEnum": "apps.patients.models.PatientProfile.ThermalPreference",
         "ShopStaffRoleEnum": "apps.shops.models.ShopStaff.Role",
         "ShopUnitEnum": "apps.shops.models.ShopRemedy.Unit",
+        "PrescriptionStatusEnum": "apps.prescriptions.models.Prescription.Status",
+        "AdviceKindEnum": "apps.prescriptions.models.PrescriptionAdvice.Kind",
+        "InvoiceStatusEnum": "apps.billing.models.ConsultationInvoice.Status",
     },
 }
 

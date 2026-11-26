@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 Status = DoctorConsultation.Status
 
 MAX_OPEN_CONSULTATIONS = 3
-CLOSED_STATUSES = (Status.CLOSED, Status.CANCELLED)
+CLOSED_STATUSES = (Status.CLOSED, Status.COMPLETED, Status.CLOSED_UNPAID, Status.CANCELLED)
 
 ALLOWED_TRANSITIONS: dict[str, set[str]] = {
     "": {Status.SUBMITTED},
@@ -66,7 +66,9 @@ ALLOWED_TRANSITIONS: dict[str, set[str]] = {
         Status.ASSIGNED,
         Status.SUBMITTED,
     },
-    Status.PRESCRIBED: {Status.CLOSED},
+    Status.PRESCRIBED: {Status.CLOSED, Status.COMPLETED, Status.CLOSED_UNPAID},
+    Status.COMPLETED: set(),
+    Status.CLOSED_UNPAID: set(),
     Status.CLOSED: set(),
     Status.CANCELLED: set(),
 }
@@ -187,6 +189,8 @@ def withdraw(
     consultation: DoctorConsultation, patient: Patient, reason: str = ""
 ) -> DoctorConsultation:
     """Cancel a patient's own consultation while it is still waiting in queue."""
+    from apps.billing.services import void_unpaid_invoice
+
     locked = DoctorConsultation.objects.select_for_update().get(pk=consultation.pk, patient=patient)
     if locked.status != Status.SUBMITTED:
         raise ConsultationNotCancellable()
@@ -202,7 +206,89 @@ def withdraw(
         note=clean_reason,
     )
     locked.save(update_fields=["status", "cancelled_at", "cancel_reason", "updated_at"])
+    void_unpaid_invoice(locked)
     return locked
+
+
+def move_to_prescribed(
+    consultation: DoctorConsultation,
+    *,
+    doctor: Doctor,
+    note: str = "",
+) -> ConsultationStatusHistory:
+    """Transition an open consultation under review to PRESCRIBED."""
+    if consultation.status == Status.ASSIGNED:
+        consultation.opened_at = consultation.opened_at or timezone.now()
+        _move(
+            consultation,
+            Status.IN_REVIEW,
+            actor_type="doctor",
+            actor_id=str(doctor.pk),
+            actor_name=doctor.full_name,
+        )
+    elif consultation.status not in (
+        Status.IN_REVIEW,
+        Status.AWAITING_PATIENT,
+        Status.RESPONDED,
+    ):
+        raise InvalidConsultationTransition()
+
+    entry = _move(
+        consultation,
+        Status.PRESCRIBED,
+        actor_type="doctor",
+        actor_id=str(doctor.pk),
+        actor_name=doctor.full_name,
+        note=note,
+    )
+    consultation.save(update_fields=["status", "opened_at", "updated_at"])
+    return entry
+
+
+def move_to_completed(
+    consultation: DoctorConsultation,
+    *,
+    actor_type: str,
+    actor_id: str = "",
+    actor_name: str = "",
+    note: str = "",
+) -> ConsultationStatusHistory | None:
+    """Transition a PRESCRIBED consultation to COMPLETED when paid or waived."""
+    if consultation.status != Status.PRESCRIBED:
+        return None
+    consultation.closed_at = consultation.closed_at or timezone.now()
+    entry = _move(
+        consultation,
+        Status.COMPLETED,
+        actor_type=actor_type,
+        actor_id=actor_id,
+        actor_name=actor_name,
+        note=note,
+    )
+    consultation.save(update_fields=["status", "closed_at", "updated_at"])
+    return entry
+
+
+def move_to_closed_unpaid(
+    consultation: DoctorConsultation,
+    *,
+    staff_user: User,
+    note: str = "",
+) -> ConsultationStatusHistory | None:
+    """Transition a PRESCRIBED consultation to CLOSED_UNPAID when staff closes its invoice."""
+    if consultation.status != Status.PRESCRIBED:
+        return None
+    consultation.closed_at = consultation.closed_at or timezone.now()
+    entry = _move(
+        consultation,
+        Status.CLOSED_UNPAID,
+        actor_type="staff",
+        actor_id=str(staff_user.pk),
+        actor_name=staff_user.get_full_name() or staff_user.username,
+        note=note,
+    )
+    consultation.save(update_fields=["status", "closed_at", "updated_at"])
+    return entry
 
 
 def _send_consultation_sms(phone: str, message: str) -> None:

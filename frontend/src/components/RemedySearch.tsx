@@ -48,12 +48,16 @@ export function RemedySearch({
   hint,
   excludeIds = [],
   onPick,
+  onPickCustom,
+  customOptionLabel,
   client,
 }: {
   label: string;
   hint?: string;
   excludeIds?: readonly string[];
   onPick: (remedy: RemedyOption) => void;
+  onPickCustom?: (name: string) => void;
+  customOptionLabel?: (name: string) => string;
   client?: ApiClient;
 }) {
   const { t } = useMessages<CommonMessages>();
@@ -67,13 +71,21 @@ export function RemedySearch({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
 
-  const query = useDebouncedValue(text.trim());
+  const trimmed = text.trim();
+  const query = useDebouncedValue(trimmed);
   const { status, remedies } = useRemedySearch(client ?? defaultClient, query);
   const excluded = new Set(excludeIds);
   const available = remedies.filter((item) => !excluded.has(item.id));
-  const showPopup = open && text.trim() !== "";
-  const listVisible = showPopup && status === "ready" && available.length > 0;
-  const navigable = listVisible && query === text.trim();
+  const showPopup = open && trimmed !== "";
+  const canCustom = Boolean(
+    onPickCustom &&
+      trimmed !== "" &&
+      status === "ready" &&
+      !available.some((item) => item.name.toLowerCase() === trimmed.toLowerCase()),
+  );
+  const optionCount = available.length + (canCustom ? 1 : 0);
+  const listVisible = showPopup && status === "ready" && optionCount > 0;
+  const navigable = listVisible && query === trimmed;
 
   function choose(remedy: RemedyOption) {
     setText("");
@@ -83,22 +95,35 @@ export function RemedySearch({
     inputRef.current?.focus();
   }
 
+  function chooseCustom() {
+    if (!onPickCustom || !trimmed) return;
+    setText("");
+    setOpen(false);
+    setActive(-1);
+    onPickCustom(trimmed);
+    inputRef.current?.focus();
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Escape") {
       setOpen(false);
       setActive(-1);
-    } else if (event.key === "ArrowDown" && !open && available.length > 0) {
+    } else if (event.key === "ArrowDown" && !open && optionCount > 0) {
       event.preventDefault();
       setOpen(true);
     } else if (event.key === "ArrowDown" && navigable) {
       event.preventDefault();
-      setActive((index) => Math.min(index + 1, available.length - 1));
+      setActive((index) => Math.min(index + 1, optionCount - 1));
     } else if (event.key === "ArrowUp" && navigable) {
       event.preventDefault();
       setActive((index) => Math.max(index - 1, 0));
     } else if (event.key === "Enter" && navigable && active >= 0) {
       event.preventDefault();
-      choose(available[active]);
+      if (active < available.length) {
+        choose(available[active]);
+      } else if (canCustom) {
+        chooseCustom();
+      }
     }
   }
 
@@ -165,7 +190,7 @@ export function RemedySearch({
             onMouseDown={(event) => event.preventDefault()}
             className="absolute inset-x-0 top-full z-10 mt-1 max-h-[min(60dvh,24rem)] overflow-y-auto rounded-panel border border-line bg-surface shadow-lg"
           >
-            {status === "ready" && available.length > 0 && (
+            {status === "ready" && optionCount > 0 && (
               <ul id={listId} role="listbox" aria-label={label}>
                 {available.map((remedy, index) => (
                   <li
@@ -188,6 +213,22 @@ export function RemedySearch({
                     )}
                   </li>
                 ))}
+                {canCustom && (
+                  <li
+                    key="__custom__"
+                    id={`${id}-option-${available.length}`}
+                    role="option"
+                    aria-selected={active === available.length}
+                    onClick={chooseCustom}
+                    className={`flex min-h-12 cursor-pointer items-center justify-between gap-2 border-t border-line px-3.5 py-2 text-base ${
+                      active === available.length ? "bg-mist" : "hover:bg-mist/60"
+                    }`}
+                  >
+                    <span className="font-normal text-ink">
+                      {customOptionLabel ? customOptionLabel(trimmed) : trimmed}
+                    </span>
+                  </li>
+                )}
               </ul>
             )}
             {status === "loading" && (
@@ -195,7 +236,7 @@ export function RemedySearch({
                 {t("remedySearch.loading")}
               </p>
             )}
-            {status === "ready" && available.length === 0 && (
+            {status === "ready" && optionCount === 0 && (
               <p role="status" className="px-3.5 py-3 text-ink-muted">
                 {t("remedySearch.none")}
               </p>

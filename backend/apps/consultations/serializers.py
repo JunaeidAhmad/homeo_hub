@@ -168,11 +168,20 @@ class PatientConsultationSummarySerializer(serializers.ModelSerializer):
         return obj.assigned_doctor.full_name if obj.assigned_doctor else None
 
 
+class PatientPrescriptionBannerSerializer(serializers.Serializer):
+    issued_at = serializers.DateTimeField()
+    remedy_count = serializers.IntegerField()
+    unlocked = serializers.BooleanField()
+    total_poisha = serializers.IntegerField()
+    invoice_status = serializers.CharField()
+
+
 class PatientConsultationDetailSerializer(serializers.ModelSerializer):
     illness = ConsultationIllnessSerializer(read_only=True)
     doctor = ConsultationDoctorSummarySerializer(source="assigned_doctor", read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
     question_sets = QuestionSetSerializer(many=True, read_only=True)
+    prescription_summary = serializers.SerializerMethodField()
 
     class Meta:
         model = DoctorConsultation
@@ -197,8 +206,33 @@ class PatientConsultationDetailSerializer(serializers.ModelSerializer):
             "updated_at",
             "history",
             "question_sets",
+            "prescription_summary",
         ]
         read_only_fields = fields
+
+    @extend_schema_field(PatientPrescriptionBannerSerializer(allow_null=True))
+    def get_prescription_summary(self, obj: DoctorConsultation) -> dict[str, Any] | None:
+        from apps.billing.models import ConsultationInvoice
+        from apps.prescriptions.models import Prescription
+
+        invoice = getattr(obj, "invoice", None)
+        if invoice is None:
+            return None
+        active = (
+            Prescription.objects.filter(consultation=obj, status=Prescription.Status.ACTIVE)
+            .only("id", "issued_at")
+            .first()
+        )
+        if active is None:
+            return None
+        return {
+            "issued_at": active.issued_at,
+            "remedy_count": active.items.count(),
+            "unlocked": invoice.status
+            in (ConsultationInvoice.Status.PAID, ConsultationInvoice.Status.WAIVED),
+            "total_poisha": invoice.total_poisha,
+            "invoice_status": invoice.status,
+        }
 
 
 class ConsultationSubmitSerializer(serializers.Serializer):

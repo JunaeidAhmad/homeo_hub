@@ -26,6 +26,7 @@ type FilterKey =
   | "AWAITING_PATIENT"
   | "RESPONDED"
   | "PRESCRIBED"
+  | "COMPLETED"
   | "CLOSED";
 
 const FILTERS: FilterKey[] = [
@@ -35,6 +36,7 @@ const FILTERS: FilterKey[] = [
   "AWAITING_PATIENT",
   "RESPONDED",
   "PRESCRIBED",
+  "COMPLETED",
   "CLOSED",
 ];
 
@@ -45,6 +47,8 @@ export const DOCTOR_STATUS_BADGE: Record<CaseStatus, string> = {
   AWAITING_PATIENT: "bg-amber-wash text-ink",
   RESPONDED: "bg-primary/15 text-primary-deep",
   PRESCRIBED: "bg-primary/15 text-primary-deep",
+  COMPLETED: "bg-primary/15 text-primary-deep",
+  CLOSED_UNPAID: "bg-mist text-ink-muted",
   CLOSED: "bg-mist text-ink-muted",
   CANCELLED: "bg-mist text-danger",
 };

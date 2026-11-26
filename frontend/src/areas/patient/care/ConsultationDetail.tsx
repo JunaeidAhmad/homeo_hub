@@ -13,7 +13,7 @@ import { AnswerView } from "@/components/questions/AnswerView";
 import { useDescribeErrorWith } from "@/hooks/use-describe-error";
 import { useSubmitWith } from "@/hooks/use-submit";
 import { fill } from "@/i18n/catalog";
-import { numberFormat } from "@/i18n/format";
+import { formatMoney, numberFormat } from "@/i18n/format";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 
@@ -30,7 +30,7 @@ const STEPS: {
   { key: "assigned", statuses: ["ASSIGNED"] },
   { key: "inReview", statuses: ["IN_REVIEW", "AWAITING_PATIENT", "RESPONDED"] },
   { key: "prescribed", statuses: ["PRESCRIBED"] },
-  { key: "closed", statuses: ["CLOSED"] },
+  { key: "closed", statuses: ["CLOSED", "COMPLETED", "CLOSED_UNPAID"] },
 ];
 
 function stepIndexFor(status: ConsultationStatus): number {
@@ -187,7 +187,7 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
         <StatusTimeline
           steps={timelineSteps}
           currentIndex={completedCount}
-          allDone={caseData.status === "CLOSED"}
+          allDone={caseData.status === "CLOSED" || caseData.status === "COMPLETED"}
           terminalStop={
             isCancelled
               ? {
@@ -195,10 +195,51 @@ export function ConsultationDetail({ caseId }: { caseId: string }) {
                   tone: "danger",
                   timestamp: terminalEntry?.created_at ?? null,
                 }
-              : null
+              : caseData.status === "CLOSED_UNPAID"
+                ? {
+                    label: t("patient.care.status.CLOSED_UNPAID"),
+                    tone: "muted",
+                    timestamp: caseData.closed_at ?? null,
+                  }
+                : null
           }
         />
       </section>
+
+      {caseData.prescription_summary && (
+        <section
+          className={`flex flex-col gap-3 rounded-panel border p-4 ${
+            caseData.prescription_summary.unlocked
+              ? "border-line bg-surface"
+              : "border-amber/40 bg-amber-wash"
+          }`}
+        >
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-base font-semibold text-ink">
+              {caseData.prescription_summary.unlocked
+                ? t("patient.rx.bannerReady")
+                : fill(t("patient.rx.bannerLocked"), {
+                    name: caseData.doctor?.full_name ?? "",
+                  })}
+            </h2>
+            {!caseData.prescription_summary.unlocked && (
+              <p className="text-sm text-ink-soft">
+                {fill(t("patient.rx.bannerLockedHint"), {
+                  total: formatMoney(locale, caseData.prescription_summary.total_poisha),
+                })}
+              </p>
+            )}
+          </div>
+          <Link
+            href={`/care/${caseData.id}/prescription`}
+            className="inline-flex min-h-12 items-center justify-center rounded-control bg-primary px-5 text-base font-bold text-surface"
+          >
+            {caseData.prescription_summary.unlocked
+              ? t("patient.rx.bannerViewBtn")
+              : t("patient.rx.bannerOpenBtn")}
+          </Link>
+        </section>
+      )}
 
       {caseData.question_sets.some((qset) => !qset.answered_at) && (
         <section className="flex flex-col gap-3 rounded-panel border border-amber/40 bg-amber-wash p-4">

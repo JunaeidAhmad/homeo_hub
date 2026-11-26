@@ -26,6 +26,8 @@ const CHIPS: Chip[] = [
   { key: "AWAITING_PATIENT", status: "AWAITING_PATIENT" },
   { key: "RESPONDED", status: "RESPONDED" },
   { key: "PRESCRIBED", status: "PRESCRIBED" },
+  { key: "COMPLETED", status: "COMPLETED" },
+  { key: "CLOSED_UNPAID", status: "CLOSED_UNPAID" },
   { key: "CLOSED", status: "CLOSED" },
   { key: "CANCELLED", status: "CANCELLED" },
   { key: "all" },
@@ -38,6 +40,8 @@ export const CASE_STATUS_BADGE: Record<CaseStatus, string> = {
   AWAITING_PATIENT: "bg-amber-wash text-ink",
   RESPONDED: "bg-mist text-ink",
   PRESCRIBED: "bg-primary/15 text-primary-deep",
+  COMPLETED: "bg-primary/15 text-primary-deep",
+  CLOSED_UNPAID: "bg-mist text-ink-muted",
   CLOSED: "bg-primary/15 text-primary-deep",
   CANCELLED: "bg-mist text-danger",
 };

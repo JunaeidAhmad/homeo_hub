@@ -18,4 +18,6 @@ urlpatterns = [
     path("", include("apps.payments.urls")),
     path("", include("apps.doctors.urls")),
     path("", include("apps.consultations.urls")),
+    path("", include("apps.prescriptions.urls")),
+    path("", include("apps.billing.urls")),
 ]

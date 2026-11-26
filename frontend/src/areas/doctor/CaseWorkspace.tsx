@@ -13,6 +13,7 @@ import type { DoctorMessages } from "@/i18n/messages/doctor";
 import { useMessages } from "@/i18n/provider";
 
 import { DOCTOR_STATUS_BADGE } from "./DoctorQueue";
+import { PrescriptionEditor } from "./PrescriptionEditor";
 import { QuestionsPanel } from "./QuestionsPanel";
 import { useDoctorSession } from "./session";
 
@@ -315,9 +316,13 @@ export function CaseWorkspace({ caseId }: { caseId: string }) {
   );
 
   const prescriptionPanel = (
-    <div className="rounded-panel border border-line bg-surface p-4 text-sm text-ink-soft">
-      {t("doctor.case.prescriptionSoon")}
-    </div>
+    <PrescriptionEditor
+      caseId={caseData.id}
+      caseStatus={caseData.status}
+      onStatusChange={(nextStatus) =>
+        setCaseData((now) => (now ? { ...now, status: nextStatus } : now))
+      }
+    />
   );
 
   return (

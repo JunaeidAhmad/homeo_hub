@@ -33,6 +33,14 @@ export const CONSULTATION_STATUS_META: Record<
     labelKey: "patient.care.status.PRESCRIBED",
     badgeClass: "bg-primary/15 text-primary-deep",
   },
+  COMPLETED: {
+    labelKey: "patient.care.status.COMPLETED",
+    badgeClass: "bg-primary/15 text-primary-deep",
+  },
+  CLOSED_UNPAID: {
+    labelKey: "patient.care.status.CLOSED_UNPAID",
+    badgeClass: "bg-mist text-ink-muted",
+  },
   CLOSED: {
     labelKey: "patient.care.status.CLOSED",
     badgeClass: "bg-primary/15 text-primary-deep",

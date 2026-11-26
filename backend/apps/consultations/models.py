@@ -13,6 +13,8 @@ class DoctorConsultation(models.Model):
         AWAITING_PATIENT = "AWAITING_PATIENT"
         RESPONDED = "RESPONDED"
         PRESCRIBED = "PRESCRIBED"
+        COMPLETED = "COMPLETED"
+        CLOSED_UNPAID = "CLOSED_UNPAID"
         CLOSED = "CLOSED"
         CANCELLED = "CANCELLED"
 
