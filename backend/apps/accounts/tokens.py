@@ -21,7 +21,11 @@ from .models import RefreshToken
 from .principals import load_principal
 
 ACCESS_LIFETIME = timedelta(minutes=15)
-REFRESH_LIFETIME = {"patient": timedelta(days=30), "staff": timedelta(hours=12)}
+REFRESH_LIFETIME = {
+    "patient": timedelta(days=30),
+    "staff": timedelta(hours=12),
+    "doctor": timedelta(days=7),
+}
 # For these, the lifetime runs from sign-in and refreshing never extends it. For the
 # others each refresh starts the clock again.
 ENDS_AFTER_SIGN_IN = {"staff"}

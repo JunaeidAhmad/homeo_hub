@@ -12,6 +12,7 @@ from django.db import models
 class OtpChallenge(models.Model):
     class Purpose(models.TextChoices):
         SIGNUP = "SIGNUP"
+        DOCTOR_SIGNUP = "DOCTOR_SIGNUP"
         PASSWORD_RESET = "PASSWORD_RESET"  # noqa: S105 (a purpose, not a password)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

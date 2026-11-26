@@ -6,4 +6,5 @@ export const DOCTOR_NAV: readonly {
 }[] = [
   { href: "/doctor", label: "doctor.nav.queue" },
   { href: "/doctor/patients", label: "doctor.nav.patients" },
+  { href: "/doctor/application", label: "doctor.nav.application" },
 ];

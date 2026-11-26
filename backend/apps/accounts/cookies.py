@@ -13,6 +13,7 @@ from .tokens import Session
 COOKIES = {
     "patient": ("hh_refresh", "/api/v1/auth/"),
     "staff": ("hh_staff_refresh", "/api/v1/auth/staff/"),
+    "doctor": ("hh_doctor_refresh", "/api/v1/auth/doctor/"),
 }
 
 

@@ -1,6 +1,5 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { admin } from "@/i18n/messages/admin";
+import { DoctorDirectory } from "@/areas/admin/doctors/DoctorDirectory";
 
-export default function Page() {
-  return <PlaceholderPage area={admin} titleKey="admin.doctors.title" />;
+export default function DoctorsPage() {
+  return <DoctorDirectory />;
 }

@@ -2,27 +2,39 @@
 
 import { useEffect, useState } from "react";
 
-import { useSession } from "@/areas/patient/session/SessionProvider";
+import type { ApiClient } from "@/api/client";
+import { FormAlert } from "@/components/form/fields";
+import { useDescribeErrorWith } from "@/hooks/use-describe-error";
+import { useSubmitWith } from "@/hooks/use-submit";
 import { fill } from "@/i18n/catalog";
 import { numberFormat } from "@/i18n/format";
-import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
-import { FormAlert } from "@/components/form/fields";
 import { pendingFrom, type PendingCode } from "./pending-code";
-import { useSubmit } from "./use-submit";
+
+export type ResendLabels = {
+  resent: string;
+  resendIn: string;
+  resend: string;
+};
 
 /** A countdown, then a button that texts a fresh code. */
 export function ResendCode({
   pending,
+  publicApi,
   onResent,
+  errorArea = "auth",
+  labels,
 }: {
   pending: PendingCode;
+  publicApi: ApiClient;
   onResent: (next: PendingCode) => void;
+  errorArea?: string;
+  labels?: ResendLabels;
 }) {
-  const { t, locale } = useMessages<AuthMessages>();
-  const { publicApi } = useSession();
-  const { pending: sending, problems, submit } = useSubmit();
+  const { t, locale } = useMessages();
+  const describe = useDescribeErrorWith(errorArea);
+  const { pending: sending, problems, submit } = useSubmitWith(describe);
   const [now, setNow] = useState(() => Date.now());
   const [resent, setResent] = useState(false);
 
@@ -36,13 +48,19 @@ export function ResendCode({
   const seconds = numberFormat(locale, { minimumIntegerDigits: 2 }).format(secondsLeft % 60);
   const time = `${minutes}:${seconds}`;
 
+  const copy: ResendLabels = labels ?? {
+    resent: t("auth.verify.resent"),
+    resendIn: t("auth.verify.resendIn"),
+    resend: t("auth.verify.resend"),
+  };
+
   return (
     <div className="flex flex-col items-start gap-2">
       <p role="status" className="text-[15px] font-medium text-primary empty:hidden">
-        {resent && t("auth.verify.resent")}
+        {resent && copy.resent}
       </p>
       {secondsLeft > 0 ? (
-        <p className="text-[15px] text-ink-muted">{fill(t("auth.verify.resendIn"), { time })}</p>
+        <p className="text-[15px] text-ink-muted">{fill(copy.resendIn, { time })}</p>
       ) : (
         <button
           type="button"
@@ -62,7 +80,7 @@ export function ResendCode({
           }
           className="min-h-11 font-semibold text-primary underline disabled:opacity-60"
         >
-          {t("auth.verify.resend")}
+          {copy.resend}
         </button>
       )}
       {problems.form && <FormAlert>{problems.form}</FormAlert>}

@@ -45,11 +45,13 @@ function useAreaSearch(client: ApiClient, query: string) {
  * are forgiven. `value` is the chosen area; editing the text forgets it (`onChange(null)`).
  */
 export function LocationPicker({
+  label,
   value,
   onChange,
   error,
   client,
 }: {
+  label?: string;
   value: Location | null;
   onChange: (area: Location | null) => void;
   /** A form's complaint about this field. */
@@ -133,7 +135,7 @@ export function LocationPicker({
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={id} className="text-[15px] font-semibold">
-        {t("location.label")}
+        {label ?? t("location.label")}
       </label>
       <div
         className="relative"

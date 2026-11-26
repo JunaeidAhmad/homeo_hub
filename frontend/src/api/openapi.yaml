@@ -4,6 +4,390 @@ info:
   version: 1.0.0
   description: HomeoHub REST API (v1).
 paths:
+  /api/v1/admin/doctors/:
+    get:
+      operationId: admin_doctors_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - APPROVED
+          - PENDING_APPROVAL
+          - REJECTED
+          - SUSPENDED
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminDoctorSummaryList'
+          description: ''
+  /api/v1/admin/doctors/{id}/:
+    get:
+      operationId: admin_doctors_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDoctorDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    patch:
+      operationId: admin_doctors_update_fee
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminDoctorFeeUpdateRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDoctorDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/doctors/{id}/approve/:
+    post:
+      operationId: admin_doctors_approve
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminDoctorApproveRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDoctorDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/doctors/{id}/reactivate/:
+    post:
+      operationId: admin_doctors_reactivate
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDoctorDetail'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/doctors/{id}/reject/:
+    post:
+      operationId: admin_doctors_reject
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminDoctorReasonRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDoctorDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/doctors/{id}/suspend/:
+    post:
+      operationId: admin_doctors_suspend
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminDoctorReasonRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDoctorDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/illness-categories/:
     get:
       operationId: admin_illness_categories_list
@@ -2106,6 +2490,185 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/auth/doctor/login/:
+    post:
+      operationId: auth_doctor_login
+      description: Base for endpoints used before signing in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorLogInRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/doctor/logout/:
+    post:
+      operationId: auth_doctor_logout
+      description: Acts on one kind of user's refresh cookie.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/doctor/refresh/:
+    post:
+      operationId: auth_doctor_refresh
+      description: Acts on one kind of user's refresh cookie.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/doctor/signup/:
+    post:
+      operationId: auth_doctor_signup
+      description: Base for endpoints used before signing in.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorSignUpRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/auth/doctor/verify/:
+    post:
+      operationId: auth_doctor_verify
+      description: Base for endpoints used before signing in.
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - web
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCodeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/auth/logout/:
     post:
       operationId: auth_logout
@@ -2592,6 +3155,138 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/application/:
+    patch:
+      operationId: doctor_application_update
+      tags:
+      - doctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorApplicationUpdateRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorMe'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/application/certificates/:
+    post:
+      operationId: doctor_certificate_upload
+      tags:
+      - doctor
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CertificateUploadRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorCertificate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/application/certificates/{id}/:
+    delete:
+      operationId: doctor_certificate_delete
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '204':
+          description: No response body
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/application/resubmit/:
+    post:
+      operationId: doctor_application_resubmit
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorMe'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/me/:
+    get:
+      operationId: doctor_me
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorMe'
+          description: ''
+        '401':
           content:
             application/json:
               schema:
@@ -3263,6 +3958,176 @@ components:
       - shop_name
       - shop_remedy_id
       - unit
+    AdminDoctorApproveRequest:
+      type: object
+      properties:
+        consultation_fee_poisha:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+      required:
+      - consultation_fee_poisha
+    AdminDoctorDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_code:
+          type: string
+          readOnly: true
+          nullable: true
+        phone:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        registration_no:
+          type: string
+          readOnly: true
+        qualifications:
+          type: string
+          readOnly: true
+        experience_years:
+          type: integer
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          readOnly: true
+        chamber_address:
+          type: string
+          readOnly: true
+        requested_fee_poisha:
+          type: integer
+          readOnly: true
+        consultation_fee_poisha:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DoctorStatusEnum'
+          readOnly: true
+        rejection_reason:
+          type: string
+          readOnly: true
+        suspension_reason:
+          type: string
+          readOnly: true
+        preferred_language:
+          allOf:
+          - $ref: '#/components/schemas/PreferredLanguageEnum'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        approved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorCertificate'
+          readOnly: true
+        approved_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        rejected_at:
+          type: string
+          format: date-time
+          nullable: true
+        rejected_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        suspended_at:
+          type: string
+          format: date-time
+          nullable: true
+        suspended_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - approved_at
+      - approved_by_name
+      - certificates
+      - chamber_address
+      - consultation_fee_poisha
+      - doctor_code
+      - experience_years
+      - full_name
+      - id
+      - location
+      - phone
+      - preferred_language
+      - qualifications
+      - registration_no
+      - rejected_by_name
+      - rejection_reason
+      - requested_fee_poisha
+      - status
+      - submitted_at
+      - suspended_by_name
+      - suspension_reason
+    AdminDoctorReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required:
+      - reason
+    AdminDoctorSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_code:
+          type: string
+          nullable: true
+          maxLength: 20
+        full_name:
+          type: string
+          maxLength: 120
+        registration_no:
+          type: string
+          maxLength: 80
+        area:
+          type: string
+          readOnly: true
+        requested_fee_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        consultation_fee_poisha:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        status:
+          $ref: '#/components/schemas/DoctorStatusEnum'
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - area
+      - full_name
+      - id
+      - registration_no
+      - requested_fee_poisha
     AdminIllness:
       type: object
       properties:
@@ -4426,6 +5291,14 @@ components:
       - name
       - picture_url
       - slug
+    CertificateUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     CheckResultEnum:
       enum:
       - ok
@@ -4460,6 +5333,200 @@ components:
       - payment_method
       - phone
       - recipient_name
+    DoctorCertificate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        original_name:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+        url:
+          type: string
+          readOnly: true
+      required:
+      - content_type
+      - id
+      - original_name
+      - size
+      - uploaded_at
+      - url
+    DoctorLogInRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          minLength: 1
+          maxLength: 80
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - login
+      - password
+    DoctorMe:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_code:
+          type: string
+          readOnly: true
+          nullable: true
+        phone:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        registration_no:
+          type: string
+          readOnly: true
+        qualifications:
+          type: string
+          readOnly: true
+        experience_years:
+          type: integer
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          readOnly: true
+        chamber_address:
+          type: string
+          readOnly: true
+        requested_fee_poisha:
+          type: integer
+          readOnly: true
+        consultation_fee_poisha:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DoctorStatusEnum'
+          readOnly: true
+        rejection_reason:
+          type: string
+          readOnly: true
+        suspension_reason:
+          type: string
+          readOnly: true
+        preferred_language:
+          allOf:
+          - $ref: '#/components/schemas/PreferredLanguageEnum'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        approved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorCertificate'
+          readOnly: true
+      required:
+      - approved_at
+      - certificates
+      - chamber_address
+      - consultation_fee_poisha
+      - doctor_code
+      - experience_years
+      - full_name
+      - id
+      - location
+      - phone
+      - preferred_language
+      - qualifications
+      - registration_no
+      - rejection_reason
+      - requested_fee_poisha
+      - status
+      - submitted_at
+      - suspension_reason
+    DoctorSignUpRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        registration_no:
+          type: string
+          minLength: 1
+          maxLength: 80
+        qualifications:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        experience_years:
+          type: integer
+          maximum: 80
+          minimum: 0
+        location_id:
+          type: string
+          format: uuid
+        chamber_address:
+          type: string
+          minLength: 1
+          maxLength: 300
+        requested_fee_poisha:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+      required:
+      - chamber_address
+      - experience_years
+      - full_name
+      - location_id
+      - password
+      - phone
+      - qualifications
+      - registration_no
+      - requested_fee_poisha
+    DoctorStatusEnum:
+      enum:
+      - PENDING_APPROVAL
+      - APPROVED
+      - REJECTED
+      - SUSPENDED
+      type: string
+      description: |-
+        * `PENDING_APPROVAL` - Pending Approval
+        * `APPROVED` - Approved
+        * `REJECTED` - Rejected
+        * `SUSPENDED` - Suspended
     Error:
       type: object
       description: Every error response (see common/errors.py).
@@ -4629,6 +5696,29 @@ components:
       required:
       - at
       - status
+    PaginatedAdminDoctorSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminDoctorSummary'
     PaginatedAdminIllnessCategoryList:
       type: object
       required:
@@ -4882,6 +5972,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Staff'
+    PatchedAdminDoctorFeeUpdateRequest:
+      type: object
+      properties:
+        consultation_fee_poisha:
+          type: integer
+          maximum: 10000000
+          minimum: 1
     PatchedAdminIllnessCategoryRequest:
       type: object
       properties:
@@ -5041,6 +6138,36 @@ components:
           type: boolean
         is_active:
           type: boolean
+    PatchedDoctorApplicationUpdateRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        registration_no:
+          type: string
+          minLength: 1
+          maxLength: 80
+        qualifications:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        experience_years:
+          type: integer
+          maximum: 80
+          minimum: 0
+        location_id:
+          type: string
+          format: uuid
+        chamber_address:
+          type: string
+          minLength: 1
+          maxLength: 300
+        requested_fee_poisha:
+          type: integer
+          maximum: 10000000
+          minimum: 1
     PatchedStaffUpdateRequest:
       type: object
       description: Send only what changes.
@@ -5739,10 +6866,12 @@ components:
       enum:
       - patient
       - staff
+      - doctor
       type: string
       description: |-
         * `patient` - patient
         * `staff` - staff
+        * `doctor` - doctor
     ShippingAddress:
       type: object
       properties:
@@ -5933,6 +7062,19 @@ components:
       - expires_in
       - phone
       - resend_after
+      - verification_id
+    VerifyCodeRequest:
+      type: object
+      properties:
+        verification_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+      required:
+      - code
       - verification_id
     VerifyRequest:
       type: object

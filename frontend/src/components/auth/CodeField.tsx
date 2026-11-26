@@ -1,10 +1,8 @@
 "use client";
 
-import type { AuthMessages } from "@/i18n/messages/auth";
+import { TextField } from "@/components/form/fields";
 import { useMessages } from "@/i18n/provider";
 import { toAsciiDigits } from "@/lib/digits";
-
-import { TextField } from "@/components/form/fields";
 
 export const isCompleteCode = (code: string) => /^\d{6}$/.test(code);
 
@@ -13,15 +11,17 @@ export function CodeField({
   value,
   onChange,
   error,
+  label,
 }: {
   value: string;
   onChange: (code: string) => void;
   error?: string;
+  label?: string;
 }) {
-  const { t } = useMessages<AuthMessages>();
+  const { t } = useMessages();
   return (
     <TextField
-      label={t("auth.verify.code")}
+      label={label ?? t("auth.verify.code")}
       error={error}
       value={value}
       onChange={(event) =>

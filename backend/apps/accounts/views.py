@@ -126,3 +126,19 @@ class StaffLogoutView(_SessionCookieView):
     @_logout_schema("auth_staff_logout")
     def post(self, request: Request) -> Response:
         return self.sign_out(request)
+
+
+class DoctorRefreshView(_SessionCookieView):
+    user_type = "doctor"
+
+    @_refresh_schema("auth_doctor_refresh")
+    def post(self, request: Request) -> Response:
+        return self.refresh(request)
+
+
+class DoctorLogoutView(_SessionCookieView):
+    user_type = "doctor"
+
+    @_logout_schema("auth_doctor_logout")
+    def post(self, request: Request) -> Response:
+        return self.sign_out(request)

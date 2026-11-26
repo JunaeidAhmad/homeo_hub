@@ -6,10 +6,10 @@ import { useSession } from "@/areas/patient/session/SessionProvider";
 import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
-import { CodeField, isCompleteCode } from "./CodeField";
+import { CodeField, isCompleteCode } from "@/components/auth/CodeField";
 import { FormAlert, Heading, SubmitBar } from "@/components/form/fields";
-import type { PendingCode } from "./pending-code";
-import { ResendCode } from "./ResendCode";
+import type { PendingCode } from "@/components/auth/pending-code";
+import { ResendCode } from "@/components/auth/ResendCode";
 import { SentNotice } from "./SentNotice";
 import { useSubmit } from "./use-submit";
 
@@ -55,7 +55,7 @@ export function VerifyStep({
       <SentNotice message="auth.verify.sentTo" phone={sent.phone} onChangeNumber={onChangeNumber} />
       {problems.form && <FormAlert>{problems.form}</FormAlert>}
       <CodeField value={code} onChange={setCode} error={problems.fields.code} />
-      <ResendCode pending={sent} onResent={onResent} />
+      <ResendCode pending={sent} publicApi={publicApi} onResent={onResent} />
       <SubmitBar pending={pending}>{t("auth.verify.submit")}</SubmitBar>
     </form>
   );

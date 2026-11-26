@@ -27,12 +27,17 @@ class ResendSerializer(serializers.Serializer):
     verification_id = serializers.UUIDField()
 
 
+class VerifyCodeSerializer(serializers.Serializer):
+    verification_id = serializers.UUIDField()
+    code = serializers.CharField(max_length=12)
+
+
 class SessionSerializer(serializers.Serializer):
     """Signed in. Keep the access token in memory; the refresh token is set as a cookie."""
 
     access_token = serializers.CharField()
     expires_in = serializers.IntegerField()
-    user_type = serializers.ChoiceField(choices=["patient", "staff"])
+    user_type = serializers.ChoiceField(choices=["patient", "staff", "doctor"])
 
     @staticmethod
     def describe(session: Session) -> dict:

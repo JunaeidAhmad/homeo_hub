@@ -107,6 +107,12 @@ export class AuthSession<Account> {
     await this.loadAccount();
   }
 
+  /** Reloads the signed-in account after an update (e.g. profile or application edit). */
+  async reloadAccount(): Promise<void> {
+    if (!this.token) return;
+    await this.loadAccount();
+  }
+
   /** False if the API could not be told, in which case we are still signed in. */
   async signOut(): Promise<boolean> {
     this.signingOut = true; // no new refreshes

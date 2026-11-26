@@ -2,7 +2,10 @@
 
 from django.urls import include, path
 
+from common.private_files import PrivateFileView
+
 urlpatterns = [
+    path("files/<str:token>/", PrivateFileView.as_view(), name="private-file"),
     path("health/", include("apps.health.urls")),
     path("locations/", include("apps.locations.urls")),
     path("auth/", include("apps.accounts.urls")),
@@ -13,4 +16,5 @@ urlpatterns = [
     path("", include("apps.orders.urls")),
     path("", include("apps.shops.urls")),
     path("", include("apps.payments.urls")),
+    path("", include("apps.doctors.urls")),
 ]

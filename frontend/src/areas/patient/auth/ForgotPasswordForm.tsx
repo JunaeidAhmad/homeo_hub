@@ -7,10 +7,10 @@ import { useSession } from "@/areas/patient/session/SessionProvider";
 import type { AuthMessages } from "@/i18n/messages/auth";
 import { useMessages } from "@/i18n/provider";
 
-import { CodeField, isCompleteCode } from "./CodeField";
+import { CodeField, isCompleteCode } from "@/components/auth/CodeField";
 import { FormAlert, Heading, SubmitBar, TextField } from "@/components/form/fields";
-import { pendingFrom, usePendingCode } from "./pending-code";
-import { ResendCode } from "./ResendCode";
+import { pendingFrom, usePendingCode } from "@/components/auth/pending-code";
+import { ResendCode } from "@/components/auth/ResendCode";
 import { SentNotice } from "./SentNotice";
 import { useForgetOnLeave } from "@/hooks/use-forget-on-leave";
 import { useSubmit } from "./use-submit";
@@ -108,7 +108,7 @@ export function ForgotPasswordForm() {
           autoComplete="new-password"
           maxLength={128}
         />
-        <ResendCode pending={sent} onResent={setSent} />
+        <ResendCode pending={sent} publicApi={publicApi} onResent={setSent} />
         <SubmitBar pending={pending}>{t("auth.reset.submit")}</SubmitBar>
       </form>
     );

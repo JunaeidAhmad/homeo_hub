@@ -4,6 +4,165 @@
  */
 
 export interface paths {
+    "/api/v1/admin/doctors/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_doctors_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/doctors/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_doctors_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        patch: operations["admin_doctors_update_fee"];
+        trace?: never;
+    };
+    "/api/v1/admin/doctors/{id}/approve/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_doctors_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/doctors/{id}/reactivate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_doctors_reactivate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/doctors/{id}/reject/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_doctors_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/doctors/{id}/suspend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_doctors_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/illness-categories/": {
         parameters: {
             query?: never;
@@ -797,6 +956,91 @@ export interface paths {
         patch: operations["admin_staff_update"];
         trace?: never;
     };
+    "/api/v1/auth/doctor/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_doctor_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/doctor/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Acts on one kind of user's refresh cookie. */
+        post: operations["auth_doctor_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/doctor/refresh/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Acts on one kind of user's refresh cookie. */
+        post: operations["auth_doctor_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/doctor/signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_doctor_signup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/doctor/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_doctor_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/logout/": {
         parameters: {
             query?: never;
@@ -1030,6 +1274,86 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["cart_items_update"];
+        trace?: never;
+    };
+    "/api/v1/doctor/application/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["doctor_application_update"];
+        trace?: never;
+    };
+    "/api/v1/doctor/application/certificates/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_certificate_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/application/certificates/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["doctor_certificate_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/application/resubmit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_application_resubmit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/health/live": {
@@ -1328,6 +1652,55 @@ export interface components {
             readonly unit: components["schemas"]["ShopUnitEnum"];
             readonly price_poisha: number;
             readonly free_stock: number;
+        };
+        AdminDoctorApproveRequest: {
+            consultation_fee_poisha: number;
+        };
+        AdminDoctorDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor_code: string | null;
+            readonly phone: string;
+            readonly full_name: string;
+            readonly registration_no: string;
+            readonly qualifications: string;
+            readonly experience_years: number;
+            readonly location: components["schemas"]["Location"];
+            readonly chamber_address: string;
+            readonly requested_fee_poisha: number;
+            readonly consultation_fee_poisha: number | null;
+            readonly status: components["schemas"]["DoctorStatusEnum"];
+            readonly rejection_reason: string;
+            readonly suspension_reason: string;
+            readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
+            /** Format: date-time */
+            readonly submitted_at: string | null;
+            /** Format: date-time */
+            readonly approved_at: string | null;
+            readonly certificates: components["schemas"]["DoctorCertificate"][];
+            readonly approved_by_name: string | null;
+            /** Format: date-time */
+            rejected_at?: string | null;
+            readonly rejected_by_name: string | null;
+            /** Format: date-time */
+            suspended_at?: string | null;
+            readonly suspended_by_name: string | null;
+        };
+        AdminDoctorReasonRequest: {
+            reason: string;
+        };
+        AdminDoctorSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            doctor_code?: string | null;
+            full_name: string;
+            registration_no: string;
+            readonly area: string;
+            requested_fee_poisha: number;
+            consultation_fee_poisha?: number | null;
+            status?: components["schemas"]["DoctorStatusEnum"];
+            /** Format: date-time */
+            submitted_at?: string | null;
         };
         AdminIllness: {
             /** Format: uuid */
@@ -1701,6 +2074,10 @@ export interface components {
             /** Format: uri */
             readonly picture_url: string | null;
         };
+        CertificateUploadRequest: {
+            /** Format: binary */
+            file: string;
+        };
         /**
          * @description * `ok` - ok
          *     * `error` - error
@@ -1715,6 +2092,63 @@ export interface components {
             address_line: string;
             payment_method: components["schemas"]["PaymentMethodEnum"];
         };
+        DoctorCertificate: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly original_name: string;
+            readonly content_type: string;
+            readonly size: number;
+            /** Format: date-time */
+            readonly uploaded_at: string;
+            readonly url: string;
+        };
+        DoctorLogInRequest: {
+            login: string;
+            password: string;
+        };
+        DoctorMe: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor_code: string | null;
+            readonly phone: string;
+            readonly full_name: string;
+            readonly registration_no: string;
+            readonly qualifications: string;
+            readonly experience_years: number;
+            readonly location: components["schemas"]["Location"];
+            readonly chamber_address: string;
+            readonly requested_fee_poisha: number;
+            readonly consultation_fee_poisha: number | null;
+            readonly status: components["schemas"]["DoctorStatusEnum"];
+            readonly rejection_reason: string;
+            readonly suspension_reason: string;
+            readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
+            /** Format: date-time */
+            readonly submitted_at: string | null;
+            /** Format: date-time */
+            readonly approved_at: string | null;
+            readonly certificates: components["schemas"]["DoctorCertificate"][];
+        };
+        DoctorSignUpRequest: {
+            phone: string;
+            password: string;
+            full_name: string;
+            registration_no: string;
+            qualifications: string;
+            experience_years: number;
+            /** Format: uuid */
+            location_id: string;
+            chamber_address: string;
+            requested_fee_poisha: number;
+        };
+        /**
+         * @description * `PENDING_APPROVAL` - Pending Approval
+         *     * `APPROVED` - Approved
+         *     * `REJECTED` - Rejected
+         *     * `SUSPENDED` - Suspended
+         * @enum {string}
+         */
+        DoctorStatusEnum: "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "SUSPENDED";
         /** @description Every error response (see common/errors.py). */
         Error: {
             error: components["schemas"]["ErrorBody"];
@@ -1798,6 +2232,21 @@ export interface components {
             status: components["schemas"]["OrderStatusEnum"];
             /** Format: date-time */
             at: string;
+        };
+        PaginatedAdminDoctorSummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminDoctorSummary"][];
         };
         PaginatedAdminIllnessCategoryList: {
             /** @example 123 */
@@ -1964,6 +2413,9 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Staff"][];
         };
+        PatchedAdminDoctorFeeUpdateRequest: {
+            consultation_fee_poisha?: number;
+        };
         PatchedAdminIllnessCategoryRequest: {
             name_en?: string;
             name_bn?: string;
@@ -2016,6 +2468,16 @@ export interface components {
             longitude?: string | null;
             is_verified?: boolean;
             is_active?: boolean;
+        };
+        PatchedDoctorApplicationUpdateRequest: {
+            full_name?: string;
+            registration_no?: string;
+            qualifications?: string;
+            experience_years?: number;
+            /** Format: uuid */
+            location_id?: string;
+            chamber_address?: string;
+            requested_fee_poisha?: number;
         };
         /** @description Send only what changes. */
         PatchedStaffUpdateRequest: {
@@ -2280,9 +2742,10 @@ export interface components {
         /**
          * @description * `patient` - patient
          *     * `staff` - staff
+         *     * `doctor` - doctor
          * @enum {string}
          */
-        SessionUserTypeEnum: "patient" | "staff";
+        SessionUserTypeEnum: "patient" | "staff" | "doctor";
         ShippingAddress: {
             recipient_name: string;
             phone: string;
@@ -2354,6 +2817,11 @@ export interface components {
             /** @description Seconds to wait before offering a resend. */
             resend_after: number;
         };
+        VerifyCodeRequest: {
+            /** Format: uuid */
+            verification_id: string;
+            code: string;
+        };
         VerifyRequest: {
             /** Format: uuid */
             verification_id: string;
@@ -2368,6 +2836,353 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_doctors_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+                status?: "APPROVED" | "PENDING_APPROVAL" | "REJECTED" | "SUSPENDED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminDoctorSummaryList"];
+                };
+            };
+        };
+    };
+    admin_doctors_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDoctorDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_doctors_update_fee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminDoctorFeeUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDoctorDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_doctors_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminDoctorApproveRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDoctorDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_doctors_reactivate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDoctorDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_doctors_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminDoctorReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDoctorDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_doctors_suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminDoctorReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDoctorDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     admin_illness_categories_list: {
         parameters: {
             query?: {
@@ -4200,6 +5015,208 @@ export interface operations {
             };
         };
     };
+    auth_doctor_login: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DoctorLogInRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_doctor_logout: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_doctor_refresh: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_doctor_signup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DoctorSignUpRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Verification"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_doctor_verify: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyCodeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Session"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     auth_logout: {
         parameters: {
             query?: never;
@@ -4759,6 +5776,174 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_application_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedDoctorApplicationUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorMe"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_certificate_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["CertificateUploadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorCertificate"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_certificate_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_application_resubmit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorMe"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorMe"];
+                };
+            };
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

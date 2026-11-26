@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.orders",
     "apps.shops",
     "apps.payments",
+    "apps.doctors",
 ]
 
 MIDDLEWARE = [
@@ -147,6 +148,10 @@ STORAGE_BUCKET = env.str("STORAGE_BUCKET", default="")
 UPLOADS_ENABLED = True
 STORAGES: dict[str, dict] = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "private": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": BASE_DIR / "private_media"},
+    },
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 if STORAGE_BUCKET:
@@ -163,6 +168,21 @@ if STORAGE_BUCKET:
             "secret_key": env.str("STORAGE_SECRET_ACCESS_KEY", default=""),
             "custom_domain": _public_domain or None,
             "querystring_auth": not _public_domain,
+            "querystring_expire": 60 * 60,
+            "file_overwrite": False,
+        },
+    }
+    STORAGES["private"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": STORAGE_BUCKET,
+            "endpoint_url": env.str("STORAGE_ENDPOINT_URL", default="") or None,
+            "region_name": env.str("STORAGE_REGION", default="") or None,
+            "access_key": env.str("STORAGE_ACCESS_KEY_ID", default=""),
+            "secret_key": env.str("STORAGE_SECRET_ACCESS_KEY", default=""),
+            "location": "private",
+            "default_acl": "private",
+            "querystring_auth": True,
             "querystring_expire": 60 * 60,
             "file_overwrite": False,
         },
@@ -206,6 +226,7 @@ REST_FRAMEWORK = {
 PRINCIPAL_LOADERS = {
     "patient": "apps.patients.services.load_principal",
     "staff": "apps.staff.services.load_principal",
+    "doctor": "apps.doctors.services.load_principal",
 }
 # Class that sends text messages. Only development uses the console one (it logs codes).
 SMS_PROVIDER = env.str("SMS_PROVIDER", default="") or "apps.accounts.sms.UnconfiguredSmsProvider"
@@ -239,6 +260,7 @@ SPECTACULAR_SETTINGS = {
         "AssignmentStatusEnum": "apps.orders.models.ShopAssignment.Status",
         "PaymentStatusEnum": "apps.payments.models.Payment.Status",
         "PaymentEventKindEnum": "apps.payments.models.PaymentEvent.Kind",
+        "DoctorStatusEnum": "apps.doctors.models.Doctor.Status",
         "ShopStaffRoleEnum": "apps.shops.models.ShopStaff.Role",
         "ShopUnitEnum": "apps.shops.models.ShopRemedy.Unit",
     },

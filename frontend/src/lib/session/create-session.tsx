@@ -49,6 +49,7 @@ export function createSession<Account>(kind: SessionKind<Account>) {
         api: session.api,
         publicApi: session.publicApi,
         completeSignIn: session.complete.bind(session),
+        reloadAccount: session.reloadAccount.bind(session),
         signOut: session.signOut.bind(session),
         retry: session.retry,
       },
