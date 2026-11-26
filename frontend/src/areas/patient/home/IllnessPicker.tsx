@@ -12,7 +12,7 @@ import { useIllnessCategories } from "./use-illness-categories";
 
 const CHEVRON = "M6 9l6 6 6-6";
 
-/** Home's "What's troubling you?" dropdown: submits to /remedies?illness=<slug>. */
+/** Home's illness dropdown: submits to /remedies?illness=<slug>. */
 export function IllnessPicker() {
   const { t } = useMessages<CommonMessages & PatientMessages>();
   const { status, categories } = useIllnessCategories();
@@ -34,7 +34,7 @@ export function IllnessPicker() {
             className="min-h-13 w-full cursor-pointer appearance-none rounded-control border-0 bg-surface pr-11 pl-3.5 text-[17px] font-semibold text-ink disabled:cursor-wait"
           >
             <option value="" disabled>
-              {status === "loading" ? t("table.loading") : t("patient.selfcare.chooseIllness")}
+              {status === "loading" ? t("table.loading") : t("patient.home.illnessPlaceholder")}
             </option>
             {categories.map((category) => (
               <optgroup key={category.id} label={category.name}>
