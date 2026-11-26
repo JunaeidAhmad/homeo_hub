@@ -4,6 +4,56 @@
  */
 
 export interface paths {
+    "/api/v1/admin/doctor-consultations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_consultations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/doctor-consultations/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_consultations_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/doctors/": {
         parameters: {
             query?: never;
@@ -1276,6 +1326,54 @@ export interface paths {
         patch: operations["cart_items_update"];
         trace?: never;
     };
+    "/api/v1/consultations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["consultations_list"];
+        put?: never;
+        post: operations["consultations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/consultations/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["consultations_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/consultations/{id}/withdraw/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["consultations_withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor/application/": {
         parameters: {
             query?: never;
@@ -1716,6 +1814,55 @@ export interface components {
             readonly unit: components["schemas"]["ShopUnitEnum"];
             readonly price_poisha: number;
             readonly free_stock: number;
+        };
+        AdminConsultationDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly patient: components["schemas"]["AdminConsultationPatient"];
+            readonly illness: components["schemas"]["ConsultationIllness"];
+            readonly chief_complaint: string;
+            readonly symptoms: string;
+            readonly duration_value: number | null;
+            readonly duration_unit: components["schemas"]["DurationUnitEnum"];
+            readonly symptom_notes: string;
+            readonly urgency: components["schemas"]["UrgencyEnum"];
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            readonly doctor: components["schemas"]["ConsultationDoctorSummary"];
+            /** Format: date-time */
+            readonly submitted_at: string;
+            /** Format: date-time */
+            readonly assigned_at: string | null;
+            /** Format: date-time */
+            readonly opened_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            /** Format: date-time */
+            readonly cancelled_at: string | null;
+            readonly cancel_reason: string;
+            readonly history: components["schemas"]["ConsultationHistory"][];
+        };
+        AdminConsultationPatient: {
+            /** Format: uuid */
+            id: string;
+            full_name: string;
+            phone: string;
+            age: number;
+            gender: string;
+            readonly area: string;
+        };
+        AdminConsultationSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly patient_name: string;
+            readonly area: string;
+            readonly chief_complaint: string;
+            readonly urgency: components["schemas"]["UrgencyEnum"];
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            readonly doctor_name: string | null;
+            /** Format: date-time */
+            readonly submitted_at: string;
         };
         AdminDoctorApproveRequest: {
             consultation_fee_poisha: number;
@@ -2179,6 +2326,59 @@ export interface components {
             general_picture: boolean;
             likes_dislikes: boolean;
         };
+        ConsultationDoctorSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor_code: string | null;
+            readonly full_name: string;
+            readonly qualifications: string;
+        };
+        ConsultationHistory: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly from_status: components["schemas"]["ConsultationStatusEnum"];
+            readonly to_status: components["schemas"]["ConsultationStatusEnum"];
+            readonly actor_type: string;
+            readonly actor_name: string;
+            readonly note: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        ConsultationIllness: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly slug: string;
+            readonly name: string;
+        };
+        /**
+         * @description * `SUBMITTED` - Submitted
+         *     * `ASSIGNED` - Assigned
+         *     * `IN_REVIEW` - In Review
+         *     * `AWAITING_PATIENT` - Awaiting Patient
+         *     * `RESPONDED` - Responded
+         *     * `PRESCRIBED` - Prescribed
+         *     * `CLOSED` - Closed
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        ConsultationStatusEnum: "SUBMITTED" | "ASSIGNED" | "IN_REVIEW" | "AWAITING_PATIENT" | "RESPONDED" | "PRESCRIBED" | "CLOSED" | "CANCELLED";
+        ConsultationSubmitRequest: {
+            /** Format: uuid */
+            illness_id?: string | null;
+            chief_complaint: string;
+            symptoms: string;
+            duration_value?: number | null;
+            /** @default  */
+            duration_unit: components["schemas"]["DurationUnitEnum"] | components["schemas"]["BlankEnum"];
+            /** @default  */
+            symptom_notes: string;
+            /** @default ROUTINE */
+            urgency: components["schemas"]["UrgencyEnum"];
+        };
+        ConsultationWithdrawRequest: {
+            /** @default  */
+            reason: string;
+        };
         DoctorCertificate: {
             /** Format: uuid */
             readonly id: string;
@@ -2236,6 +2436,14 @@ export interface components {
          * @enum {string}
          */
         DoctorStatusEnum: "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "SUSPENDED";
+        /**
+         * @description * `DAYS` - Days
+         *     * `WEEKS` - Weeks
+         *     * `MONTHS` - Months
+         *     * `YEARS` - Years
+         * @enum {string}
+         */
+        DurationUnitEnum: "DAYS" | "WEEKS" | "MONTHS" | "YEARS";
         /** @description Every error response (see common/errors.py). */
         Error: {
             error: components["schemas"]["ErrorBody"];
@@ -2327,6 +2535,21 @@ export interface components {
             status: components["schemas"]["OrderStatusEnum"];
             /** Format: date-time */
             at: string;
+        };
+        PaginatedAdminConsultationSummaryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminConsultationSummary"][];
         };
         PaginatedAdminDoctorSummaryList: {
             /** @example 123 */
@@ -2627,6 +2850,47 @@ export interface components {
             readonly age: number;
             readonly location: components["schemas"]["Location"];
             readonly preferred_language: components["schemas"]["PreferredLanguageEnum"];
+        };
+        PatientConsultationDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly chief_complaint: string;
+            readonly symptoms: string;
+            readonly duration_value: number | null;
+            readonly duration_unit: components["schemas"]["DurationUnitEnum"];
+            readonly symptom_notes: string;
+            readonly urgency: components["schemas"]["UrgencyEnum"];
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            readonly illness: components["schemas"]["ConsultationIllness"];
+            readonly doctor: components["schemas"]["ConsultationDoctorSummary"];
+            /** Format: date-time */
+            readonly submitted_at: string;
+            /** Format: date-time */
+            readonly assigned_at: string | null;
+            /** Format: date-time */
+            readonly opened_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            /** Format: date-time */
+            readonly cancelled_at: string | null;
+            readonly cancel_reason: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly history: components["schemas"]["ConsultationHistory"][];
+        };
+        PatientConsultationSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly chief_complaint: string;
+            readonly urgency: components["schemas"]["UrgencyEnum"];
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            readonly doctor_name: string | null;
+            /** Format: date-time */
+            readonly submitted_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
         };
         PatientOrderCard: {
             /** Format: uuid */
@@ -2984,6 +3248,13 @@ export interface components {
          * @enum {string}
          */
         ThermalPreferenceEnum: "CHILLY" | "HOT" | "AMBIVALENT";
+        /**
+         * @description * `ROUTINE` - Routine
+         *     * `SOON` - Soon
+         *     * `URGENT` - Urgent
+         * @enum {string}
+         */
+        UrgencyEnum: "ROUTINE" | "SOON" | "URGENT";
         /** @description A code has been requested; send it back with ``verification_id``. */
         Verification: {
             /** Format: uuid */
@@ -3013,6 +3284,93 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_consultations_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                q?: string;
+                status?: "ASSIGNED" | "AWAITING_PATIENT" | "CANCELLED" | "CLOSED" | "IN_REVIEW" | "PRESCRIBED" | "RESPONDED" | "SUBMITTED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminConsultationSummaryList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_consultations_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     admin_doctors_list: {
         parameters: {
             query?: {
@@ -5953,6 +6311,174 @@ export interface operations {
                 };
             };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    consultations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientConsultationSummary"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    consultations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConsultationSubmitRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientConsultationDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    consultations_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    consultations_withdraw: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ConsultationWithdrawRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientConsultationDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

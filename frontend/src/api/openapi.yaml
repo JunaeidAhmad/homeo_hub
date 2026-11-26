@@ -4,6 +4,117 @@ info:
   version: 1.0.0
   description: HomeoHub REST API (v1).
 paths:
+  /api/v1/admin/doctor-consultations/:
+    get:
+      operationId: admin_consultations_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ASSIGNED
+          - AWAITING_PATIENT
+          - CANCELLED
+          - CLOSED
+          - IN_REVIEW
+          - PRESCRIBED
+          - RESPONDED
+          - SUBMITTED
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminConsultationSummaryList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/doctor-consultations/{id}/:
+    get:
+      operationId: admin_consultations_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminConsultationDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/doctors/:
     get:
       operationId: admin_doctors_list
@@ -3160,6 +3271,148 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/consultations/:
+    get:
+      operationId: consultations_list
+      tags:
+      - consultations
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientConsultationSummary'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    post:
+      operationId: consultations_create
+      tags:
+      - consultations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationSubmitRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientConsultationDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/consultations/{id}/:
+    get:
+      operationId: consultations_read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - consultations
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientConsultationDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/consultations/{id}/withdraw/:
+    post:
+      operationId: consultations_withdraw
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - consultations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsultationWithdrawRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientConsultationDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/doctor/application/:
     patch:
       operationId: doctor_application_update
@@ -4109,6 +4362,174 @@ components:
       - shop_name
       - shop_remedy_id
       - unit
+    AdminConsultationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        patient:
+          allOf:
+          - $ref: '#/components/schemas/AdminConsultationPatient'
+          readOnly: true
+        illness:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationIllness'
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        symptoms:
+          type: string
+          readOnly: true
+        duration_value:
+          type: integer
+          readOnly: true
+          nullable: true
+        duration_unit:
+          allOf:
+          - $ref: '#/components/schemas/DurationUnitEnum'
+          readOnly: true
+        symptom_notes:
+          type: string
+          readOnly: true
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        doctor:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationDoctorSummary'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        opened_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancel_reason:
+          type: string
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationHistory'
+          readOnly: true
+      required:
+      - assigned_at
+      - cancel_reason
+      - cancelled_at
+      - chief_complaint
+      - closed_at
+      - consultation_code
+      - doctor
+      - duration_unit
+      - duration_value
+      - history
+      - id
+      - illness
+      - opened_at
+      - patient
+      - status
+      - submitted_at
+      - symptom_notes
+      - symptoms
+      - urgency
+    AdminConsultationPatient:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        phone:
+          type: string
+        age:
+          type: integer
+        gender:
+          type: string
+        area:
+          type: string
+          readOnly: true
+      required:
+      - age
+      - area
+      - full_name
+      - gender
+      - id
+      - phone
+    AdminConsultationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        patient_name:
+          type: string
+          readOnly: true
+        area:
+          type: string
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        doctor_name:
+          type: string
+          nullable: true
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - area
+      - chief_complaint
+      - consultation_code
+      - doctor_name
+      - id
+      - patient_name
+      - status
+      - submitted_at
+      - urgency
     AdminDoctorApproveRequest:
       type: object
       properties:
@@ -5532,6 +5953,145 @@ components:
       - medical_history
       - mental_picture
       - picture
+    ConsultationDoctorSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_code:
+          type: string
+          readOnly: true
+          nullable: true
+        full_name:
+          type: string
+          readOnly: true
+        qualifications:
+          type: string
+          readOnly: true
+      required:
+      - doctor_code
+      - full_name
+      - id
+      - qualifications
+    ConsultationHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        from_status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        to_status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        actor_type:
+          type: string
+          readOnly: true
+        actor_name:
+          type: string
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor_name
+      - actor_type
+      - created_at
+      - from_status
+      - id
+      - note
+      - to_status
+    ConsultationIllness:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+      - slug
+    ConsultationStatusEnum:
+      enum:
+      - SUBMITTED
+      - ASSIGNED
+      - IN_REVIEW
+      - AWAITING_PATIENT
+      - RESPONDED
+      - PRESCRIBED
+      - CLOSED
+      - CANCELLED
+      type: string
+      description: |-
+        * `SUBMITTED` - Submitted
+        * `ASSIGNED` - Assigned
+        * `IN_REVIEW` - In Review
+        * `AWAITING_PATIENT` - Awaiting Patient
+        * `RESPONDED` - Responded
+        * `PRESCRIBED` - Prescribed
+        * `CLOSED` - Closed
+        * `CANCELLED` - Cancelled
+    ConsultationSubmitRequest:
+      type: object
+      properties:
+        illness_id:
+          type: string
+          format: uuid
+          nullable: true
+        chief_complaint:
+          type: string
+          minLength: 1
+          maxLength: 200
+        symptoms:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        duration_value:
+          type: integer
+          maximum: 200
+          minimum: 1
+          nullable: true
+        duration_unit:
+          default: ''
+          oneOf:
+          - $ref: '#/components/schemas/DurationUnitEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        symptom_notes:
+          type: string
+          default: ''
+          maxLength: 4000
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          default: ROUTINE
+      required:
+      - chief_complaint
+      - symptoms
+    ConsultationWithdrawRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 300
     DoctorCertificate:
       type: object
       properties:
@@ -5726,6 +6286,18 @@ components:
         * `APPROVED` - Approved
         * `REJECTED` - Rejected
         * `SUSPENDED` - Suspended
+    DurationUnitEnum:
+      enum:
+      - DAYS
+      - WEEKS
+      - MONTHS
+      - YEARS
+      type: string
+      description: |-
+        * `DAYS` - Days
+        * `WEEKS` - Weeks
+        * `MONTHS` - Months
+        * `YEARS` - Years
     Error:
       type: object
       description: Every error response (see common/errors.py).
@@ -5907,6 +6479,29 @@ components:
       required:
       - at
       - status
+    PaginatedAdminConsultationSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminConsultationSummary'
     PaginatedAdminDoctorSummaryList:
       type: object
       required:
@@ -6535,6 +7130,147 @@ components:
       - phone_verified
       - preferred_language
       - user_type
+    PatientConsultationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        symptoms:
+          type: string
+          readOnly: true
+        duration_value:
+          type: integer
+          readOnly: true
+          nullable: true
+        duration_unit:
+          allOf:
+          - $ref: '#/components/schemas/DurationUnitEnum'
+          readOnly: true
+        symptom_notes:
+          type: string
+          readOnly: true
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        illness:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationIllness'
+          readOnly: true
+        doctor:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationDoctorSummary'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        opened_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancel_reason:
+          type: string
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationHistory'
+          readOnly: true
+      required:
+      - assigned_at
+      - cancel_reason
+      - cancelled_at
+      - chief_complaint
+      - closed_at
+      - consultation_code
+      - doctor
+      - duration_unit
+      - duration_value
+      - history
+      - id
+      - illness
+      - opened_at
+      - status
+      - submitted_at
+      - symptom_notes
+      - symptoms
+      - updated_at
+      - urgency
+    PatientConsultationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        doctor_name:
+          type: string
+          nullable: true
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - chief_complaint
+      - consultation_code
+      - doctor_name
+      - id
+      - status
+      - submitted_at
+      - updated_at
+      - urgency
     PatientOrderCard:
       type: object
       properties:
@@ -7509,6 +8245,16 @@ components:
         * `CHILLY` - Chilly
         * `HOT` - Hot
         * `AMBIVALENT` - Ambivalent
+    UrgencyEnum:
+      enum:
+      - ROUTINE
+      - SOON
+      - URGENT
+      type: string
+      description: |-
+        * `ROUTINE` - Routine
+        * `SOON` - Soon
+        * `URGENT` - Urgent
     Verification:
       type: object
       description: A code has been requested; send it back with ``verification_id``.

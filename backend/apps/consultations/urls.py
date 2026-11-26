@@ -1,0 +1,31 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path(
+        "consultations/",
+        views.PatientConsultationListCreateView.as_view(),
+        name="consultations-list",
+    ),
+    path(
+        "consultations/<uuid:pk>/",
+        views.PatientConsultationDetailView.as_view(),
+        name="consultations-detail",
+    ),
+    path(
+        "consultations/<uuid:pk>/withdraw/",
+        views.PatientConsultationWithdrawView.as_view(),
+        name="consultations-withdraw",
+    ),
+    path(
+        "admin/doctor-consultations/",
+        views.AdminConsultationListView.as_view(),
+        name="admin-consultations-list",
+    ),
+    path(
+        "admin/doctor-consultations/<uuid:pk>/",
+        views.AdminConsultationDetailView.as_view(),
+        name="admin-consultations-detail",
+    ),
+]

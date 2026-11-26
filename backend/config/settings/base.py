@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.shops",
     "apps.payments",
     "apps.doctors",
+    "apps.consultations",
 ]
 
 MIDDLEWARE = [
@@ -261,6 +262,9 @@ SPECTACULAR_SETTINGS = {
         "PaymentStatusEnum": "apps.payments.models.Payment.Status",
         "PaymentEventKindEnum": "apps.payments.models.PaymentEvent.Kind",
         "DoctorStatusEnum": "apps.doctors.models.Doctor.Status",
+        "ConsultationStatusEnum": "apps.consultations.models.DoctorConsultation.Status",
+        "UrgencyEnum": "apps.consultations.models.DoctorConsultation.Urgency",
+        "DurationUnitEnum": "apps.consultations.models.DoctorConsultation.DurationUnit",
         "BloodGroupEnum": "apps.patients.models.PatientProfile.BloodGroup",
         "MaritalStatusEnum": "apps.patients.models.PatientProfile.MaritalStatus",
         "ThermalPreferenceEnum": "apps.patients.models.PatientProfile.ThermalPreference",

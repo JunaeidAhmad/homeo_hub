@@ -21,6 +21,10 @@ CLINICAL_FIELDS: set[str] = {
     "food_cravings",
     "food_aversions",
     "weather_modalities",
+    "chief_complaint",
+    "symptoms",
+    "symptom_notes",
+    "cancel_reason",
 }
 
 _CLINICAL_REGEX = re.compile("|".join(sorted(CLINICAL_FIELDS)), flags=re.IGNORECASE)

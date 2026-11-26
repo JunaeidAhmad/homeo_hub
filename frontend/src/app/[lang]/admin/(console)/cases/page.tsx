@@ -1,6 +1,5 @@
-import { PlaceholderPage } from "@/components/PlaceholderPage";
-import { admin } from "@/i18n/messages/admin";
+import { CaseQueue } from "@/areas/admin/cases/CaseQueue";
 
-export default function Page() {
-  return <PlaceholderPage area={admin} titleKey="admin.cases.title" />;
+export default function CasesPage() {
+  return <CaseQueue />;
 }
