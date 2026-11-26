@@ -1457,6 +1457,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/profile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["patient_profile_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/profile/basic/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patient_profile_update_basic"];
+        trace?: never;
+    };
+    "/api/v1/me/profile/picture/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["patient_profile_upload_picture"];
+        post?: never;
+        delete: operations["patient_profile_delete_picture"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/profile/sections/{key}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patient_profile_update_section"];
+        trace?: never;
+    };
     "/api/v1/orders/": {
         parameters: {
             query?: never;
@@ -2047,6 +2111,20 @@ export interface components {
          * @enum {string}
          */
         AssignmentStatusEnum: "ASSIGNED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "RETURNED" | "CANCELLED";
+        /** @enum {unknown} */
+        BlankEnum: "";
+        /**
+         * @description * `A+` - A+
+         *     * `A-` - A-
+         *     * `B+` - B+
+         *     * `B-` - B-
+         *     * `AB+` - AB+
+         *     * `AB-` - AB-
+         *     * `O+` - O+
+         *     * `O-` - O-
+         * @enum {string}
+         */
+        BloodGroupEnum: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
         Cart: {
             /** Format: uuid */
             readonly id: string;
@@ -2091,6 +2169,15 @@ export interface components {
             phone: string;
             address_line: string;
             payment_method: components["schemas"]["PaymentMethodEnum"];
+        };
+        CompletenessSections: {
+            picture: boolean;
+            basic: boolean;
+            family_history: boolean;
+            medical_history: boolean;
+            mental_picture: boolean;
+            general_picture: boolean;
+            likes_dislikes: boolean;
         };
         DoctorCertificate: {
             /** Format: uuid */
@@ -2205,6 +2292,14 @@ export interface components {
             phone: string;
             password: string;
         };
+        /**
+         * @description * `SINGLE` - Single
+         *     * `MARRIED` - Married
+         *     * `WIDOWED` - Widowed
+         *     * `DIVORCED` - Divorced
+         * @enum {string}
+         */
+        MaritalStatusEnum: "SINGLE" | "MARRIED" | "WIDOWED" | "DIVORCED";
         /** @enum {unknown} */
         NullEnum: null;
         OrderQuoteRequestRequest: {
@@ -2479,6 +2574,36 @@ export interface components {
             chamber_address?: string;
             requested_fee_poisha?: number;
         };
+        PatchedPatientProfileBasicUpdateRequest: {
+            full_name?: string;
+            gender?: components["schemas"]["GenderEnum"];
+            age?: number;
+            /** Format: uuid */
+            location_id?: string;
+            blood_group?: components["schemas"]["BloodGroupEnum"] | components["schemas"]["BlankEnum"];
+            height_cm?: number | null;
+            /** Format: decimal */
+            weight_kg?: string | null;
+            marital_status?: components["schemas"]["MaritalStatusEnum"] | components["schemas"]["BlankEnum"];
+            occupation?: string;
+        };
+        PatchedPatientProfileSectionUpdateRequest: {
+            family_conditions?: string;
+            family_notes?: string;
+            chronic_conditions?: string;
+            current_medications?: string;
+            allergies?: string;
+            temperament?: string;
+            fears_anxieties?: string;
+            emotional_notes?: string;
+            thermal_preference?: components["schemas"]["ThermalPreferenceEnum"] | components["schemas"]["BlankEnum"];
+            appetite_thirst?: string;
+            sleep_dreams?: string;
+            general_notes?: string;
+            food_cravings?: string;
+            food_aversions?: string;
+            weather_modalities?: string;
+        };
         /** @description Send only what changes. */
         PatchedStaffUpdateRequest: {
             full_name?: string;
@@ -2555,6 +2680,46 @@ export interface components {
             form: components["schemas"]["FormEnum"];
             price_poisha: number;
         };
+        PatientProfile: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly phone: string;
+            readonly phone_verified: boolean;
+            readonly full_name: string;
+            readonly gender: components["schemas"]["GenderEnum"];
+            readonly age: number;
+            readonly location: components["schemas"]["Location"];
+            /** Format: uri */
+            readonly picture_url: string | null;
+            readonly blood_group: components["schemas"]["BloodGroupEnum"];
+            readonly height_cm: number | null;
+            /** Format: decimal */
+            readonly weight_kg: string | null;
+            readonly marital_status: components["schemas"]["MaritalStatusEnum"];
+            readonly occupation: string;
+            readonly family_conditions: string;
+            readonly family_notes: string;
+            readonly chronic_conditions: string;
+            readonly current_medications: string;
+            readonly allergies: string;
+            readonly temperament: string;
+            readonly fears_anxieties: string;
+            readonly emotional_notes: string;
+            readonly thermal_preference: components["schemas"]["ThermalPreferenceEnum"];
+            readonly appetite_thirst: string;
+            readonly sleep_dreams: string;
+            readonly general_notes: string;
+            readonly food_cravings: string;
+            readonly food_aversions: string;
+            readonly weather_modalities: string;
+            readonly completeness: components["schemas"]["ProfileCompleteness"];
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PatientProfilePictureUploadRequest: {
+            /** Format: binary */
+            picture: string;
+        };
         /**
          * @description * `patient` - patient
          * @enum {string}
@@ -2621,6 +2786,11 @@ export interface components {
          * @enum {string}
          */
         PreferredLanguageEnum: "en" | "bn";
+        ProfileCompleteness: {
+            filled: number;
+            total: number;
+            sections: components["schemas"]["CompletenessSections"];
+        };
         PublicIllnessCategory: {
             /** Format: uuid */
             readonly id: string;
@@ -2807,6 +2977,13 @@ export interface components {
             username: string;
             password: string;
         };
+        /**
+         * @description * `CHILLY` - Chilly
+         *     * `HOT` - Hot
+         *     * `AMBIVALENT` - Ambivalent
+         * @enum {string}
+         */
+        ThermalPreferenceEnum: "CHILLY" | "HOT" | "AMBIVALENT";
         /** @description A code has been requested; send it back with ``verification_id``. */
         Verification: {
             /** Format: uuid */
@@ -6095,6 +6272,195 @@ export interface operations {
                 };
             };
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    patient_profile_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientProfile"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    patient_profile_update_basic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPatientProfileBasicUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientProfile"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    patient_profile_upload_picture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PatientProfilePictureUploadRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientProfile"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    patient_profile_delete_picture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientProfile"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    patient_profile_update_section: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPatientProfileSectionUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientProfile"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

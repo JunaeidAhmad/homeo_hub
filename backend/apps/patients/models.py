@@ -70,3 +70,106 @@ def date_of_birth_for_age(age: int, today: date) -> date:
         return today.replace(year=today.year - age)
     except ValueError:
         return today.replace(year=today.year - age, day=28)
+
+
+class PatientProfile(models.Model):
+    """Patient portrait, extended basic details, and homeopathic clinical history."""
+
+    class BloodGroup(models.TextChoices):
+        A_POS = "A+", "A+"
+        A_NEG = "A-", "A-"
+        B_POS = "B+", "B+"
+        B_NEG = "B-", "B-"
+        AB_POS = "AB+", "AB+"
+        AB_NEG = "AB-", "AB-"
+        O_POS = "O+", "O+"
+        O_NEG = "O-", "O-"
+
+    class MaritalStatus(models.TextChoices):
+        SINGLE = "SINGLE"
+        MARRIED = "MARRIED"
+        WIDOWED = "WIDOWED"
+        DIVORCED = "DIVORCED"
+
+    class ThermalPreference(models.TextChoices):
+        CHILLY = "CHILLY"
+        HOT = "HOT"
+        AMBIVALENT = "AMBIVALENT"
+
+    patient = models.OneToOneField(
+        Patient,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        related_name="profile",
+    )
+    picture = models.ImageField(upload_to="patients/", blank=True)
+
+    blood_group = models.CharField(max_length=5, choices=BloodGroup.choices, blank=True, default="")
+    height_cm = models.PositiveSmallIntegerField(null=True, blank=True)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    marital_status = models.CharField(
+        max_length=12, choices=MaritalStatus.choices, blank=True, default=""
+    )
+    occupation = models.CharField(max_length=120, blank=True, default="")
+
+    family_conditions = models.TextField(blank=True, default="")
+    family_notes = models.TextField(blank=True, default="")
+
+    chronic_conditions = models.TextField(blank=True, default="")
+    current_medications = models.TextField(blank=True, default="")
+    allergies = models.TextField(blank=True, default="")
+
+    temperament = models.TextField(blank=True, default="")
+    fears_anxieties = models.TextField(blank=True, default="")
+    emotional_notes = models.TextField(blank=True, default="")
+
+    thermal_preference = models.CharField(
+        max_length=12, choices=ThermalPreference.choices, blank=True, default=""
+    )
+    appetite_thirst = models.TextField(blank=True, default="")
+    sleep_dreams = models.TextField(blank=True, default="")
+    general_notes = models.TextField(blank=True, default="")
+
+    food_cravings = models.TextField(blank=True, default="")
+    food_aversions = models.TextField(blank=True, default="")
+    weather_modalities = models.TextField(blank=True, default="")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"Profile for {self.patient.full_name}"
+
+
+SECTION_FIELDS: dict[str, tuple[str, ...]] = {
+    "family_history": ("family_conditions", "family_notes"),
+    "medical_history": ("chronic_conditions", "current_medications", "allergies"),
+    "mental_picture": ("temperament", "fears_anxieties", "emotional_notes"),
+    "general_picture": (
+        "thermal_preference",
+        "appetite_thirst",
+        "sleep_dreams",
+        "general_notes",
+    ),
+    "likes_dislikes": ("food_cravings", "food_aversions", "weather_modalities"),
+}
+
+
+def profile_completeness(profile: PatientProfile) -> dict[str, object]:
+    """Return completeness counts and booleans across all 7 profile areas."""
+    basic_filled = any(
+        [
+            bool(profile.blood_group),
+            profile.height_cm is not None,
+            profile.weight_kg is not None,
+            bool(profile.marital_status),
+            bool(profile.occupation.strip()),
+        ]
+    )
+    sections: dict[str, bool] = {
+        "picture": bool(profile.picture),
+        "basic": basic_filled,
+    }
+    for key, fields in SECTION_FIELDS.items():
+        sections[key] = any(bool(str(getattr(profile, field, "")).strip()) for field in fields)
+    filled = sum(1 for done in sections.values() if done)
+    return {"filled": filled, "total": len(sections), "sections": sections}

@@ -261,10 +261,15 @@ SPECTACULAR_SETTINGS = {
         "PaymentStatusEnum": "apps.payments.models.Payment.Status",
         "PaymentEventKindEnum": "apps.payments.models.PaymentEvent.Kind",
         "DoctorStatusEnum": "apps.doctors.models.Doctor.Status",
+        "BloodGroupEnum": "apps.patients.models.PatientProfile.BloodGroup",
+        "MaritalStatusEnum": "apps.patients.models.PatientProfile.MaritalStatus",
+        "ThermalPreferenceEnum": "apps.patients.models.PatientProfile.ThermalPreference",
         "ShopStaffRoleEnum": "apps.shops.models.ShopStaff.Role",
         "ShopUnitEnum": "apps.shops.models.ShopRemedy.Unit",
     },
 }
+
+DEFAULT_EXCEPTION_REPORTER_FILTER = "common.logging_filters.SensitiveDataFilter"
 
 LOGGING = {
     "version": 1,

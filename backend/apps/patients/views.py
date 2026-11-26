@@ -1,5 +1,8 @@
+from typing import cast
+
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,11 +14,16 @@ from apps.accounts.tokens import Session
 from apps.accounts.views import CLIENT_HEADER, IsWebClient, PublicAuthView
 from common.serializers import ErrorSerializer
 
-from . import services
+from . import selectors, services
+from .models import Patient
 from .permissions import IsPatient
 from .serializers import (
     ForgotPasswordSerializer,
     LogInSerializer,
+    PatientProfileBasicUpdateSerializer,
+    PatientProfilePictureUploadSerializer,
+    PatientProfileSectionUpdateSerializer,
+    PatientProfileSerializer,
     PatientSerializer,
     ResetPasswordSerializer,
     SignUpSerializer,
@@ -133,3 +141,81 @@ class MeView(APIView):
     )
     def get(self, request: Request) -> Response:
         return Response(PatientSerializer(request.user).data)
+
+
+class MeProfileView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="patient_profile_read",
+        tags=["patient"],
+        responses={200: PatientProfileSerializer, 401: ErrorSerializer},
+    )
+    def get(self, request: Request) -> Response:
+        profile = selectors.get_or_create_profile(cast(Patient, request.user))
+        return Response(PatientProfileSerializer(profile, context={"request": request}).data)
+
+
+class MeProfileBasicView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="patient_profile_update_basic",
+        tags=["patient"],
+        request=PatientProfileBasicUpdateSerializer,
+        responses={200: PatientProfileSerializer, 400: ErrorSerializer, 401: ErrorSerializer},
+    )
+    def patch(self, request: Request) -> Response:
+        data = _validated(PatientProfileBasicUpdateSerializer, request)
+        profile = services.update_basic_profile(cast(Patient, request.user), data)
+        return Response(PatientProfileSerializer(profile, context={"request": request}).data)
+
+
+class MeProfileSectionView(APIView):
+    permission_classes = [IsPatient]
+
+    @extend_schema(
+        operation_id="patient_profile_update_section",
+        tags=["patient"],
+        request=PatientProfileSectionUpdateSerializer,
+        responses={
+            200: PatientProfileSerializer,
+            400: ErrorSerializer,
+            401: ErrorSerializer,
+            404: ErrorSerializer,
+        },
+    )
+    def patch(self, request: Request, key: str) -> Response:
+        data = _validated(PatientProfileSectionUpdateSerializer, request)
+        profile = services.update_profile_section(cast(Patient, request.user), key, data)
+        return Response(PatientProfileSerializer(profile, context={"request": request}).data)
+
+
+class MeProfilePictureView(APIView):
+    permission_classes = [IsPatient]
+    parser_classes = [MultiPartParser]
+
+    @extend_schema(
+        operation_id="patient_profile_upload_picture",
+        tags=["patient"],
+        request={"multipart/form-data": PatientProfilePictureUploadSerializer},
+        responses={
+            200: PatientProfileSerializer,
+            400: ErrorSerializer,
+            401: ErrorSerializer,
+            503: ErrorSerializer,
+        },
+    )
+    def put(self, request: Request) -> Response:
+        data = _validated(PatientProfilePictureUploadSerializer, request)
+        profile = services.set_profile_picture(cast(Patient, request.user), data["picture"])
+        return Response(PatientProfileSerializer(profile, context={"request": request}).data)
+
+    @extend_schema(
+        operation_id="patient_profile_delete_picture",
+        tags=["patient"],
+        responses={200: PatientProfileSerializer, 401: ErrorSerializer},
+    )
+    def delete(self, request: Request) -> Response:
+        profile = services.remove_profile_picture(cast(Patient, request.user))
+        return Response(PatientProfileSerializer(profile, context={"request": request}).data)

@@ -3437,6 +3437,157 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/me/profile/:
+    get:
+      operationId: patient_profile_read
+      tags:
+      - patient
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfile'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/me/profile/basic/:
+    patch:
+      operationId: patient_profile_update_basic
+      tags:
+      - patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientProfileBasicUpdateRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/me/profile/picture/:
+    put:
+      operationId: patient_profile_upload_picture
+      tags:
+      - patient
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientProfilePictureUploadRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: patient_profile_delete_picture
+      tags:
+      - patient
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfile'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/me/profile/sections/{key}/:
+    patch:
+      operationId: patient_profile_update_section
+      parameters:
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      tags:
+      - patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientProfileSectionUpdateRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientProfile'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/orders/:
     get:
       operationId: orders_list
@@ -5197,6 +5348,29 @@ components:
         * `DELIVERED` - Delivered
         * `RETURNED` - Returned
         * `CANCELLED` - Cancelled
+    BlankEnum:
+      enum:
+      - ''
+    BloodGroupEnum:
+      enum:
+      - A+
+      - A-
+      - B+
+      - B-
+      - AB+
+      - AB-
+      - O+
+      - O-
+      type: string
+      description: |-
+        * `A+` - A+
+        * `A-` - A-
+        * `B+` - B+
+        * `B-` - B-
+        * `AB+` - AB+
+        * `AB-` - AB-
+        * `O+` - O+
+        * `O-` - O-
     Cart:
       type: object
       properties:
@@ -5333,6 +5507,31 @@ components:
       - payment_method
       - phone
       - recipient_name
+    CompletenessSections:
+      type: object
+      properties:
+        picture:
+          type: boolean
+        basic:
+          type: boolean
+        family_history:
+          type: boolean
+        medical_history:
+          type: boolean
+        mental_picture:
+          type: boolean
+        general_picture:
+          type: boolean
+        likes_dislikes:
+          type: boolean
+      required:
+      - basic
+      - family_history
+      - general_picture
+      - likes_dislikes
+      - medical_history
+      - mental_picture
+      - picture
     DoctorCertificate:
       type: object
       properties:
@@ -5641,6 +5840,18 @@ components:
       required:
       - password
       - phone
+    MaritalStatusEnum:
+      enum:
+      - SINGLE
+      - MARRIED
+      - WIDOWED
+      - DIVORCED
+      type: string
+      description: |-
+        * `SINGLE` - Single
+        * `MARRIED` - Married
+        * `WIDOWED` - Widowed
+        * `DIVORCED` - Divorced
     NullEnum:
       enum:
       - null
@@ -6168,6 +6379,92 @@ components:
           type: integer
           maximum: 10000000
           minimum: 1
+    PatchedPatientProfileBasicUpdateRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        gender:
+          $ref: '#/components/schemas/GenderEnum'
+        age:
+          type: integer
+          maximum: 120
+          minimum: 1
+        location_id:
+          type: string
+          format: uuid
+        blood_group:
+          oneOf:
+          - $ref: '#/components/schemas/BloodGroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        height_cm:
+          type: integer
+          maximum: 250
+          minimum: 30
+          nullable: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
+          nullable: true
+        marital_status:
+          oneOf:
+          - $ref: '#/components/schemas/MaritalStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        occupation:
+          type: string
+          maxLength: 120
+    PatchedPatientProfileSectionUpdateRequest:
+      type: object
+      properties:
+        family_conditions:
+          type: string
+          maxLength: 4000
+        family_notes:
+          type: string
+          maxLength: 4000
+        chronic_conditions:
+          type: string
+          maxLength: 4000
+        current_medications:
+          type: string
+          maxLength: 4000
+        allergies:
+          type: string
+          maxLength: 4000
+        temperament:
+          type: string
+          maxLength: 4000
+        fears_anxieties:
+          type: string
+          maxLength: 4000
+        emotional_notes:
+          type: string
+          maxLength: 4000
+        thermal_preference:
+          oneOf:
+          - $ref: '#/components/schemas/ThermalPreferenceEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        appetite_thirst:
+          type: string
+          maxLength: 4000
+        sleep_dreams:
+          type: string
+          maxLength: 4000
+        general_notes:
+          type: string
+          maxLength: 4000
+        food_cravings:
+          type: string
+          maxLength: 4000
+        food_aversions:
+          type: string
+          maxLength: 4000
+        weather_modalities:
+          type: string
+          maxLength: 4000
     PatchedStaffUpdateRequest:
       type: object
       description: Send only what changes.
@@ -6421,6 +6718,152 @@ components:
       required:
       - form
       - price_poisha
+    PatientProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+        phone_verified:
+          type: boolean
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        gender:
+          allOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          readOnly: true
+        age:
+          type: integer
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          readOnly: true
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        blood_group:
+          allOf:
+          - $ref: '#/components/schemas/BloodGroupEnum'
+          readOnly: true
+        height_cm:
+          type: integer
+          readOnly: true
+          nullable: true
+        weight_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
+          readOnly: true
+          nullable: true
+        marital_status:
+          allOf:
+          - $ref: '#/components/schemas/MaritalStatusEnum'
+          readOnly: true
+        occupation:
+          type: string
+          readOnly: true
+        family_conditions:
+          type: string
+          readOnly: true
+        family_notes:
+          type: string
+          readOnly: true
+        chronic_conditions:
+          type: string
+          readOnly: true
+        current_medications:
+          type: string
+          readOnly: true
+        allergies:
+          type: string
+          readOnly: true
+        temperament:
+          type: string
+          readOnly: true
+        fears_anxieties:
+          type: string
+          readOnly: true
+        emotional_notes:
+          type: string
+          readOnly: true
+        thermal_preference:
+          allOf:
+          - $ref: '#/components/schemas/ThermalPreferenceEnum'
+          readOnly: true
+        appetite_thirst:
+          type: string
+          readOnly: true
+        sleep_dreams:
+          type: string
+          readOnly: true
+        general_notes:
+          type: string
+          readOnly: true
+        food_cravings:
+          type: string
+          readOnly: true
+        food_aversions:
+          type: string
+          readOnly: true
+        weather_modalities:
+          type: string
+          readOnly: true
+        completeness:
+          allOf:
+          - $ref: '#/components/schemas/ProfileCompleteness'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - age
+      - allergies
+      - appetite_thirst
+      - blood_group
+      - chronic_conditions
+      - completeness
+      - current_medications
+      - emotional_notes
+      - family_conditions
+      - family_notes
+      - fears_anxieties
+      - food_aversions
+      - food_cravings
+      - full_name
+      - gender
+      - general_notes
+      - height_cm
+      - id
+      - location
+      - marital_status
+      - occupation
+      - phone
+      - phone_verified
+      - picture_url
+      - sleep_dreams
+      - temperament
+      - thermal_preference
+      - updated_at
+      - weather_modalities
+      - weight_kg
+    PatientProfilePictureUploadRequest:
+      type: object
+      properties:
+        picture:
+          type: string
+          format: binary
+      required:
+      - picture
     PatientUserTypeEnum:
       enum:
       - patient
@@ -6532,6 +6975,19 @@ components:
       description: |-
         * `en` - English
         * `bn` - Bangla
+    ProfileCompleteness:
+      type: object
+      properties:
+        filled:
+          type: integer
+        total:
+          type: integer
+        sections:
+          $ref: '#/components/schemas/CompletenessSections'
+      required:
+      - filled
+      - sections
+      - total
     PublicIllnessCategory:
       type: object
       properties:
@@ -7043,6 +7499,16 @@ components:
       required:
       - password
       - username
+    ThermalPreferenceEnum:
+      enum:
+      - CHILLY
+      - HOT
+      - AMBIVALENT
+      type: string
+      description: |-
+        * `CHILLY` - Chilly
+        * `HOT` - Hot
+        * `AMBIVALENT` - Ambivalent
     Verification:
       type: object
       description: A code has been requested; send it back with ``verification_id``.
