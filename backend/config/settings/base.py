@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "apps.staff",
     "apps.remedies",
     "apps.illnesses",
+    "apps.selfcare",
+    "apps.orders",
 ]
 
 MIDDLEWARE = [
@@ -224,6 +226,8 @@ SPECTACULAR_SETTINGS = {
         "PermissionEnum": "apps.staff.serializers.PERMISSION_CHOICES",
         "RemedyStatusEnum": "apps.remedies.models.Remedy.Status",
         "IllnessStatusEnum": "apps.illnesses.models.Illness.Status",
+        "PotenciesEnum": "apps.remedies.choices.Potency",
+        "CartStatusEnum": "apps.orders.models.Cart.Status",
     },
 }
 

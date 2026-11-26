@@ -6,11 +6,14 @@ import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import { Logo } from "@/components/Logo";
+import { fill } from "@/i18n/catalog";
+import { numberFormat } from "@/i18n/format";
 import type { CommonMessages } from "@/i18n/messages/common";
 import type { PatientMessages } from "@/i18n/messages/patient";
 import { useMessages } from "@/i18n/provider";
 import { isCurrentPath } from "@/lib/nav";
 
+import { useCart } from "./cart/CartProvider";
 import { PATIENT_TABS } from "./nav";
 
 const CART_ICON =
@@ -30,7 +33,12 @@ export function TopBar({
   task?: { title: string; backHref: string };
 }) {
   const pathname = usePathname();
-  const { t } = useMessages<CommonMessages & PatientMessages>();
+  const { locale, t } = useMessages<CommonMessages & PatientMessages>();
+  const { cart } = useCart();
+  const count = cart?.item_count ?? 0;
+  const countText = numberFormat(locale).format(count);
+  const cartAriaLabel =
+    count > 0 ? fill(t("patient.cart.badgeLabel"), { count: countText }) : t("patient.cart");
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-surface">
@@ -57,8 +65,16 @@ export function TopBar({
             <LanguageSwitch />
           </>
         )}
-        <Link href="/cart" aria-label={t("patient.cart")} className={iconLink}>
+        <Link href="/cart" aria-label={cartAriaLabel} className={`${iconLink} relative`}>
           <Icon path={CART_ICON} strokeWidth={2} />
+          {count > 0 && (
+            <span
+              aria-hidden="true"
+              className="absolute top-0.5 right-0.5 flex min-w-5 items-center justify-center rounded-full bg-amber px-1 text-[11px] leading-5 font-bold text-surface"
+            >
+              {countText}
+            </span>
+          )}
         </Link>
       </div>
 
@@ -89,10 +105,19 @@ export function TopBar({
         <LanguageSwitch />
         <Link
           href="/cart"
+          aria-label={cartAriaLabel}
           className="flex min-h-11 items-center gap-2 rounded-control border border-line-strong px-3.5 text-[15px] font-semibold"
         >
           <Icon path={CART_ICON} size={20} strokeWidth={2} />
-          {t("patient.cart")}
+          <span>{t("patient.cart")}</span>
+          {count > 0 && (
+            <span
+              aria-hidden="true"
+              className="flex min-w-5 items-center justify-center rounded-full bg-amber px-1.5 text-xs leading-5 font-bold text-surface"
+            >
+              {countText}
+            </span>
+          )}
         </Link>
       </div>
     </header>

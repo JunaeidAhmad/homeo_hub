@@ -1,11 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 import type { components } from "@/api/schema";
 import { ActionBar } from "@/areas/patient/ActionBar";
+import { useCart } from "@/areas/patient/cart/CartProvider";
+import { useSession } from "@/areas/patient/session/SessionProvider";
 import { RemedyVial } from "@/components/RemedyVial";
 import { formatMoney } from "@/i18n/format";
 import type { PatientMessages } from "@/i18n/messages/patient";
@@ -29,18 +32,24 @@ export function RemedyPurchase({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const session = useSession();
+  const { add } = useCart();
 
   const requestedPotency = searchParams.get("potency");
   const requestedForm = searchParams.get("form");
   const activeIllness = illnessSlug || searchParams.get("illness") || undefined;
-  void activeIllness; // ticket 09 attaches illness to cart items
 
   const [choice, setChoice] = useState<RemedyChoiceValue>(() =>
     initialChoice(remedy.potencies, remedy.prices, requestedPotency, requestedForm),
   );
+  const [busy, setBusy] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [error, setError] = useState("");
 
   function handleChange(next: RemedyChoiceValue) {
     setChoice(next);
+    setAdded(false);
+    setError("");
     const params = new URLSearchParams(searchParams.toString());
     params.set("potency", next.potency);
     if (next.form) {
@@ -49,6 +58,31 @@ export function RemedyPurchase({
       params.delete("form");
     }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  async function handleAdd() {
+    if (!choice.form || choice.price === null) return;
+    if (session.status !== "signedIn") {
+      const query = searchParams.toString();
+      const returnTo = query ? `${pathname}?${query}` : pathname;
+      router.push(`/signin?next=${encodeURIComponent(returnTo)}`);
+      return;
+    }
+    setBusy(true);
+    setError("");
+    const result = await add({
+      remedy_id: remedy.id,
+      illness_slug: activeIllness ?? null,
+      potency: choice.potency,
+      form: choice.form,
+      quantity: 1,
+    });
+    setBusy(false);
+    if (result.ok) {
+      setAdded(true);
+    } else {
+      setError(t("patient.cart.updateFailed"));
+    }
   }
 
   return (
@@ -101,22 +135,40 @@ export function RemedyPurchase({
 
       <ActionBar>
         {choice.price !== null && choice.form ? (
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-col">
-              <span className="font-display text-2xl leading-none font-normal">
-                {formatMoney(locale, choice.price)}
-              </span>
-              <span className="text-sm text-ink-muted">
-                {choice.potency} · {t(`patient.remedy.form.${choice.form}`)}
-              </span>
+          <div className="flex flex-col gap-2">
+            {error && (
+              <p role="alert" className="text-sm font-medium text-danger">
+                {error}
+              </p>
+            )}
+            <p role="status" className="flex items-center justify-between gap-2 text-sm font-semibold text-primary-deep empty:hidden">
+              {added && (
+                <>
+                  <span>{t("patient.cart.added")}</span>
+                  <Link href="/cart" className="underline">
+                    {t("patient.cart.viewCart")}
+                  </Link>
+                </>
+              )}
+            </p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-col">
+                <span className="font-display text-2xl leading-none font-normal">
+                  {formatMoney(locale, choice.price)}
+                </span>
+                <span className="text-sm text-ink-muted">
+                  {choice.potency} · {t(`patient.remedy.form.${choice.form}`)}
+                </span>
+              </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleAdd()}
+                className="min-h-[54px] flex-1 rounded-control bg-primary px-5 text-[17px] font-bold text-surface disabled:opacity-60 desktop:max-w-xs"
+              >
+                {t("patient.remedy.addToCart")}
+              </button>
             </div>
-            <button
-              type="button"
-              disabled
-              className="min-h-[54px] flex-1 cursor-not-allowed rounded-control bg-primary px-5 text-[17px] font-bold text-surface opacity-60 desktop:max-w-xs"
-            >
-              {t("patient.remedy.addToCart")}
-            </button>
           </div>
         ) : (
           <p className="py-2 text-center font-semibold text-ink-muted">

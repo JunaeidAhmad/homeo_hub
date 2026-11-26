@@ -1304,6 +1304,146 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/cart/:
+    get:
+      operationId: cart_read
+      tags:
+      - cart
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/cart/items/:
+    post:
+      operationId: cart_items_add
+      tags:
+      - cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItemRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/cart/items/{id}/:
+    patch:
+      operationId: cart_items_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItemRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: cart_items_remove
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - cart
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/health/live:
     get:
       operationId: health_live
@@ -1518,6 +1658,37 @@ paths:
           description: ''
 components:
   schemas:
+    AddCartItemRequest:
+      type: object
+      properties:
+        remedy_id:
+          type: string
+          format: uuid
+        illness_id:
+          type: string
+          format: uuid
+          nullable: true
+        illness_slug:
+          nullable: true
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        potency:
+          $ref: '#/components/schemas/PotenciesEnum'
+        form:
+          $ref: '#/components/schemas/FormEnum'
+        quantity:
+          type: integer
+          maximum: 10
+          minimum: 1
+          default: 1
+      required:
+      - form
+      - potency
+      - remedy_id
     AdminIllness:
       type: object
       properties:
@@ -1928,6 +2099,100 @@ components:
       - description_en
       - indication_en
       - name
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+          readOnly: true
+        item_count:
+          type: integer
+          readOnly: true
+        subtotal_poisha:
+          type: integer
+          readOnly: true
+        max_quantity:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - item_count
+      - items
+      - max_quantity
+      - subtotal_poisha
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        remedy:
+          allOf:
+          - $ref: '#/components/schemas/CartRemedy'
+          readOnly: true
+        illness_name:
+          type: string
+          nullable: true
+          readOnly: true
+        potency:
+          allOf:
+          - $ref: '#/components/schemas/PotenciesEnum'
+          readOnly: true
+        form:
+          allOf:
+          - $ref: '#/components/schemas/FormEnum'
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+        unit_price_poisha:
+          type: integer
+          readOnly: true
+        line_total_poisha:
+          type: integer
+          readOnly: true
+        available:
+          type: boolean
+          readOnly: true
+      required:
+      - available
+      - form
+      - id
+      - illness_name
+      - line_total_poisha
+      - potency
+      - quantity
+      - remedy
+      - unit_price_poisha
+    CartRemedy:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+      required:
+      - name
+      - picture_url
+      - slug
     CheckResultEnum:
       enum:
       - ok
@@ -2302,6 +2567,11 @@ components:
             $ref: '#/components/schemas/RoleEnum'
         is_active:
           type: boolean
+    PatchedUpdateCartItemRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
     Patient:
       type: object
       description: The signed-in patient's own account.

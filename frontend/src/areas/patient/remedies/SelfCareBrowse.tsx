@@ -157,6 +157,7 @@ export function SelfCareBrowse() {
                     key={remedy.id}
                     remedy={remedy}
                     illnessSlug={activeIllness.detail!.slug}
+                    illnessId={activeIllness.detail!.id}
                   />
                 ))}
               </div>

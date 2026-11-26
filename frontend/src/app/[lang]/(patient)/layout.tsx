@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { CartProvider } from "@/areas/patient/cart/CartProvider";
 import { SessionProvider } from "@/areas/patient/session/SessionProvider";
 import { messagesFor } from "@/i18n/catalog";
 import { auth } from "@/i18n/messages/auth";
@@ -12,7 +13,9 @@ export default async function PatientLayout({ children }: { children: ReactNode 
   const locale = await getLocale();
   return (
     <I18nProvider locale={locale} messages={messagesFor(locale, common, patient, auth)}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <CartProvider>{children}</CartProvider>
+      </SessionProvider>
     </I18nProvider>
   );
 }

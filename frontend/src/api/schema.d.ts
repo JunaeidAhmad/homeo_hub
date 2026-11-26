@@ -523,6 +523,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cart/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["cart_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cart/items/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cart_items_add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cart/items/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["cart_items_remove"];
+        options?: never;
+        head?: never;
+        patch: operations["cart_items_update"];
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -662,6 +710,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddCartItemRequest: {
+            /** Format: uuid */
+            remedy_id: string;
+            /** Format: uuid */
+            illness_id?: string | null;
+            illness_slug?: (string) | null;
+            potency: components["schemas"]["PotenciesEnum"];
+            form: components["schemas"]["FormEnum"];
+            /** @default 1 */
+            quantity: number;
+        };
         AdminIllness: {
             /** Format: uuid */
             readonly id: string;
@@ -793,6 +852,33 @@ export interface components {
             advice_do_bn?: string;
             advice_dont_en: string;
             advice_dont_bn?: string;
+        };
+        Cart: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly items: components["schemas"]["CartItem"][];
+            readonly item_count: number;
+            readonly subtotal_poisha: number;
+            readonly max_quantity: number;
+        };
+        CartItem: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly remedy: components["schemas"]["CartRemedy"];
+            readonly illness_name: string | null;
+            readonly potency: components["schemas"]["PotenciesEnum"];
+            readonly form: components["schemas"]["FormEnum"];
+            readonly quantity: number;
+            readonly unit_price_poisha: number;
+            readonly line_total_poisha: number;
+            readonly available: boolean;
+        };
+        CartRemedy: {
+            name: string;
+            name_bn?: string;
+            slug: string;
+            /** Format: uri */
+            readonly picture_url: string | null;
         };
         /**
          * @description * `ok` - ok
@@ -983,6 +1069,9 @@ export interface components {
             full_name?: string;
             roles?: components["schemas"]["RoleEnum"][];
             is_active?: boolean;
+        };
+        PatchedUpdateCartItemRequest: {
+            quantity?: number;
         };
         /** @description The signed-in patient's own account. */
         Patient: {
@@ -2498,6 +2587,174 @@ export interface operations {
                 };
             };
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    cart_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    cart_items_add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddCartItemRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    cart_items_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    cart_items_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedUpdateCartItemRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cart"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
