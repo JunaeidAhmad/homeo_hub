@@ -115,6 +115,71 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/admin/doctor-consultations/{id}/assign/:
+    post:
+      operationId: admin_consultations_assign
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminAssignDoctorRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminConsultationDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/doctors/:
     get:
       operationId: admin_doctors_list
@@ -486,6 +551,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/doctors/assignable/:
+    get:
+      operationId: admin_doctors_assignable
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+
+        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+        (any one of them grants access), or ``ANY_STAFF``.
+      parameters:
+      - in: query
+        name: consultation_id
+        schema:
+          type: string
+      - in: query
+        name: q
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssignableDoctor'
           description: ''
         '401':
           content:
@@ -3525,6 +3635,136 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/doctor/consultations/:
+    get:
+      operationId: doctor_consultations_list
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ASSIGNED
+          - AWAITING_PATIENT
+          - CANCELLED
+          - CLOSED
+          - IN_REVIEW
+          - PRESCRIBED
+          - RESPONDED
+          - SUBMITTED
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorConsultationSummary'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/consultations/{id}/:
+    get:
+      operationId: doctor_consultations_read
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorConsultationDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/doctor/consultations/{id}/open/:
+    post:
+      operationId: doctor_consultations_open
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - doctor
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorConsultationDetail'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/doctor/me/:
     get:
       operationId: doctor_me
@@ -4249,6 +4489,18 @@ components:
       - form
       - potency
       - remedy_id
+    AdminAssignDoctorRequest:
+      type: object
+      properties:
+        doctor_id:
+          type: string
+          format: uuid
+        note:
+          type: string
+          default: ''
+          maxLength: 300
+      required:
+      - doctor_id
     AdminAssignLineRequest:
       type: object
       properties:
@@ -5753,6 +6005,44 @@ components:
         * `DISTRICT` - DISTRICT
         * `DIVISION` - DIVISION
         * `OTHER` - OTHER
+    AssignableDoctor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        doctor_code:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        qualifications:
+          type: string
+          readOnly: true
+        area:
+          type: string
+          readOnly: true
+        area_match:
+          allOf:
+          - $ref: '#/components/schemas/AreaMatchEnum'
+          readOnly: true
+        consultation_fee_poisha:
+          type: integer
+          readOnly: true
+        open_case_count:
+          type: integer
+          readOnly: true
+      required:
+      - area
+      - area_match
+      - consultation_fee_poisha
+      - doctor_code
+      - full_name
+      - id
+      - open_case_count
+      - qualifications
     AssignmentStatusEnum:
       enum:
       - ASSIGNED
@@ -6122,6 +6412,173 @@ components:
       - size
       - uploaded_at
       - url
+    DoctorConsultationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        symptoms:
+          type: string
+          readOnly: true
+        duration_value:
+          type: integer
+          readOnly: true
+          nullable: true
+        duration_unit:
+          allOf:
+          - $ref: '#/components/schemas/DurationUnitEnum'
+          readOnly: true
+        symptom_notes:
+          type: string
+          readOnly: true
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        illness:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationIllness'
+          readOnly: true
+        patient:
+          allOf:
+          - $ref: '#/components/schemas/DoctorPatientProfile'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        opened_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsultationHistory'
+          readOnly: true
+        patient_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorHistorySummary'
+          readOnly: true
+      required:
+      - assigned_at
+      - chief_complaint
+      - closed_at
+      - consultation_code
+      - duration_unit
+      - duration_value
+      - history
+      - id
+      - illness
+      - opened_at
+      - patient
+      - patient_history
+      - status
+      - submitted_at
+      - symptom_notes
+      - symptoms
+      - urgency
+    DoctorConsultationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        patient_name:
+          type: string
+          readOnly: true
+        patient_age:
+          type: integer
+          readOnly: true
+        patient_area:
+          type: string
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        urgency:
+          allOf:
+          - $ref: '#/components/schemas/UrgencyEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - assigned_at
+      - chief_complaint
+      - consultation_code
+      - id
+      - patient_age
+      - patient_area
+      - patient_name
+      - status
+      - submitted_at
+      - urgency
+    DoctorHistorySummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        consultation_code:
+          type: string
+          readOnly: true
+        chief_complaint:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ConsultationStatusEnum'
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - chief_complaint
+      - consultation_code
+      - id
+      - status
+      - submitted_at
     DoctorLogInRequest:
       type: object
       properties:
@@ -6225,6 +6682,123 @@ components:
       - status
       - submitted_at
       - suspension_reason
+    DoctorPatientProfile:
+      type: object
+      description: Read-only patient summary and clinical profile visible to the assigned
+        doctor.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        gender:
+          allOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          readOnly: true
+        age:
+          type: integer
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          readOnly: true
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        blood_group:
+          type: string
+          readOnly: true
+        height_cm:
+          type: integer
+          nullable: true
+          readOnly: true
+        weight_kg:
+          type: string
+          nullable: true
+          readOnly: true
+        marital_status:
+          type: string
+          readOnly: true
+        occupation:
+          type: string
+          readOnly: true
+        family_conditions:
+          type: string
+          readOnly: true
+        family_notes:
+          type: string
+          readOnly: true
+        chronic_conditions:
+          type: string
+          readOnly: true
+        current_medications:
+          type: string
+          readOnly: true
+        allergies:
+          type: string
+          readOnly: true
+        temperament:
+          type: string
+          readOnly: true
+        fears_anxieties:
+          type: string
+          readOnly: true
+        emotional_notes:
+          type: string
+          readOnly: true
+        thermal_preference:
+          type: string
+          readOnly: true
+        appetite_thirst:
+          type: string
+          readOnly: true
+        sleep_dreams:
+          type: string
+          readOnly: true
+        general_notes:
+          type: string
+          readOnly: true
+        food_cravings:
+          type: string
+          readOnly: true
+        food_aversions:
+          type: string
+          readOnly: true
+        weather_modalities:
+          type: string
+          readOnly: true
+      required:
+      - age
+      - allergies
+      - appetite_thirst
+      - blood_group
+      - chronic_conditions
+      - current_medications
+      - emotional_notes
+      - family_conditions
+      - family_notes
+      - fears_anxieties
+      - food_aversions
+      - food_cravings
+      - full_name
+      - gender
+      - general_notes
+      - height_cm
+      - id
+      - location
+      - marital_status
+      - occupation
+      - picture_url
+      - sleep_dreams
+      - temperament
+      - thermal_preference
+      - weather_modalities
+      - weight_kg
     DoctorSignUpRequest:
       type: object
       properties:

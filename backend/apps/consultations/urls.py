@@ -28,4 +28,29 @@ urlpatterns = [
         views.AdminConsultationDetailView.as_view(),
         name="admin-consultations-detail",
     ),
+    path(
+        "admin/doctor-consultations/<uuid:pk>/assign/",
+        views.AdminConsultationAssignView.as_view(),
+        name="admin-consultations-assign",
+    ),
+    path(
+        "admin/doctors/assignable/",
+        views.AdminAssignableDoctorListView.as_view(),
+        name="admin-doctors-assignable",
+    ),
+    path(
+        "doctor/consultations/",
+        views.DoctorConsultationListView.as_view(),
+        name="doctor-consultations-list",
+    ),
+    path(
+        "doctor/consultations/<uuid:pk>/",
+        views.DoctorConsultationDetailView.as_view(),
+        name="doctor-consultations-detail",
+    ),
+    path(
+        "doctor/consultations/<uuid:pk>/open/",
+        views.DoctorConsultationOpenView.as_view(),
+        name="doctor-consultations-open",
+    ),
 ]

@@ -1,5 +1,5 @@
-import { DoctorQueueEmpty } from "@/areas/doctor/DoctorQueueEmpty";
+import { DoctorQueue } from "@/areas/doctor/DoctorQueue";
 
 export default function DoctorHomePage() {
-  return <DoctorQueueEmpty />;
+  return <DoctorQueue />;
 }

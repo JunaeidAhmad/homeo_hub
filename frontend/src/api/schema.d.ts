@@ -54,6 +54,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/doctor-consultations/{id}/assign/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_consultations_assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/doctors/": {
         parameters: {
             query?: never;
@@ -207,6 +232,31 @@ export interface paths {
          *     (any one of them grants access), or ``ANY_STAFF``.
          */
         post: operations["admin_doctors_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/doctors/assignable/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_doctors_assignable"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1438,6 +1488,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/doctor/consultations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_consultations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/consultations/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doctor_consultations_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/doctor/consultations/{id}/open/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["doctor_consultations_open"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/doctor/me/": {
         parameters: {
             query?: never;
@@ -1779,6 +1877,12 @@ export interface components {
             form: components["schemas"]["FormEnum"];
             /** @default 1 */
             quantity: number;
+        };
+        AdminAssignDoctorRequest: {
+            /** Format: uuid */
+            doctor_id: string;
+            /** @default  */
+            note: string;
         };
         AdminAssignLineRequest: {
             /** Format: uuid */
@@ -2248,6 +2352,17 @@ export interface components {
          * @enum {string}
          */
         AreaMatchEnum: "UPAZILA" | "DISTRICT" | "DIVISION" | "OTHER";
+        AssignableDoctor: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly doctor_code: string;
+            readonly full_name: string;
+            readonly qualifications: string;
+            readonly area: string;
+            readonly area_match: components["schemas"]["AreaMatchEnum"];
+            readonly consultation_fee_poisha: number;
+            readonly open_case_count: number;
+        };
         /**
          * @description * `ASSIGNED` - Assigned
          *     * `PROCESSING` - Processing
@@ -2389,6 +2504,54 @@ export interface components {
             readonly uploaded_at: string;
             readonly url: string;
         };
+        DoctorConsultationDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly chief_complaint: string;
+            readonly symptoms: string;
+            readonly duration_value: number | null;
+            readonly duration_unit: components["schemas"]["DurationUnitEnum"];
+            readonly symptom_notes: string;
+            readonly urgency: components["schemas"]["UrgencyEnum"];
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            readonly illness: components["schemas"]["ConsultationIllness"];
+            readonly patient: components["schemas"]["DoctorPatientProfile"];
+            /** Format: date-time */
+            readonly submitted_at: string;
+            /** Format: date-time */
+            readonly assigned_at: string | null;
+            /** Format: date-time */
+            readonly opened_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            readonly history: components["schemas"]["ConsultationHistory"][];
+            readonly patient_history: components["schemas"]["DoctorHistorySummary"][];
+        };
+        DoctorConsultationSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly patient_name: string;
+            readonly patient_age: number;
+            readonly patient_area: string;
+            readonly chief_complaint: string;
+            readonly urgency: components["schemas"]["UrgencyEnum"];
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            /** Format: date-time */
+            readonly submitted_at: string;
+            /** Format: date-time */
+            readonly assigned_at: string | null;
+        };
+        DoctorHistorySummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly consultation_code: string;
+            readonly chief_complaint: string;
+            readonly status: components["schemas"]["ConsultationStatusEnum"];
+            /** Format: date-time */
+            readonly submitted_at: string;
+        };
         DoctorLogInRequest: {
             login: string;
             password: string;
@@ -2415,6 +2578,37 @@ export interface components {
             /** Format: date-time */
             readonly approved_at: string | null;
             readonly certificates: components["schemas"]["DoctorCertificate"][];
+        };
+        /** @description Read-only patient summary and clinical profile visible to the assigned doctor. */
+        DoctorPatientProfile: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly full_name: string;
+            readonly gender: components["schemas"]["GenderEnum"];
+            readonly age: number;
+            readonly location: components["schemas"]["Location"];
+            /** Format: uri */
+            readonly picture_url: string | null;
+            readonly blood_group: string;
+            readonly height_cm: number | null;
+            readonly weight_kg: string | null;
+            readonly marital_status: string;
+            readonly occupation: string;
+            readonly family_conditions: string;
+            readonly family_notes: string;
+            readonly chronic_conditions: string;
+            readonly current_medications: string;
+            readonly allergies: string;
+            readonly temperament: string;
+            readonly fears_anxieties: string;
+            readonly emotional_notes: string;
+            readonly thermal_preference: string;
+            readonly appetite_thirst: string;
+            readonly sleep_dreams: string;
+            readonly general_notes: string;
+            readonly food_cravings: string;
+            readonly food_aversions: string;
+            readonly weather_modalities: string;
         };
         DoctorSignUpRequest: {
             phone: string;
@@ -3371,6 +3565,71 @@ export interface operations {
             };
         };
     };
+    admin_consultations_assign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminAssignDoctorRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminConsultationDetail"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     admin_doctors_list: {
         parameters: {
             query?: {
@@ -3709,6 +3968,44 @@ export interface operations {
                 };
             };
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_doctors_assignable: {
+        parameters: {
+            query?: {
+                consultation_id?: string;
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignableDoctor"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6617,6 +6914,142 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DoctorMe"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultations_list: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: "ASSIGNED" | "AWAITING_PATIENT" | "CANCELLED" | "CLOSED" | "IN_REVIEW" | "PRESCRIBED" | "RESPONDED" | "SUBMITTED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorConsultationSummary"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultations_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    doctor_consultations_open: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DoctorConsultationDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             409: {

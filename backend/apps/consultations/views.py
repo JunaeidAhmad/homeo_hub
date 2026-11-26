@@ -9,6 +9,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.doctors.models import Doctor
+from apps.doctors.permissions import IsApprovedDoctor
 from apps.patients.models import Patient
 from apps.patients.permissions import IsPatient
 from apps.staff.permissions import AdminView
@@ -19,10 +21,14 @@ from common.serializers import ErrorSerializer
 from . import selectors, services
 from .models import DoctorConsultation
 from .serializers import (
+    AdminAssignDoctorSerializer,
     AdminConsultationDetailSerializer,
     AdminConsultationSummarySerializer,
+    AssignableDoctorSerializer,
     ConsultationSubmitSerializer,
     ConsultationWithdrawSerializer,
+    DoctorConsultationDetailSerializer,
+    DoctorConsultationSummarySerializer,
     PatientConsultationDetailSerializer,
     PatientConsultationSummarySerializer,
 )
@@ -133,8 +139,10 @@ class AdminConsultationListView(AdminView, ListAPIView):
         "chief_complaint",
         "patient__full_name",
         "patient__phone",
-        "patient__location__display_name_en",
-        "patient__location__display_name_bn",
+        "patient__location__upazila_en",
+        "patient__location__upazila_bn",
+        "patient__location__district_en",
+        "patient__location__district_bn",
         "assigned_doctor__full_name",
         "assigned_doctor__doctor_code",
     ]
@@ -179,3 +187,144 @@ class AdminConsultationDetailView(AdminView, APIView):
     def get(self, request: Request, pk: str) -> Response:
         case = get_object_or_404(selectors.admin_consultations(), pk=pk)
         return Response(AdminConsultationDetailSerializer(case, context={"request": request}).data)
+
+
+class AdminConsultationAssignView(AdminView, APIView):
+    required_permissions = {"POST": Perm.ASSIGN_CASES}
+
+    @extend_schema(
+        operation_id="admin_consultations_assign",
+        tags=["admin"],
+        request=AdminAssignDoctorSerializer,
+        responses={
+            200: AdminConsultationDetailSerializer,
+            400: ErrorSerializer,
+            **ADMIN_REFUSED,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        body = AdminAssignDoctorSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        case = get_object_or_404(DoctorConsultation, pk=pk)
+        doctor = get_object_or_404(Doctor, pk=body.validated_data["doctor_id"])
+        updated = services.assign(
+            case,
+            doctor,
+            request.user,  # type: ignore[arg-type]
+            note=body.validated_data.get("note", ""),
+        )
+        detail = get_object_or_404(selectors.admin_consultations(), pk=updated.pk)
+        return Response(
+            AdminConsultationDetailSerializer(detail, context={"request": request}).data
+        )
+
+
+class AdminAssignableDoctorListView(AdminView, APIView):
+    required_permissions = {"GET": Perm.ASSIGN_CASES}
+    pagination_class = None
+
+    @extend_schema(
+        operation_id="admin_doctors_assignable",
+        tags=["admin"],
+        parameters=[
+            OpenApiParameter(name="consultation_id", type=str, required=False),
+            OpenApiParameter(name="q", type=str, required=False),
+        ],
+        responses={200: AssignableDoctorSerializer(many=True), **ADMIN_REFUSED},
+    )
+    def get(self, request: Request) -> Response:
+        consultation_id = request.query_params.get("consultation_id", "").strip()
+        consultation = (
+            get_object_or_404(
+                DoctorConsultation.objects.select_related("patient__location"),
+                pk=consultation_id,
+            )
+            if consultation_id
+            else None
+        )
+        rows = selectors.assignable_doctors(
+            q=request.query_params.get("q", ""),
+            consultation=consultation,
+        )
+        return Response(
+            AssignableDoctorSerializer(rows, many=True, context={"request": request}).data
+        )
+
+
+class DoctorConsultationListView(APIView):
+    permission_classes = [IsApprovedDoctor]
+    pagination_class = None
+
+    @extend_schema(
+        operation_id="doctor_consultations_list",
+        tags=["doctor"],
+        parameters=[
+            OpenApiParameter(name="q", type=str, required=False),
+            OpenApiParameter(
+                name="status",
+                type=str,
+                required=False,
+                enum=[choice for choice, _ in DoctorConsultation.Status.choices],
+            ),
+        ],
+        responses={
+            200: DoctorConsultationSummarySerializer(many=True),
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+        },
+    )
+    def get(self, request: Request) -> Response:
+        cases = selectors.cases_for_doctor(
+            cast(Doctor, request.user),
+            status=request.query_params.get("status", ""),
+            q=request.query_params.get("q", ""),
+        )
+        return Response(
+            DoctorConsultationSummarySerializer(cases, many=True, context={"request": request}).data
+        )
+
+
+class DoctorConsultationDetailView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_consultations_read",
+        tags=["doctor"],
+        responses={
+            200: DoctorConsultationDetailSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+        },
+    )
+    def get(self, request: Request, pk: str) -> Response:
+        case = get_object_or_404(selectors.cases_for_doctor(cast(Doctor, request.user)), pk=pk)
+        return Response(DoctorConsultationDetailSerializer(case, context={"request": request}).data)
+
+
+class DoctorConsultationOpenView(APIView):
+    permission_classes = [IsApprovedDoctor]
+
+    @extend_schema(
+        operation_id="doctor_consultations_open",
+        tags=["doctor"],
+        request=None,
+        responses={
+            200: DoctorConsultationDetailSerializer,
+            401: ErrorSerializer,
+            403: ErrorSerializer,
+            404: ErrorSerializer,
+            409: ErrorSerializer,
+        },
+    )
+    def post(self, request: Request, pk: str) -> Response:
+        case = get_object_or_404(selectors.cases_for_doctor(cast(Doctor, request.user)), pk=pk)
+        updated = services.open_case(case, cast(Doctor, request.user))
+        detail = get_object_or_404(
+            selectors.cases_for_doctor(cast(Doctor, request.user)), pk=updated.pk
+        )
+        return Response(
+            DoctorConsultationDetailSerializer(detail, context={"request": request}).data
+        )

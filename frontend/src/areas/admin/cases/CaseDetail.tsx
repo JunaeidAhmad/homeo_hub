@@ -11,6 +11,7 @@ import type { AdminMessages } from "@/i18n/messages/admin";
 import { useMessages } from "@/i18n/provider";
 
 import { useStaffSession } from "../session";
+import { AssignDoctorPanel } from "./AssignDoctorPanel";
 import { CASE_STATUS_BADGE } from "./CaseQueue";
 
 type CaseDetailData = components["schemas"]["AdminConsultationDetail"];
@@ -155,6 +156,8 @@ export function CaseDetail({ caseId }: { caseId: string }) {
           </p>
         </div>
       </section>
+
+      <AssignDoctorPanel caseData={caseData} onAssigned={setCaseData} />
 
       <section className="rounded-panel border border-line bg-surface p-5">
         <h2 className="pb-3 text-base font-semibold text-ink">{t("admin.cases.history")}</h2>
