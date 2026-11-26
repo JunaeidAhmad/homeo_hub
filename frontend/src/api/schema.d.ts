@@ -4,6 +4,146 @@
  */
 
 export interface paths {
+    "/api/v1/admin/illness-categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_illness_categories_list"];
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        post: operations["admin_illness_categories_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/illness-categories/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_illness_categories_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        patch: operations["admin_illness_categories_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/illnesses/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_illnesses_list"];
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        post: operations["admin_illnesses_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/illnesses/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_illnesses_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        patch: operations["admin_illnesses_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/illnesses/{id}/remedies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        get: operations["admin_illnesses_remedies_list"];
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         */
+        put: operations["admin_illnesses_remedies_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/me/": {
         parameters: {
             query?: never;
@@ -417,6 +557,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/illness-categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Active illness categories with their active illnesses. Public. */
+        get: operations["illness_categories_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/illnesses/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One active illness with ranked active remedies. Public. */
+        get: operations["illnesses_read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/locations/": {
         parameters: {
             query?: never;
@@ -488,6 +662,62 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdminIllness: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            category: string;
+            readonly category_name_en: string;
+            name_en: string;
+            name_bn?: string;
+            slug?: string;
+            short_description_en: string;
+            short_description_bn?: string;
+            status?: components["schemas"]["IllnessStatusEnum"];
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AdminIllnessCategory: {
+            /** Format: uuid */
+            readonly id: string;
+            name_en: string;
+            name_bn?: string;
+            slug?: string;
+            sort_order?: number;
+            is_active?: boolean;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AdminIllnessCategoryRequest: {
+            name_en: string;
+            name_bn?: string;
+            slug?: string;
+            sort_order?: number;
+            is_active?: boolean;
+        };
+        AdminIllnessRemedy: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly remedy_id: string;
+            readonly remedy_name: string;
+            readonly remedy_name_bn: string;
+            readonly remedy_slug: string;
+            readonly remedy_status: string;
+            /** Format: uri */
+            readonly picture_url: string | null;
+            rank: number;
+        };
+        AdminIllnessRequest: {
+            /** Format: uuid */
+            category: string;
+            name_en: string;
+            name_bn?: string;
+            slug?: string;
+            short_description_en: string;
+            short_description_bn?: string;
+            status?: components["schemas"]["IllnessStatusEnum"];
+        };
         /** @description The signed-in staff member, with what they are allowed to do. */
         AdminMe: {
             readonly id: number;
@@ -523,6 +753,9 @@ export interface components {
             form: components["schemas"]["FormEnum"];
             price_poisha: number;
             is_active?: boolean;
+        };
+        AdminRankedRemediesInputRequest: {
+            remedy_ids: string[];
         };
         /** @description Everything about a remedy, both languages, for the editor. */
         AdminRemedy: {
@@ -595,6 +828,12 @@ export interface components {
          * @enum {string}
          */
         GenderEnum: "FEMALE" | "MALE" | "OTHER";
+        /**
+         * @description * `ACTIVE` - Active
+         *     * `INACTIVE` - Inactive
+         * @enum {string}
+         */
+        IllnessStatusEnum: "ACTIVE" | "INACTIVE";
         Live: {
             status: components["schemas"]["LiveStatusEnum"];
         };
@@ -616,6 +855,36 @@ export interface components {
         LogInRequest: {
             phone: string;
             password: string;
+        };
+        PaginatedAdminIllnessCategoryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminIllnessCategory"][];
+        };
+        PaginatedAdminIllnessList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AdminIllness"][];
         };
         PaginatedAdminRemedyList: {
             /** @example 123 */
@@ -676,6 +945,23 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Staff"][];
+        };
+        PatchedAdminIllnessCategoryRequest: {
+            name_en?: string;
+            name_bn?: string;
+            slug?: string;
+            sort_order?: number;
+            is_active?: boolean;
+        };
+        PatchedAdminIllnessRequest: {
+            /** Format: uuid */
+            category?: string;
+            name_en?: string;
+            name_bn?: string;
+            slug?: string;
+            short_description_en?: string;
+            short_description_bn?: string;
+            status?: components["schemas"]["IllnessStatusEnum"];
         };
         /** @description Everything about a remedy, both languages, for the editor. */
         PatchedAdminRemedyRequest: {
@@ -757,6 +1043,41 @@ export interface components {
          * @enum {string}
          */
         PreferredLanguageEnum: "en" | "bn";
+        PublicIllnessCategory: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            readonly name: string;
+            readonly illnesses: components["schemas"]["PublicIllnessSummary"][];
+        };
+        PublicIllnessDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            readonly name: string;
+            readonly short_description: string;
+            readonly category_name: string;
+            readonly remedies: components["schemas"]["RankedRemedyCard"][];
+        };
+        PublicIllnessSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            readonly name: string;
+        };
+        /** @description A remedy in a list, in the language asked for. */
+        RankedRemedyCard: {
+            /** Format: uuid */
+            readonly id: string;
+            name: string;
+            name_bn?: string;
+            slug: string;
+            /** Format: uri */
+            readonly picture_url: string | null;
+            readonly indication: string;
+            readonly prices: components["schemas"]["PatientPrice"][];
+            readonly rank: number;
+        };
         Ready: {
             status: components["schemas"]["ReadyStatusEnum"];
             checks: components["schemas"]["ReadyChecks"];
@@ -903,6 +1224,353 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_illness_categories_list: {
+        parameters: {
+            query?: {
+                is_active?: boolean;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminIllnessCategoryList"];
+                };
+            };
+        };
+    };
+    admin_illness_categories_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminIllnessCategoryRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllnessCategory"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_illness_categories_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllnessCategory"];
+                };
+            };
+        };
+    };
+    admin_illness_categories_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminIllnessCategoryRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllnessCategory"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_illnesses_list: {
+        parameters: {
+            query?: {
+                category?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Keyword search (typo-tolerant, Bangla or English). */
+                q?: string;
+                status?: "ACTIVE" | "INACTIVE";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminIllnessList"];
+                };
+            };
+        };
+    };
+    admin_illnesses_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminIllnessRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllness"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_illnesses_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllness"];
+                };
+            };
+        };
+    };
+    admin_illnesses_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminIllnessRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllness"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_illnesses_remedies_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllnessRemedy"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    admin_illnesses_remedies_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminRankedRemediesInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminIllnessRemedy"][];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     admin_me: {
         parameters: {
             query?: never;
@@ -1881,6 +2549,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Ready"];
+                };
+            };
+        };
+    };
+    illness_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicIllnessCategory"][];
+                };
+            };
+        };
+    };
+    illnesses_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicIllnessDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

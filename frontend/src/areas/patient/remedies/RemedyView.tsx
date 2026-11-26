@@ -31,13 +31,15 @@ function Advice({ title, items, tone }: { title: string; items: string[]; tone: 
 /** The remedy page: picture or vial, name, pickers, when to use, description, do's and don'ts. */
 export function RemedyView({
   remedy,
+  illnessSlug,
   t,
 }: {
   remedy: Remedy;
+  illnessSlug?: string;
   t: (key: keyof PatientMessages) => string;
 }) {
   return (
-    <RemedyPurchase remedy={remedy}>
+    <RemedyPurchase remedy={remedy} illnessSlug={illnessSlug}>
       <section
         aria-labelledby="about-remedy"
         className="flex flex-col gap-5 rounded-panel border border-line bg-surface px-4 py-5 desktop:p-9"

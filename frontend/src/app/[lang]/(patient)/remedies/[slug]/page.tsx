@@ -5,7 +5,10 @@ import { patient } from "@/i18n/messages/patient";
 import { common } from "@/i18n/messages/common";
 import { getTranslator } from "@/i18n/server";
 
-export default async function Page({ params }: PageProps<"/[lang]/remedies/[slug]">) {
+export default async function Page({
+  params,
+  searchParams,
+}: PageProps<"/[lang]/remedies/[slug]">) {
   const { t } = await getTranslator(common, patient);
   return (
     <Suspense
@@ -15,7 +18,7 @@ export default async function Page({ params }: PageProps<"/[lang]/remedies/[slug
         </p>
       }
     >
-      <RemedyScreen params={params} />
+      <RemedyScreen params={params} searchParams={searchParams} />
     </Suspense>
   );
 }

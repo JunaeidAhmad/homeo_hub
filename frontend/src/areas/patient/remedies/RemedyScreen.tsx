@@ -23,17 +23,28 @@ async function fetchRemedy(slug: string) {
 }
 
 /** One remedy, fetched on each visit in the page's language. */
-export async function RemedyScreen({ params }: { params: Promise<{ slug: string }> }) {
+export async function RemedyScreen({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ illness?: string }>;
+}) {
   await connection();
-  const { slug } = await params;
+  const [{ slug }, query] = await Promise.all([
+    params,
+    searchParams ?? Promise.resolve<{ illness?: string }>({}),
+  ]);
+  const illness = query.illness?.trim() || undefined;
+  const backHref = illness ? `/remedies?illness=${encodeURIComponent(illness)}` : "/remedies";
   const { t } = await getTranslator(common, patient);
   const { remedy, missing } = await fetchRemedy(slug);
   if (missing) notFound();
 
   return (
-    <TaskScreen title={remedy?.name ?? t("patient.remedy.heading")} backHref="/remedies">
+    <TaskScreen title={remedy?.name ?? t("patient.remedy.heading")} backHref={backHref}>
       {remedy ? (
-        <RemedyView remedy={remedy} t={t} />
+        <RemedyView remedy={remedy} illnessSlug={illness} t={t} />
       ) : (
         <p role="alert" className="text-danger">
           {t("patient.remedy.failed")}

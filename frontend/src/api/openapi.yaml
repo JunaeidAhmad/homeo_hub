@@ -4,6 +4,408 @@ info:
   version: 1.0.0
   description: HomeoHub REST API (v1).
 paths:
+  /api/v1/admin/illness-categories/:
+    get:
+      operationId: admin_illness_categories_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminIllnessCategoryList'
+          description: ''
+    post:
+      operationId: admin_illness_categories_create
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminIllnessCategoryRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIllnessCategory'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/illness-categories/{id}/:
+    get:
+      operationId: admin_illness_categories_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIllnessCategory'
+          description: ''
+    patch:
+      operationId: admin_illness_categories_update
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminIllnessCategoryRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIllnessCategory'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/illnesses/:
+    get:
+      operationId: admin_illnesses_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: q
+        required: false
+        in: query
+        description: Keyword search (typo-tolerant, Bangla or English).
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - INACTIVE
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminIllnessList'
+          description: ''
+    post:
+      operationId: admin_illnesses_create
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminIllnessRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIllness'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/illnesses/{id}/:
+    get:
+      operationId: admin_illnesses_read
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIllness'
+          description: ''
+    patch:
+      operationId: admin_illnesses_update
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminIllnessRequest'
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminIllness'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/admin/illnesses/{id}/remedies/:
+    get:
+      operationId: admin_illnesses_remedies_list
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminIllnessRemedy'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    put:
+      operationId: admin_illnesses_remedies_set
+      description: |-
+        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+
+        class RemedyList(AdminView, ListCreateAPIView):
+            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRankedRemediesInputRequest'
+        required: true
+      security:
+      - accessToken: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminIllnessRemedy'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/admin/me/:
     get:
       operationId: admin_me
@@ -934,6 +1336,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/Ready'
           description: ''
+  /api/v1/illness-categories/:
+    get:
+      operationId: illness_categories_list
+      description: Active illness categories with their active illnesses. Public.
+      tags:
+      - illnesses
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicIllnessCategory'
+          description: ''
+  /api/v1/illnesses/{slug}/:
+    get:
+      operationId: illnesses_read
+      description: One active illness with ranked active remedies. Public.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - illnesses
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicIllnessDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/locations/:
     get:
       operationId: locations_list
@@ -1072,6 +1518,184 @@ paths:
           description: ''
 components:
   schemas:
+    AdminIllness:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        category:
+          type: string
+          format: uuid
+        category_name_en:
+          type: string
+          readOnly: true
+        name_en:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        short_description_en:
+          type: string
+          maxLength: 2000
+        short_description_bn:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/IllnessStatusEnum'
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - category_name_en
+      - id
+      - name_en
+      - short_description_en
+      - updated_at
+    AdminIllnessCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name_en:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        sort_order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        is_active:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - name_en
+      - updated_at
+    AdminIllnessCategoryRequest:
+      type: object
+      properties:
+        name_en:
+          type: string
+          minLength: 1
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        sort_order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        is_active:
+          type: boolean
+      required:
+      - name_en
+    AdminIllnessRemedy:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        remedy_id:
+          type: string
+          format: uuid
+          readOnly: true
+        remedy_name:
+          type: string
+          readOnly: true
+        remedy_name_bn:
+          type: string
+          readOnly: true
+        remedy_slug:
+          type: string
+          readOnly: true
+        remedy_status:
+          type: string
+          readOnly: true
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        rank:
+          type: integer
+          maximum: 32767
+          minimum: 0
+      required:
+      - id
+      - picture_url
+      - rank
+      - remedy_id
+      - remedy_name
+      - remedy_name_bn
+      - remedy_slug
+      - remedy_status
+    AdminIllnessRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          format: uuid
+        name_en:
+          type: string
+          minLength: 1
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        short_description_en:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        short_description_bn:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/IllnessStatusEnum'
+      required:
+      - category
+      - name_en
+      - short_description_en
     AdminMe:
       type: object
       description: The signed-in staff member, with what they are allowed to do.
@@ -1169,6 +1793,16 @@ components:
       required:
       - form
       - price_poisha
+    AdminRankedRemediesInputRequest:
+      type: object
+      properties:
+        remedy_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - remedy_ids
     AdminRemedy:
       type: object
       description: Everything about a remedy, both languages, for the editor.
@@ -1354,6 +1988,14 @@ components:
         * `FEMALE` - Female
         * `MALE` - Male
         * `OTHER` - Other
+    IllnessStatusEnum:
+      enum:
+      - ACTIVE
+      - INACTIVE
+      type: string
+      description: |-
+        * `ACTIVE` - Active
+        * `INACTIVE` - Inactive
     Live:
       type: object
       properties:
@@ -1408,6 +2050,52 @@ components:
       required:
       - password
       - phone
+    PaginatedAdminIllnessCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminIllnessCategory'
+    PaginatedAdminIllnessList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminIllness'
     PaginatedAdminRemedyList:
       type: object
       required:
@@ -1500,6 +2188,58 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Staff'
+    PatchedAdminIllnessCategoryRequest:
+      type: object
+      properties:
+        name_en:
+          type: string
+          minLength: 1
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        sort_order:
+          type: integer
+          maximum: 32767
+          minimum: 0
+        is_active:
+          type: boolean
+    PatchedAdminIllnessRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          format: uuid
+        name_en:
+          type: string
+          minLength: 1
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          oneOf:
+          - type: string
+            maxLength: 160
+            pattern: ^[-a-zA-Z0-9_]+$
+          - type: string
+            maxLength: 0
+        short_description_en:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        short_description_bn:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/IllnessStatusEnum'
     PatchedAdminRemedyRequest:
       type: object
       description: Everything about a remedy, both languages, for the editor.
@@ -1688,6 +2428,122 @@ components:
       description: |-
         * `en` - English
         * `bn` - Bangla
+    PublicIllnessCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+        illnesses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicIllnessSummary'
+          readOnly: true
+      required:
+      - id
+      - illnesses
+      - name
+      - slug
+    PublicIllnessDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+        short_description:
+          type: string
+          readOnly: true
+        category_name:
+          type: string
+          readOnly: true
+        remedies:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedRemedyCard'
+          readOnly: true
+      required:
+      - category_name
+      - id
+      - name
+      - remedies
+      - short_description
+      - slug
+    PublicIllnessSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+      - slug
+    RankedRemedyCard:
+      type: object
+      description: A remedy in a list, in the language asked for.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        name_bn:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 160
+          pattern: ^[-a-zA-Z0-9_]+$
+        picture_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        indication:
+          type: string
+          readOnly: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientPrice'
+          readOnly: true
+        rank:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - indication
+      - name
+      - picture_url
+      - prices
+      - rank
+      - slug
     Ready:
       type: object
       properties:

@@ -18,9 +18,11 @@ type Remedy = components["schemas"]["RemedyDetail"];
 /** Client purchase wrapper for the remedy detail page: pickers, amber/clear vial, and pinned bar. */
 export function RemedyPurchase({
   remedy,
+  illnessSlug,
   children,
 }: {
   remedy: Remedy;
+  illnessSlug?: string;
   children: ReactNode;
 }) {
   const { locale, t } = useMessages<PatientMessages>();
@@ -30,6 +32,8 @@ export function RemedyPurchase({
 
   const requestedPotency = searchParams.get("potency");
   const requestedForm = searchParams.get("form");
+  const activeIllness = illnessSlug || searchParams.get("illness") || undefined;
+  void activeIllness; // ticket 09 attaches illness to cart items
 
   const [choice, setChoice] = useState<RemedyChoiceValue>(() =>
     initialChoice(remedy.potencies, remedy.prices, requestedPotency, requestedForm),

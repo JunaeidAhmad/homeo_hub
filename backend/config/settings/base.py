@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "apps.patients",
     "apps.staff",
     "apps.remedies",
+    "apps.illnesses",
 ]
 
 MIDDLEWARE = [
@@ -222,6 +223,7 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.staff.serializers.ROLE_CHOICES",
         "PermissionEnum": "apps.staff.serializers.PERMISSION_CHOICES",
         "RemedyStatusEnum": "apps.remedies.models.Remedy.Status",
+        "IllnessStatusEnum": "apps.illnesses.models.Illness.Status",
     },
 }
 
