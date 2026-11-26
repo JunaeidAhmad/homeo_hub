@@ -96,8 +96,8 @@ cd backend && .venv/bin/python manage.py create_staff yourname --name "Your Name
   roles and deactivates accounts at `/admin/staff`.
 - Every view under `/api/v1/admin/` extends `AdminView` and declares `required_permissions` per method; anything
   undeclared is refused. The admin menu hides sections from roles without them, but the API is what enforces it.
-- A staff session ends 12 hours after sign-in. Staff and patients have separate cookies. Two-factor sign-in is
-  ticket 22.
+- A staff session ends 12 hours after sign-in. Staff and patients have separate cookies. Staff also enter a
+  code from an authenticator app (`STAFF_TOTP_REQUIRED`).
 
 ## Remedies and pictures
 
@@ -166,14 +166,48 @@ GitHub Actions, each workflow runs only when its folder changes:
 
 ## Deploy
 
-- **API → Render**: blueprint in [`render.yaml`](render.yaml). Set `DATABASE_URL` (Neon), `REDIS_URL`
-  (Render Key Value) and `CORS_ALLOWED_ORIGINS` (the Vercel domain) in the dashboard.
-- **Text messages are not set up for deployment yet.** Outside development, sign-up and password reset answer
-  "texts cannot be sent" until `SMS_PROVIDER` names a gateway class (the real gateway still has to be written).
-  `apps.accounts.sms.ConsoleSmsProvider` prints codes to the server log: only for a private demo, never real users.
-- **Rate limits need the visitor's address.** Set the same `PROXY_SHARED_SECRET` on Render and Vercel: the web app
-  then tells the API which visitor each forwarded request is for (taken from `X-Forwarded-For`, which Vercel sets
-  itself; do not put the web app behind a host that passes a browser's own value through). Other callers are
-  identified by the address added by the last `NUM_PROXIES` proxies; check that value against what Render sends.
-- **Web → Vercel**: import the repo with Root Directory `frontend`; set `API_BASE_URL` to the Render URL and
-  `PROXY_SHARED_SECRET` to the value Render generated.
+Deploy the API first, then the web app. Each needs the other's address, so choose the Vercel project name up front.
+
+### 1. API on Render
+
+In Render: **New → Blueprint**, pick this repository. [`render.yaml`](render.yaml) creates the API (`homeohub-api`)
+and a Key Value instance (Redis), both free plan, in Singapore next to the Neon database. When asked:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | the Neon connection string |
+| `CORS_ALLOWED_ORIGINS` | the web app's address, e.g. `https://homeohub.vercel.app` (**required**, no trailing slash) |
+| `SMS_PROVIDER` | see "Before real users" below |
+| `STORAGE_*` | an S3-compatible bucket; leave empty to refuse uploads for now |
+| `WEBPUSH_*` | leave empty to turn push notifications off |
+
+`SECRET_KEY` and `PROXY_SHARED_SECRET` are generated, `REDIS_URL` comes from the Key Value instance. Render runs
+[`backend/build.sh`](backend/build.sh) on every deploy: it installs dependencies, collects static files, runs
+migrations and loads the area list and staff roles. Check `https://<api>/api/v1/health/ready` afterwards.
+
+Create the first staff account from your machine:
+`cd backend && USE_NEON=true .venv/bin/python manage.py create_staff yourname --name "Your Name"`.
+
+### 2. Web app on Vercel
+
+**Add New → Project**, import this repository, set **Root Directory** to `frontend` (framework: Next.js), and add:
+
+| Variable | Value |
+|---|---|
+| `API_BASE_URL` | the Render address, e.g. `https://homeohub-api.onrender.com` (the build fails without it) |
+| `PROXY_SHARED_SECRET` | the value Render generated |
+
+If the web app's address differs from what you gave Render, update `CORS_ALLOWED_ORIGINS` there and redeploy.
+
+### Before real users
+
+- **Text messages are not set up.** Sign-up and password reset answer "texts cannot be sent" until `SMS_PROVIDER`
+  names a gateway class (the real gateway still has to be written). `apps.accounts.sms.ConsoleSmsProvider` prints
+  codes to the server log: only for a private demo.
+- **Online payment is a test page.** With the mock gateway anyone can mark their own payment successful.
+- **Uploads need a bucket** (remedy pictures, doctor certificates, answer photos): a deployed server's disk is wiped.
+- **Stuck online payments** are settled by hand: `python manage.py reconcile_payments` (no scheduler).
+- **Rate limits need the visitor's address.** `PROXY_SHARED_SECRET` must match on both sides: the web app then
+  tells the API which visitor each forwarded request is for (from `X-Forwarded-For`, which Vercel sets itself; do
+  not put the web app behind a host that passes a browser's own value through). Other callers are identified by the
+  address added by the last `NUM_PROXIES` proxies; check that value against what Render sends.

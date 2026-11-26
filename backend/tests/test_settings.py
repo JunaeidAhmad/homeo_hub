@@ -78,3 +78,19 @@ def test_production_never_logs_codes_or_sends_cookies_over_http_by_default(tmp_p
     result = load_settings("config.settings.production", COMPLETE_ENV, tmp_path, then=show)
 
     assert result.stdout.split() == ["apps.accounts.sms.UnconfiguredSmsProvider", "True"]
+
+
+def test_production_derives_web_addresses_and_accepts_the_render_host(tmp_path):
+    show = (
+        "from django.conf import settings as s; "
+        "print(s.WEB_APP_URL, ','.join(s.CSRF_TRUSTED_ORIGINS), ','.join(s.ALLOWED_HOSTS))"
+    )
+    env = {**COMPLETE_ENV, "RENDER_EXTERNAL_HOSTNAME": "api-x1y2.onrender.com"}
+
+    result = load_settings("config.settings.production", env, tmp_path, then=show)
+
+    assert result.stdout.split() == [
+        "https://app.example.com",
+        "https://app.example.com",
+        "api.example.com,api-x1y2.onrender.com",
+    ], result.stderr

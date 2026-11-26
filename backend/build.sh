@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Render build step for the API.
+# Render build step for the API (render.yaml: buildCommand). Installs dependencies, collects
+# static files, migrates the database and loads reference data, so a plain
+# `pip install -r requirements.txt` is not enough.
 set -o errexit -o nounset -o pipefail
 
 pip install --upgrade pip
