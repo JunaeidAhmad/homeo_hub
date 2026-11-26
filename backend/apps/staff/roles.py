@@ -14,6 +14,7 @@ class Perm(StrEnum):
     MANAGE_DOCTORS = "manage_doctors"
     VIEW_CASES = "view_cases"
     ASSIGN_CASES = "assign_cases"
+    VIEW_CLINICAL = "view_clinical"
     MANAGE_REMEDIES = "manage_remedies"
     MANAGE_ILLNESSES = "manage_illnesses"
     VIEW_PATIENTS = "view_patients"
@@ -23,6 +24,7 @@ class Perm(StrEnum):
     MANAGE_PAYMENTS = "manage_payments"
     MANAGE_SHOPS = "manage_shops"
     MANAGE_OWN_SHOP = "manage_own_shop"
+    VIEW_AUDIT_LOG = "view_audit_log"
 
     @property
     def full(self) -> str:
@@ -36,6 +38,7 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.MANAGE_DOCTORS: "Approve, reject and suspend doctors",
     Perm.VIEW_CASES: "See doctor consultations",
     Perm.ASSIGN_CASES: "Assign consultations to doctors",
+    Perm.VIEW_CLINICAL: "Read consultation concerns and answers",
     Perm.MANAGE_REMEDIES: "Manage remedies and prices",
     Perm.MANAGE_ILLNESSES: "Manage illnesses and recommendations",
     Perm.VIEW_PATIENTS: "See patient accounts",
@@ -45,6 +48,7 @@ PERMISSION_DESCRIPTIONS: dict[Perm, str] = {
     Perm.MANAGE_PAYMENTS: "Manage payments and refunds",
     Perm.MANAGE_SHOPS: "Register shops and edit any shop's price list",
     Perm.MANAGE_OWN_SHOP: "Maintain their own shop's price list",
+    Perm.VIEW_AUDIT_LOG: "Search and view the audit log",
 }
 
 
@@ -64,10 +68,12 @@ class Role(StrEnum):
 # docs/01-architecture.md §8.2
 ROLE_PERMISSIONS: dict[Role, frozenset[Perm]] = {
     Role.SUPER_ADMIN: frozenset(Perm),
-    # Everything except managing staff and their roles; a shop is its owner's.
-    Role.ADMIN: frozenset(Perm) - {Perm.MANAGE_STAFF, Perm.MANAGE_OWN_SHOP},
+    # Everything except managing staff, audit log, and own-shop price list.
+    Role.ADMIN: frozenset(Perm) - {Perm.MANAGE_STAFF, Perm.MANAGE_OWN_SHOP, Perm.VIEW_AUDIT_LOG},
     Role.DOCTOR_MANAGER: frozenset({Perm.VIEW_DOCTORS, Perm.MANAGE_DOCTORS}),
-    Role.CASE_MANAGER: frozenset({Perm.VIEW_CASES, Perm.ASSIGN_CASES, Perm.VIEW_DOCTORS}),
+    Role.CASE_MANAGER: frozenset(
+        {Perm.VIEW_CASES, Perm.ASSIGN_CASES, Perm.VIEW_CLINICAL, Perm.VIEW_DOCTORS}
+    ),
     Role.REMEDY_MANAGER: frozenset({Perm.MANAGE_REMEDIES}),
     Role.ILLNESS_MANAGER: frozenset({Perm.MANAGE_ILLNESSES}),
     Role.FULFILMENT_MANAGER: frozenset({Perm.VIEW_ORDERS, Perm.MANAGE_ORDERS}),

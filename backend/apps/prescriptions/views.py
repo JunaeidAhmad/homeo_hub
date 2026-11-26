@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.audit import services as audit
 from apps.billing.models import ConsultationInvoice
 from apps.billing.selectors import is_unlocked
 from apps.consultations.models import DoctorConsultation
@@ -58,6 +59,7 @@ class DoctorPrescriptionView(APIView):
             pk=pk,
             assigned_doctor=doctor,
         )
+        audit.read(request, "prescription.read", case)
         return Response(
             DoctorPrescriptionWorkspaceSerializer(
                 _doctor_workspace_payload(case),

@@ -14,6 +14,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.audit import services as audit
 from apps.doctors.models import Doctor
 from apps.doctors.permissions import IsApprovedDoctor
 from apps.patients.models import Patient
@@ -195,6 +196,7 @@ class AdminConsultationDetailView(AdminView, APIView):
     )
     def get(self, request: Request, pk: str) -> Response:
         case = get_object_or_404(selectors.admin_consultations(), pk=pk)
+        audit.read(request, "consultation.read", case)
         return Response(AdminConsultationDetailSerializer(case, context={"request": request}).data)
 
 
@@ -217,12 +219,20 @@ class AdminConsultationAssignView(AdminView, APIView):
         body = AdminAssignDoctorSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         case = get_object_or_404(DoctorConsultation, pk=pk)
+        before = audit.snapshot(case, ["status", "assigned_doctor_id"])
         doctor = get_object_or_404(Doctor, pk=body.validated_data["doctor_id"])
         updated = services.assign(
             case,
             doctor,
             request.user,  # type: ignore[arg-type]
             note=body.validated_data.get("note", ""),
+        )
+        audit.change(
+            request,
+            "consultation.assign",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "assigned_doctor_id"]),
         )
         detail = get_object_or_404(selectors.admin_consultations(), pk=updated.pk)
         return Response(
@@ -310,6 +320,7 @@ class DoctorConsultationDetailView(APIView):
     )
     def get(self, request: Request, pk: str) -> Response:
         case = get_object_or_404(selectors.cases_for_doctor(cast(Doctor, request.user)), pk=pk)
+        audit.read(request, "consultation.patient_record.read", case)
         return Response(DoctorConsultationDetailSerializer(case, context={"request": request}).data)
 
 

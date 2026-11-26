@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any
 
 from drf_spectacular.utils import extend_schema_field
@@ -8,6 +9,7 @@ from apps.illnesses.models import Illness
 from apps.locations.models import Location
 from apps.locations.serializers import LocationSerializer
 from apps.patients.models import Patient, PatientProfile
+from apps.staff.roles import Perm
 from common.i18n import localized_text
 from common.private_files import signed_link
 from common.serializers import LocalizedField
@@ -279,10 +281,20 @@ class AdminConsultationPatientSerializer(serializers.Serializer):
         return _area_label(obj.location)
 
 
+def _can_view_clinical(context: Mapping[str, Any]) -> bool:
+    request = context.get("request")
+    user = getattr(request, "user", None)
+    return bool(
+        user and getattr(user, "is_staff", False) and user.has_perm(Perm.VIEW_CLINICAL.full)
+    )
+
+
 class AdminConsultationSummarySerializer(serializers.ModelSerializer):
     patient_name = serializers.CharField(source="patient.full_name", read_only=True)
     area = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
+    chief_complaint = serializers.CharField(allow_null=True, read_only=True)
+    clinical_hidden = serializers.SerializerMethodField()
 
     class Meta:
         model = DoctorConsultation
@@ -296,6 +308,7 @@ class AdminConsultationSummarySerializer(serializers.ModelSerializer):
             "status",
             "doctor_name",
             "submitted_at",
+            "clinical_hidden",
         ]
         read_only_fields = fields
 
@@ -305,12 +318,26 @@ class AdminConsultationSummarySerializer(serializers.ModelSerializer):
     def get_doctor_name(self, obj: DoctorConsultation) -> str | None:
         return obj.assigned_doctor.full_name if obj.assigned_doctor else None
 
+    def get_clinical_hidden(self, obj: DoctorConsultation) -> bool:
+        return not _can_view_clinical(self.context)
+
+    def to_representation(self, instance: DoctorConsultation) -> dict[str, Any]:
+        data = super().to_representation(instance)
+        if not _can_view_clinical(self.context):
+            data["chief_complaint"] = None
+        return data
+
 
 class AdminConsultationDetailSerializer(serializers.ModelSerializer):
     patient = AdminConsultationPatientSerializer(read_only=True)
-    illness = ConsultationIllnessSerializer(read_only=True)
+    illness = ConsultationIllnessSerializer(read_only=True, allow_null=True)
     doctor = ConsultationDoctorSummarySerializer(source="assigned_doctor", read_only=True)
     history = ConsultationHistorySerializer(many=True, read_only=True)
+    chief_complaint = serializers.CharField(allow_null=True, read_only=True)
+    symptoms = serializers.CharField(allow_null=True, read_only=True)
+    duration_unit = serializers.CharField(allow_null=True, read_only=True)
+    symptom_notes = serializers.CharField(allow_null=True, read_only=True)
+    clinical_hidden = serializers.SerializerMethodField()
 
     class Meta:
         model = DoctorConsultation
@@ -334,8 +361,26 @@ class AdminConsultationDetailSerializer(serializers.ModelSerializer):
             "cancelled_at",
             "cancel_reason",
             "history",
+            "clinical_hidden",
         ]
         read_only_fields = fields
+
+    def get_clinical_hidden(self, obj: DoctorConsultation) -> bool:
+        return not _can_view_clinical(self.context)
+
+    def to_representation(self, instance: DoctorConsultation) -> dict[str, Any]:
+        data = super().to_representation(instance)
+        if not _can_view_clinical(self.context):
+            for field in (
+                "illness",
+                "chief_complaint",
+                "symptoms",
+                "duration_value",
+                "duration_unit",
+                "symptom_notes",
+            ):
+                data[field] = None
+        return data
 
 
 class AdminAssignDoctorSerializer(serializers.Serializer):

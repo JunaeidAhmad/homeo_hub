@@ -11,6 +11,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.audit import services as audit
 from apps.staff.permissions import AdminView
 from apps.staff.roles import Perm
 from common.serializers import ErrorSerializer
@@ -64,6 +65,16 @@ class RemedyDetailView(RetrieveAPIView):
         return public_remedies()
 
 
+REMEDY_AUDIT_FIELDS = [
+    "name",
+    "name_bn",
+    "slug",
+    "status",
+    "description_en",
+    "indication_en",
+]
+
+
 @extend_schema_view(
     get=extend_schema(
         operation_id="admin_remedies_list",
@@ -88,7 +99,15 @@ class AdminRemedyListView(AdminView, ListCreateAPIView):
         return all_remedies()
 
     def perform_create(self, serializer) -> None:
-        serializer.instance = services.create_remedy(**serializer.validated_data)
+        remedy = services.create_remedy(**serializer.validated_data)
+        serializer.instance = remedy
+        audit.change(
+            self.request,
+            "remedy.create",
+            remedy,
+            before=None,
+            after=audit.snapshot(remedy, REMEDY_AUDIT_FIELDS),
+        )
 
 
 @extend_schema_view(
@@ -112,9 +131,17 @@ class AdminRemedyDetailView(AdminView, GenericAPIView):
 
     def patch(self, request: Request, pk) -> Response:
         current = self.get_object()
+        before = audit.snapshot(current, REMEDY_AUDIT_FIELDS)
         serializer = self.get_serializer(current, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         remedy = services.update_remedy(current, **serializer.validated_data)
+        audit.change(
+            request,
+            "remedy.update",
+            remedy,
+            before=before,
+            after=audit.snapshot(remedy, REMEDY_AUDIT_FIELDS),
+        )
         return Response(self.get_serializer(remedy).data)
 
 
@@ -143,9 +170,17 @@ class AdminRemedyPictureView(AdminView, GenericAPIView):
     )
     def put(self, request: Request, pk) -> Response:
         remedy = self.get_object()
+        before = {"picture": bool(remedy.picture)}
         body = PictureUploadSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         services.set_picture(remedy, body.validated_data["picture"])
+        audit.change(
+            request,
+            "remedy.picture.set",
+            remedy,
+            before=before,
+            after={"picture": bool(remedy.picture)},
+        )
         return Response(self.get_serializer(remedy).data)
 
     @extend_schema(
@@ -155,7 +190,16 @@ class AdminRemedyPictureView(AdminView, GenericAPIView):
         responses={200: AdminRemedySerializer, **REFUSED},
     )
     def delete(self, request: Request, pk) -> Response:
-        remedy = services.remove_picture(self.get_object())
+        current = self.get_object()
+        before = {"picture": bool(current.picture)}
+        remedy = services.remove_picture(current)
+        audit.change(
+            request,
+            "remedy.picture.remove",
+            remedy,
+            before=before,
+            after={"picture": False},
+        )
         return Response(self.get_serializer(remedy).data)
 
 
@@ -175,6 +219,10 @@ class AdminRemedyPricesView(AdminView, GenericAPIView):
     )
     def put(self, request: Request, pk) -> Response:
         remedy = self.get_object()
+        before = {
+            p.form: {"price_poisha": p.price_poisha, "is_active": p.is_active}
+            for p in remedy.prices.all()
+        }
         body = AdminPriceInputSerializer(data=request.data, many=True)
         body.is_valid(raise_exception=True)
         forms = [item["form"] for item in body.validated_data]
@@ -183,4 +231,9 @@ class AdminRemedyPricesView(AdminView, GenericAPIView):
                 {"non_field_errors": ["Each form may appear at most once."]}
             )
         updated = services.set_prices(remedy, body.validated_data)
+        after = {
+            p.form: {"price_poisha": p.price_poisha, "is_active": p.is_active}
+            for p in updated.prices.all()
+        }
+        audit.change(request, "remedy.prices.update", updated, before=before, after=after)
         return Response(self.get_serializer(updated).data)

@@ -16,6 +16,7 @@ from apps.accounts.serializers import (
 )
 from apps.accounts.throttles import CodeAddressThrottle, LoginAddressThrottle
 from apps.accounts.views import CLIENT_HEADER, IsWebClient, PublicAuthView
+from apps.audit import services as audit
 from apps.staff.permissions import AdminView
 from apps.staff.roles import Perm
 from common.serializers import ErrorSerializer
@@ -275,9 +276,17 @@ class AdminDoctorDetailView(AdminView, GenericAPIView):
     )
     def patch(self, request: Request, pk) -> Response:
         doctor = self.get_object()
+        before = audit.snapshot(doctor, ["status", "consultation_fee_poisha"])
         body = AdminDoctorFeeUpdateSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         updated = services.set_fee(doctor, body.validated_data["consultation_fee_poisha"])
+        audit.change(
+            request,
+            "doctor.fee.update",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "consultation_fee_poisha"]),
+        )
         refreshed = _admin_doctors_queryset().get(pk=updated.pk)
         return Response(self.get_serializer(refreshed).data)
 
@@ -300,11 +309,19 @@ class AdminDoctorApproveView(AdminView, GenericAPIView):
     )
     def post(self, request: Request, pk) -> Response:
         doctor = get_object_or_404(Doctor, pk=pk)
+        before = audit.snapshot(doctor, ["status", "consultation_fee_poisha", "doctor_code"])
         body = AdminDoctorApproveSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         assert isinstance(request.user, User)
         updated = services.approve(
             doctor, request.user, body.validated_data["consultation_fee_poisha"]
+        )
+        audit.change(
+            request,
+            "doctor.approve",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "consultation_fee_poisha", "doctor_code"]),
         )
         refreshed = _admin_doctors_queryset().get(pk=updated.pk)
         return Response(self.get_serializer(refreshed).data)
@@ -328,10 +345,18 @@ class AdminDoctorRejectView(AdminView, GenericAPIView):
     )
     def post(self, request: Request, pk) -> Response:
         doctor = get_object_or_404(Doctor, pk=pk)
+        before = audit.snapshot(doctor, ["status", "rejection_reason"])
         body = AdminDoctorReasonSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         assert isinstance(request.user, User)
         updated = services.reject(doctor, request.user, body.validated_data["reason"])
+        audit.change(
+            request,
+            "doctor.reject",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "rejection_reason"]),
+        )
         refreshed = _admin_doctors_queryset().get(pk=updated.pk)
         return Response(self.get_serializer(refreshed).data)
 
@@ -354,10 +379,18 @@ class AdminDoctorSuspendView(AdminView, GenericAPIView):
     )
     def post(self, request: Request, pk) -> Response:
         doctor = get_object_or_404(Doctor, pk=pk)
+        before = audit.snapshot(doctor, ["status", "suspension_reason"])
         body = AdminDoctorReasonSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         assert isinstance(request.user, User)
         updated = services.suspend(doctor, request.user, body.validated_data["reason"])
+        audit.change(
+            request,
+            "doctor.suspend",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "suspension_reason"]),
+        )
         refreshed = _admin_doctors_queryset().get(pk=updated.pk)
         return Response(self.get_serializer(refreshed).data)
 
@@ -379,7 +412,15 @@ class AdminDoctorReactivateView(AdminView, GenericAPIView):
     )
     def post(self, request: Request, pk) -> Response:
         doctor = get_object_or_404(Doctor, pk=pk)
+        before = audit.snapshot(doctor, ["status"])
         assert isinstance(request.user, User)
         updated = services.reactivate(doctor, request.user)
+        audit.change(
+            request,
+            "doctor.reactivate",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status"]),
+        )
         refreshed = _admin_doctors_queryset().get(pk=updated.pk)
         return Response(self.get_serializer(refreshed).data)

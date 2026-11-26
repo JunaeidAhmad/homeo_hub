@@ -7,6 +7,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIVi
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.audit import services as audit
 from apps.illnesses.selectors import public_illnesses
 from apps.patients.models import Patient
 from apps.patients.permissions import IsPatient, IsVerifiedPatient
@@ -363,6 +364,11 @@ class AdminOrderDetailView(AdminView, RetrieveAPIView):
     def get_queryset(self):
         return _admin_orders_queryset()
 
+    def retrieve(self, request: Request, *args, **kwargs) -> Response:
+        instance = self.get_object()
+        audit.read(request, "order.read", instance)
+        return Response(self.get_serializer(instance).data)
+
 
 class AdminOrderItemCandidatesView(AdminView, GenericAPIView):
     required_permissions = {"GET": Perm.VIEW_ORDERS}
@@ -413,8 +419,24 @@ class AdminOrderItemAssignView(AdminView, GenericAPIView):
         body = AdminAssignLineSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         assert isinstance(request.user, User)
+        before = {
+            "shop_remedy_id": item.shop_remedy_id,
+            "order_status": order.status,
+        }
         updated = fulfilment.assign_line(
             order, item, body.validated_data["shop_remedy"], request.user
+        )
+        item.refresh_from_db()
+        audit.change(
+            request,
+            "order.assign_line",
+            updated,
+            before=before,
+            after={
+                "item_id": str(item.pk),
+                "shop_remedy_id": item.shop_remedy_id,
+                "order_status": updated.status,
+            },
         )
         refreshed = _admin_orders_queryset().get(pk=updated.pk)
         return Response(AdminOrderDetailSerializer(refreshed).data)
@@ -434,7 +456,19 @@ class AdminOrderItemAssignView(AdminView, GenericAPIView):
         order = get_object_or_404(Order, pk=pk)
         item = get_object_or_404(OrderItem, pk=item_id, order=order)
         assert isinstance(request.user, User)
+        before = {
+            "item_id": str(item.pk),
+            "shop_remedy_id": item.shop_remedy_id,
+            "order_status": order.status,
+        }
         updated = fulfilment.unassign_line(item, request.user)
+        audit.change(
+            request,
+            "order.unassign_line",
+            updated,
+            before=before,
+            after={"item_id": str(item.pk), "shop_remedy_id": None, "order_status": updated.status},
+        )
         refreshed = _admin_orders_queryset().get(pk=updated.pk)
         return Response(AdminOrderDetailSerializer(refreshed).data)
 
@@ -461,12 +495,29 @@ class AdminShopAssignmentStatusView(AdminView, GenericAPIView):
         body = AdminAssignmentStatusSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         assert isinstance(request.user, User)
+        before = {
+            "assignment_id": str(assignment.pk),
+            "status": assignment.status,
+            "order_status": assignment.order.status,
+        }
         updated = fulfilment.advance_assignment(
             assignment,
             body.validated_data["status"],
             request.user,
             cash_collected_poisha=body.validated_data.get("cash_collected_poisha"),
             note=body.validated_data.get("note", ""),
+        )
+        assignment.refresh_from_db()
+        audit.change(
+            request,
+            "order.assignment.status",
+            updated,
+            before=before,
+            after={
+                "assignment_id": str(assignment.pk),
+                "status": assignment.status,
+                "order_status": updated.status,
+            },
         )
         refreshed = _admin_orders_queryset().get(pk=updated.pk)
         return Response(AdminOrderDetailSerializer(refreshed).data)
@@ -493,11 +544,19 @@ class AdminOrderCancelView(AdminView, GenericAPIView):
         body = AdminCancelOrderSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         assert isinstance(request.user, User)
+        before = audit.snapshot(order, ("status", "cancellation_reason"))
         updated = fulfilment.cancel_order(
             order,
             actor=request.user,
             by_patient=False,
             reason=body.validated_data.get("reason", ""),
+        )
+        audit.change(
+            request,
+            "order.cancel",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ("status", "cancellation_reason")),
         )
         refreshed = _admin_orders_queryset().get(pk=updated.pk)
         return Response(AdminOrderDetailSerializer(refreshed).data)

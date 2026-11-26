@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.audit import services as audit
 from apps.staff.permissions import AdminView
 from apps.staff.roles import Perm
 from common.serializers import ErrorSerializer
@@ -85,7 +86,15 @@ class AdminIllnessCategoryListView(AdminView, ListCreateAPIView):
         return all_categories()
 
     def perform_create(self, serializer) -> None:
-        serializer.instance = services.create_category(**serializer.validated_data)
+        cat = services.create_category(**serializer.validated_data)
+        serializer.instance = cat
+        audit.change(
+            self.request,
+            "illness_category.create",
+            cat,
+            before=None,
+            after=audit.snapshot(cat, ["name_en", "name_bn", "slug", "sort_order", "is_active"]),
+        )
 
 
 @extend_schema_view(
@@ -113,9 +122,18 @@ class AdminIllnessCategoryDetailView(AdminView, GenericAPIView):
 
     def patch(self, request: Request, pk) -> Response:
         current = self.get_object()
+        fields = ["name_en", "name_bn", "slug", "sort_order", "is_active"]
+        before = audit.snapshot(current, fields)
         serializer = self.get_serializer(current, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         category = services.update_category(current, **serializer.validated_data)
+        audit.change(
+            request,
+            "illness_category.update",
+            category,
+            before=before,
+            after=audit.snapshot(category, fields),
+        )
         return Response(self.get_serializer(category).data)
 
 
@@ -146,7 +164,15 @@ class AdminIllnessListView(AdminView, ListCreateAPIView):
         return all_illnesses()
 
     def perform_create(self, serializer) -> None:
-        serializer.instance = services.create_illness(**serializer.validated_data)
+        illness = services.create_illness(**serializer.validated_data)
+        serializer.instance = illness
+        audit.change(
+            self.request,
+            "illness.create",
+            illness,
+            before=None,
+            after=audit.snapshot(illness, ["name_en", "name_bn", "slug", "status", "category"]),
+        )
 
 
 @extend_schema_view(
@@ -170,9 +196,18 @@ class AdminIllnessDetailView(AdminView, GenericAPIView):
 
     def patch(self, request: Request, pk) -> Response:
         current = self.get_object()
+        fields = ["name_en", "name_bn", "slug", "status", "category"]
+        before = audit.snapshot(current, fields)
         serializer = self.get_serializer(current, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         illness = services.update_illness(current, **serializer.validated_data)
+        audit.change(
+            request,
+            "illness.update",
+            illness,
+            before=before,
+            after=audit.snapshot(illness, fields),
+        )
         return Response(self.get_serializer(illness).data)
 
 
@@ -209,7 +244,20 @@ class AdminIllnessRemediesView(AdminView, GenericAPIView):
     )
     def put(self, request: Request, pk) -> Response:
         illness = self.get_object()
+        before_ids = [
+            str(r_id)
+            for r_id in IllnessRemedy.objects.filter(illness=illness)
+            .order_by("rank")
+            .values_list("remedy_id", flat=True)
+        ]
         body = AdminRankedRemediesInputSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         items = services.set_ranked_remedies(illness, body.validated_data["remedy_ids"])
+        audit.change(
+            request,
+            "illness.remedies.update",
+            illness,
+            before={"remedy_ids": before_ids},
+            after={"remedy_ids": [str(item.remedy_id) for item in items]},
+        )
         return Response(self.get_serializer(items, many=True).data)

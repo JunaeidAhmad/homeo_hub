@@ -124,28 +124,36 @@ export function CaseDetail({ caseId }: { caseId: string }) {
 
       <section className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-5">
         <h2 className="text-base font-semibold text-ink">{t("admin.cases.caseHeading")}</h2>
-        <div>
-          <p className="text-xs font-semibold text-ink-muted">{t("admin.cases.complaint")}</p>
-          <p className="font-semibold text-ink">{caseData.chief_complaint}</p>
-        </div>
-        <p className="whitespace-pre-line text-sm text-ink-soft">{caseData.symptoms}</p>
-        {caseData.duration_value !== null && caseData.duration_unit && (
-          <div>
-            <p className="text-xs font-semibold text-ink-muted">{t("admin.cases.duration")}</p>
-            <p className="text-sm text-ink-soft">
-              {numberFormat(locale).format(caseData.duration_value)} {caseData.duration_unit}
-            </p>
-          </div>
-        )}
-        {caseData.symptom_notes && (
-          <div>
-            <p className="text-xs font-semibold text-ink-muted">
-              {t("admin.cases.symptomNotes")}
-            </p>
-            <p className="whitespace-pre-line text-sm text-ink-soft">
-              {caseData.symptom_notes}
-            </p>
-          </div>
+        {caseData.clinical_hidden ? (
+          <p className="rounded-control bg-mist px-3.5 py-2.5 text-sm text-ink-muted">
+            {t("admin.cases.clinicalHidden")}
+          </p>
+        ) : (
+          <>
+            <div>
+              <p className="text-xs font-semibold text-ink-muted">{t("admin.cases.complaint")}</p>
+              <p className="font-semibold text-ink">{caseData.chief_complaint}</p>
+            </div>
+            <p className="whitespace-pre-line text-sm text-ink-soft">{caseData.symptoms}</p>
+            {caseData.duration_value !== null && caseData.duration_unit && (
+              <div>
+                <p className="text-xs font-semibold text-ink-muted">{t("admin.cases.duration")}</p>
+                <p className="text-sm text-ink-soft">
+                  {numberFormat(locale).format(caseData.duration_value)} {caseData.duration_unit}
+                </p>
+              </div>
+            )}
+            {caseData.symptom_notes && (
+              <div>
+                <p className="text-xs font-semibold text-ink-muted">
+                  {t("admin.cases.symptomNotes")}
+                </p>
+                <p className="whitespace-pre-line text-sm text-ink-soft">
+                  {caseData.symptom_notes}
+                </p>
+              </div>
+            )}
+          </>
         )}
         <div>
           <p className="text-xs font-semibold text-ink-muted">{t("admin.cases.doctor")}</p>

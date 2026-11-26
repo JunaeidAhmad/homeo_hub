@@ -6,6 +6,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIVi
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.audit import services as audit
 from apps.staff.permissions import AdminView
 from apps.staff.roles import Perm, Role
 from common.serializers import ErrorSerializer
@@ -63,7 +64,15 @@ class AdminShopListView(AdminView, ListCreateAPIView):
         return shops_for(self.request.user)
 
     def perform_create(self, serializer) -> None:
-        serializer.instance = services.create_shop(**serializer.validated_data)
+        shop = services.create_shop(**serializer.validated_data)
+        serializer.instance = shop
+        audit.change(
+            self.request,
+            "shop.create",
+            shop,
+            before=None,
+            after=audit.snapshot(shop, ["name", "phone", "is_active", "is_verified"]),
+        )
 
 
 @extend_schema_view(
@@ -89,9 +98,18 @@ class AdminShopDetailView(AdminView, GenericAPIView):
 
     def patch(self, request: Request, pk) -> Response:
         current = self.get_object()
+        fields = ["name", "phone", "address", "is_active", "is_verified"]
+        before = audit.snapshot(current, fields)
         serializer = self.get_serializer(current, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         updated = services.update_shop(current, **serializer.validated_data)
+        audit.change(
+            request,
+            "shop.update",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, fields),
+        )
         return Response(self.get_serializer(updated).data)
 
 
@@ -135,6 +153,13 @@ class AdminShopStaffListView(AdminView, GenericAPIView):
             user=body.validated_data["user"],
             role=body.validated_data["role"],
         )
+        audit.change(
+            request,
+            "shop_staff.add",
+            shop,
+            before=None,
+            after={"user_id": str(link.user_id), "role": link.role},
+        )
         return Response(self.get_serializer(link).data, status=status.HTTP_201_CREATED)
 
 
@@ -151,7 +176,15 @@ class AdminShopStaffDetailView(AdminView, GenericAPIView):
     )
     def delete(self, request: Request, pk, link_id) -> Response:
         link = get_object_or_404(ShopStaff, pk=link_id, shop_id=pk)
+        before = {"user_id": str(link.user_id), "role": link.role}
         services.unlink_staff(link)
+        audit.change(
+            request,
+            "shop_staff.remove",
+            ("shop", str(pk)),
+            before=before,
+            after=None,
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -212,7 +245,17 @@ class AdminShopRemedyListView(AdminView, ListCreateAPIView):
 
     def perform_create(self, serializer) -> None:
         shop = self._shop()
-        serializer.instance = services.create_listing(shop=shop, **serializer.validated_data)
+        listing = services.create_listing(shop=shop, **serializer.validated_data)
+        serializer.instance = listing
+        audit.change(
+            self.request,
+            "shop_remedy.create",
+            listing,
+            before=None,
+            after=audit.snapshot(
+                listing, ["shop_id", "remedy_id", "pack_size", "unit", "price_poisha", "stock_qty"]
+            ),
+        )
 
 
 class AdminShopRemedyDetailView(AdminView, GenericAPIView):
@@ -241,9 +284,18 @@ class AdminShopRemedyDetailView(AdminView, GenericAPIView):
     )
     def patch(self, request: Request, pk) -> Response:
         listing = self.get_object()
+        fields = ["pack_size", "unit", "price_poisha", "stock_qty", "is_available"]
+        before = audit.snapshot(listing, fields)
         body = AdminShopRemedyUpdateSerializer(data=request.data, partial=True)
         body.is_valid(raise_exception=True)
         updated = services.update_listing(listing, **body.validated_data)
+        audit.change(
+            request,
+            "shop_remedy.update",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, fields),
+        )
         return Response(self.get_serializer(updated).data)
 
     @extend_schema(
@@ -254,5 +306,14 @@ class AdminShopRemedyDetailView(AdminView, GenericAPIView):
     )
     def delete(self, request: Request, pk) -> Response:
         listing = self.get_object()
+        before = audit.snapshot(listing, ["shop_id", "remedy_id", "pack_size", "price_poisha"])
+        target_id = str(listing.pk)
         services.delete_listing(listing)
+        audit.change(
+            request,
+            "shop_remedy.delete",
+            ("shopremedy", target_id),
+            before=before,
+            after=None,
+        )
         return Response(status=status.HTTP_204_NO_CONTENT)

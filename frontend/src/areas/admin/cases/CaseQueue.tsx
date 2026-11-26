@@ -118,7 +118,13 @@ export function CaseQueue() {
     {
       key: "complaint",
       header: t("admin.cases.complaint"),
-      cell: (row) => <span className="text-sm text-ink-soft">{row.chief_complaint}</span>,
+      cell: (row) => (
+        <span className={row.clinical_hidden ? "text-sm text-ink-muted" : "text-sm text-ink-soft"}>
+          {row.clinical_hidden
+            ? t("admin.cases.clinicalHiddenShort")
+            : (row.chief_complaint ?? "—")}
+        </span>
+      ),
     },
     {
       key: "doctor",

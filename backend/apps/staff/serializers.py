@@ -18,19 +18,58 @@ class StaffLogInSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=128, trim_whitespace=False, write_only=True)
 
 
+class StaffTotpChallengeSerializer(serializers.Serializer):
+    totp_required = serializers.BooleanField(default=True)
+    setup_required = serializers.BooleanField()
+    challenge_id = serializers.CharField()
+
+
+class StaffTotpSetupRequestSerializer(serializers.Serializer):
+    challenge_id = serializers.CharField(max_length=200)
+
+
+class StaffTotpSetupResponseSerializer(serializers.Serializer):
+    secret = serializers.CharField()
+    otpauth_uri = serializers.CharField()
+    qr_svg = serializers.CharField()
+
+
+class StaffTotpVerifyRequestSerializer(serializers.Serializer):
+    challenge_id = serializers.CharField(max_length=200)
+    code = serializers.CharField(max_length=16, required=False, allow_blank=True, default="")
+    recovery_code = serializers.CharField(
+        max_length=32, required=False, allow_blank=True, default=""
+    )
+
+
+class StaffTotpSessionSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+    expires_in = serializers.IntegerField()
+    user_type = serializers.CharField()
+    recovery_codes = serializers.ListField(
+        child=serializers.CharField(), required=False, allow_null=True
+    )
+
+
 class StaffSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source="first_name", read_only=True)
     roles = serializers.SerializerMethodField()
+    totp_enabled = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "full_name", "is_active", "roles", "last_login"]
+        fields = ["id", "username", "full_name", "is_active", "roles", "totp_enabled", "last_login"]
         read_only_fields = fields
 
     @staticmethod
     @extend_schema_field(_roles_field())
     def get_roles(user: User) -> list[str]:
         return roles_of(user)
+
+    @staticmethod
+    def get_totp_enabled(user: User) -> bool:
+        totp = getattr(user, "totp", None)
+        return bool(totp and totp.confirmed_at is not None)
 
 
 class AdminMeShopSerializer(serializers.Serializer):

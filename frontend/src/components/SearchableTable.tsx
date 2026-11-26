@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import { Fragment, useId, type ReactNode } from "react";
 
 import { Pager } from "@/components/Pager";
 
@@ -31,6 +31,7 @@ export function SearchableTable<T>({
   onPageChange,
   onRetry,
   status,
+  renderExpanded,
 }: {
   columns: Column<T>[];
   rows: T[];
@@ -43,6 +44,7 @@ export function SearchableTable<T>({
   onPageChange: (page: number) => void;
   onRetry: () => void;
   status: ListStatus;
+  renderExpanded?: (row: T) => ReactNode;
 }) {
   const { t } = useMessages<CommonMessages>();
   const searchId = useId();
@@ -97,24 +99,35 @@ export function SearchableTable<T>({
             </tr>
           </thead>
           <tbody role="rowgroup" className="block desktop:table-row-group">
-            {rows.map((row) => (
-              <tr
-                key={getRowId(row)}
-                role="row"
-                className="mb-2 block rounded-panel border border-line bg-surface p-3 desktop:mb-0 desktop:table-row desktop:rounded-none desktop:border-0 desktop:border-b desktop:bg-transparent desktop:p-0"
-              >
-                {columns.map((column) => (
-                  <td
-                    key={column.key}
-                    role="cell"
-                    data-label={column.header}
-                    className="flex justify-between gap-4 py-1 before:text-sm before:font-semibold before:text-ink-muted before:content-[attr(data-label)] desktop:table-cell desktop:px-3 desktop:py-3 desktop:before:hidden"
+            {rows.map((row) => {
+              const expanded = renderExpanded?.(row);
+              return (
+                <Fragment key={getRowId(row)}>
+                  <tr
+                    role="row"
+                    className="mb-2 block rounded-panel border border-line bg-surface p-3 desktop:mb-0 desktop:table-row desktop:rounded-none desktop:border-0 desktop:border-b desktop:bg-transparent desktop:p-0"
                   >
-                    <span>{column.cell(row)}</span>
-                  </td>
-                ))}
-              </tr>
-            ))}
+                    {columns.map((column) => (
+                      <td
+                        key={column.key}
+                        role="cell"
+                        data-label={column.header}
+                        className="flex justify-between gap-4 py-1 before:text-sm before:font-semibold before:text-ink-muted before:content-[attr(data-label)] desktop:table-cell desktop:px-3 desktop:py-3 desktop:before:hidden"
+                      >
+                        <span>{column.cell(row)}</span>
+                      </td>
+                    ))}
+                  </tr>
+                  {expanded && (
+                    <tr className="mb-2 block rounded-panel border border-line bg-mist p-3 desktop:mb-0 desktop:table-row desktop:rounded-none desktop:border-0 desktop:border-b desktop:p-0">
+                      <td colSpan={columns.length} className="block desktop:table-cell desktop:p-4">
+                        {expanded}
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
           </tbody>
         </table>
       )}

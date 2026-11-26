@@ -8,6 +8,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.audit import services as audit
 from apps.staff.permissions import AdminView
 from apps.staff.roles import Perm
 from common.serializers import ErrorSerializer
@@ -94,12 +95,20 @@ class AdminInvoiceWaiveView(AdminView, GenericAPIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         invoice = get_object_or_404(ConsultationInvoice, pk=pk)
+        before = audit.snapshot(invoice, ["status", "waive_reason"])
         body = self.get_serializer(data=request.data)
         body.is_valid(raise_exception=True)
         updated = services.waive_invoice(
             invoice,
             request.user,  # type: ignore[arg-type]
             body.validated_data["reason"],
+        )
+        audit.change(
+            request,
+            "invoice.waive",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "waive_reason"]),
         )
         loaded = get_object_or_404(_admin_invoices_queryset(), pk=updated.pk)
         return Response(AdminInvoiceSerializer(loaded).data)
@@ -124,12 +133,20 @@ class AdminInvoiceCloseView(AdminView, GenericAPIView):
     )
     def post(self, request: Request, pk: str) -> Response:
         invoice = get_object_or_404(ConsultationInvoice, pk=pk)
+        before = audit.snapshot(invoice, ["status", "close_reason"])
         body = self.get_serializer(data=request.data)
         body.is_valid(raise_exception=True)
         updated = services.close_invoice(
             invoice,
             request.user,  # type: ignore[arg-type]
             body.validated_data["reason"],
+        )
+        audit.change(
+            request,
+            "invoice.close",
+            updated,
+            before=before,
+            after=audit.snapshot(updated, ["status", "close_reason"]),
         )
         loaded = get_object_or_404(_admin_invoices_queryset(), pk=updated.pk)
         return Response(AdminInvoiceSerializer(loaded).data)

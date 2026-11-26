@@ -4,6 +4,31 @@
  */
 
 export interface paths {
+    "/api/v1/admin/audit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        get: operations["admin_audit_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/doctor-consultations/": {
         parameters: {
             query?: never;
@@ -1265,6 +1290,31 @@ export interface paths {
         patch: operations["admin_staff_update"];
         trace?: never;
     };
+    "/api/v1/admin/staff/{id}/reset-2fa/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
+         *
+         *     class RemedyList(AdminView, ListCreateAPIView):
+         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
+         *
+         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
+         *     (any one of them grants access), or ``ANY_STAFF``.
+         */
+        post: operations["admin_staff_reset_2fa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/doctor/login/": {
         parameters: {
             query?: never;
@@ -1531,6 +1581,40 @@ export interface paths {
         put?: never;
         /** @description Acts on one kind of user's refresh cookie. */
         post: operations["auth_staff_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/staff/totp/setup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_staff_totp_setup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/staff/totp/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base for endpoints used before signing in. */
+        post: operations["auth_staff_totp_verify"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2410,12 +2494,12 @@ export interface components {
             readonly id: string;
             readonly consultation_code: string;
             readonly patient: components["schemas"]["AdminConsultationPatient"];
-            readonly illness: components["schemas"]["ConsultationIllness"];
-            readonly chief_complaint: string;
-            readonly symptoms: string;
+            readonly illness: components["schemas"]["ConsultationIllness"] | null;
+            readonly chief_complaint: string | null;
+            readonly symptoms: string | null;
             readonly duration_value: number | null;
-            readonly duration_unit: components["schemas"]["DurationUnitEnum"];
-            readonly symptom_notes: string;
+            readonly duration_unit: string | null;
+            readonly symptom_notes: string | null;
             readonly urgency: components["schemas"]["UrgencyEnum"];
             readonly status: components["schemas"]["ConsultationStatusEnum"];
             readonly doctor: components["schemas"]["ConsultationDoctorSummary"];
@@ -2431,6 +2515,7 @@ export interface components {
             readonly cancelled_at: string | null;
             readonly cancel_reason: string;
             readonly history: components["schemas"]["ConsultationHistory"][];
+            readonly clinical_hidden: boolean;
         };
         AdminConsultationPatient: {
             /** Format: uuid */
@@ -2447,12 +2532,13 @@ export interface components {
             readonly consultation_code: string;
             readonly patient_name: string;
             readonly area: string;
-            readonly chief_complaint: string;
+            readonly chief_complaint: string | null;
             readonly urgency: components["schemas"]["UrgencyEnum"];
             readonly status: components["schemas"]["ConsultationStatusEnum"];
             readonly doctor_name: string | null;
             /** Format: date-time */
             readonly submitted_at: string;
+            readonly clinical_hidden: boolean;
         };
         AdminDoctorApproveRequest: {
             consultation_fee_poisha: number;
@@ -2601,6 +2687,7 @@ export interface components {
              */
             readonly is_active: boolean;
             readonly roles: components["schemas"]["RoleEnum"][];
+            readonly totp_enabled: boolean;
             /** Format: date-time */
             readonly last_login: string | null;
             readonly permissions: components["schemas"]["PermissionEnum"][];
@@ -2909,6 +2996,29 @@ export interface components {
          * @enum {string}
          */
         AssignmentStatusEnum: "ASSIGNED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "RETURNED" | "CANCELLED";
+        /**
+         * @description * `staff` - Staff
+         *     * `doctor` - Doctor
+         *     * `patient` - Patient
+         *     * `system` - System
+         * @enum {string}
+         */
+        AuditActorTypeEnum: "staff" | "doctor" | "patient" | "system";
+        AuditEntry: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly actor_type: components["schemas"]["AuditActorTypeEnum"];
+            readonly actor_id: string;
+            readonly actor_label: string;
+            readonly action: string;
+            readonly target_type: string;
+            readonly target_id: string;
+            readonly ip: string;
+            readonly before: unknown;
+            readonly after: unknown;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
         /** @enum {unknown} */
         BlankEnum: "";
         /**
@@ -3522,6 +3632,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["AdminShopRemedy"][];
         };
+        PaginatedAuditEntryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["AuditEntry"][];
+        };
         PaginatedLocationList: {
             /** @example 123 */
             count: number;
@@ -3933,6 +4058,7 @@ export interface components {
          *     * `manage_doctors` - manage_doctors
          *     * `view_cases` - view_cases
          *     * `assign_cases` - assign_cases
+         *     * `view_clinical` - view_clinical
          *     * `manage_remedies` - manage_remedies
          *     * `manage_illnesses` - manage_illnesses
          *     * `view_patients` - view_patients
@@ -3942,9 +4068,10 @@ export interface components {
          *     * `manage_payments` - manage_payments
          *     * `manage_shops` - manage_shops
          *     * `manage_own_shop` - manage_own_shop
+         *     * `view_audit_log` - view_audit_log
          * @enum {string}
          */
-        PermissionEnum: "manage_staff" | "view_doctors" | "manage_doctors" | "view_cases" | "assign_cases" | "manage_remedies" | "manage_illnesses" | "view_patients" | "view_orders" | "manage_orders" | "view_payments" | "manage_payments" | "manage_shops" | "manage_own_shop";
+        PermissionEnum: "manage_staff" | "view_doctors" | "manage_doctors" | "view_cases" | "assign_cases" | "view_clinical" | "manage_remedies" | "manage_illnesses" | "view_patients" | "view_orders" | "manage_orders" | "view_payments" | "manage_payments" | "manage_shops" | "manage_own_shop" | "view_audit_log";
         PictureUploadRequest: {
             /** Format: binary */
             picture: string;
@@ -4269,6 +4396,7 @@ export interface components {
              */
             readonly is_active: boolean;
             readonly roles: components["schemas"]["RoleEnum"][];
+            readonly totp_enabled: boolean;
             /** Format: date-time */
             readonly last_login: string | null;
         };
@@ -4281,6 +4409,34 @@ export interface components {
         StaffLogInRequest: {
             username: string;
             password: string;
+        };
+        StaffLogInResponse: components["schemas"]["Session"] | components["schemas"]["StaffTotpChallenge"];
+        StaffTotpChallenge: {
+            /** @default true */
+            totp_required: boolean;
+            setup_required: boolean;
+            challenge_id: string;
+        };
+        StaffTotpSession: {
+            access_token: string;
+            expires_in: number;
+            user_type: string;
+            recovery_codes?: string[] | null;
+        };
+        StaffTotpSetupRequestRequest: {
+            challenge_id: string;
+        };
+        StaffTotpSetupResponse: {
+            secret: string;
+            otpauth_uri: string;
+            qr_svg: string;
+        };
+        StaffTotpVerifyRequestRequest: {
+            challenge_id: string;
+            /** @default  */
+            code: string;
+            /** @default  */
+            recovery_code: string;
         };
         /**
          * @description * `CHILLY` - Chilly
@@ -4340,6 +4496,38 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_audit_list: {
+        parameters: {
+            query?: {
+                action?: string;
+                actor_type?: "doctor" | "patient" | "staff" | "system";
+                from?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                q?: string;
+                target_type?: string;
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAuditEntryList"];
+                };
+            };
+        };
+    };
     admin_consultations_list: {
         parameters: {
             query?: {
@@ -7108,6 +7296,51 @@ export interface operations {
             };
         };
     };
+    admin_staff_reset_2fa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Staff"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     auth_doctor_login: {
         parameters: {
             query?: never;
@@ -7632,7 +7865,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Session"];
+                    "application/json": components["schemas"]["StaffLogInResponse"];
                 };
             };
             400: {
@@ -7701,6 +7934,112 @@ export interface operations {
                 };
             };
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_staff_totp_setup: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffTotpSetupRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffTotpSetupResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    auth_staff_totp_verify: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Client": "web";
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffTotpVerifyRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffTotpSession"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -97,6 +97,10 @@ class PrivateFileView(APIView):
             raise Http404("File not found.")
 
         content_type = "application/pdf" if name.lower().endswith(".pdf") else "image/webp"
+        if name.startswith("consultations/"):
+            from apps.audit import services as audit
+
+            audit.read(request, "patient_photo.read", ("patient_photo", name))
         response = FileResponse(storage.open(name, "rb"), content_type=content_type)
         response["X-Content-Type-Options"] = "nosniff"
         response["Cache-Control"] = "private, no-store"

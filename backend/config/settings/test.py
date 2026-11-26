@@ -18,3 +18,4 @@ CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 SMS_PROVIDER = "apps.accounts.sms.MemorySmsProvider"
 REFRESH_COOKIE_SECURE = True
+STAFF_TOTP_REQUIRED = False

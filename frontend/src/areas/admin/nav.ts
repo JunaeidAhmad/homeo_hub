@@ -30,6 +30,7 @@ export const ADMIN_NAV: readonly AdminSection[] = [
   { href: "/admin/orders", label: "admin.nav.orders", permission: "view_orders" },
   { href: "/admin/payments", label: "admin.nav.payments", permission: "view_payments" },
   { href: "/admin/locations", label: "admin.nav.locations" },
+  { href: "/admin/audit", label: "admin.nav.audit", permission: "view_audit_log" },
 ];
 
 const allows = (permissions: readonly Permission[], section: AdminSection) => {
