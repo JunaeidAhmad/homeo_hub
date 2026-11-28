@@ -141,11 +141,17 @@ export function VideoCallTab({
       setSlotError(t("doctor.call.needDateTime"));
       return;
     }
+    const trimmedLink = linkInput.trim();
+    if (trimmedLink && !trimmedLink.startsWith("https://")) {
+      setLinkError(t("doctor.call.invalidLink"));
+      return;
+    }
     const startAtIso = dhakaInputToIso(dateStr, timeStr);
     const body = {
       start_at: startAtIso,
       duration_minutes: duration,
       note: note.trim(),
+      meeting_link: trimmedLink,
     };
 
     if (active && (active.status === "RESCHEDULE_REQUESTED" || active.status === "ACCEPTED")) {
@@ -158,6 +164,7 @@ export function VideoCallTab({
           }),
         (updated) => {
           upsertAppointment(updated);
+          setLinkInput(updated.meeting_link);
           setNotice(
             t(
               active.status === "ACCEPTED"
@@ -393,41 +400,43 @@ export function VideoCallTab({
           />
 
           {/* Meeting link field while PROPOSED / ACCEPTED */}
-          {active && (active.status === "PROPOSED" || active.status === "ACCEPTED") && (
-            <form
-              onSubmit={saveLink}
-              noValidate
-              className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-4"
-            >
-              <TextField
-                label={t("doctor.call.linkLabel")}
-                value={linkInput}
-                onChange={(event) => {
-                  setLinkInput(event.target.value);
-                  setLinkError(undefined);
-                }}
-                error={linkError ?? problems.fields.meeting_link}
-                placeholder="https://meet.google.com/..."
-                maxLength={500}
-              />
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                {active.meeting_host ? (
-                  <span className="text-xs font-semibold text-primary-deep">
-                    {fill(t("doctor.call.opensInHost"), { host: active.meeting_host })}
-                  </span>
-                ) : (
-                  <span />
-                )}
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="min-h-10 rounded-control border border-line-strong bg-surface px-4 text-sm font-semibold text-ink disabled:opacity-60"
-                >
-                  {t("doctor.call.saveLinkBtn")}
-                </button>
-              </div>
-            </form>
-          )}
+          {active &&
+            !showProposeForm &&
+            (active.status === "PROPOSED" || active.status === "ACCEPTED") && (
+              <form
+                onSubmit={saveLink}
+                noValidate
+                className="flex flex-col gap-3 rounded-panel border border-line bg-surface p-4"
+              >
+                <TextField
+                  label={t("doctor.call.linkLabel")}
+                  value={linkInput}
+                  onChange={(event) => {
+                    setLinkInput(event.target.value);
+                    setLinkError(undefined);
+                  }}
+                  error={linkError ?? problems.fields.meeting_link}
+                  placeholder="https://meet.google.com/..."
+                  maxLength={500}
+                />
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  {active.meeting_host ? (
+                    <span className="text-xs font-semibold text-primary-deep">
+                      {fill(t("doctor.call.opensInHost"), { host: active.meeting_host })}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    className="min-h-10 rounded-control border border-line-strong bg-surface px-4 text-sm font-semibold text-ink disabled:opacity-60"
+                  >
+                    {t("doctor.call.saveLinkBtn")}
+                  </button>
+                </div>
+              </form>
+            )}
 
           {/* Start call, No-show, Reschedule, Cancel */}
           {active &&
@@ -585,6 +594,19 @@ export function VideoCallTab({
               ))}
             </select>
           </label>
+
+          <TextField
+            label={t("doctor.call.linkLabel")}
+            hint={t("doctor.call.linkHint")}
+            value={linkInput}
+            onChange={(event) => {
+              setLinkInput(event.target.value);
+              setLinkError(undefined);
+            }}
+            error={linkError ?? problems.fields.meeting_link}
+            placeholder="https://meet.google.com/..."
+            maxLength={500}
+          />
 
           <TextField
             label={t("doctor.call.note")}

@@ -128,6 +128,9 @@ class ProposeAppointmentSerializer(serializers.Serializer):
     start_at = serializers.DateTimeField()
     duration_minutes = serializers.IntegerField(min_value=10, max_value=60, default=20)
     note = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
+    meeting_link = serializers.CharField(
+        max_length=500, required=False, allow_blank=True, default=""
+    )
 
 
 class AppointmentNoteSerializer(serializers.Serializer):

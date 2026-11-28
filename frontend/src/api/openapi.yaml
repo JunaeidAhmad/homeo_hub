@@ -12190,6 +12190,10 @@ components:
           type: string
           default: ''
           maxLength: 500
+        meeting_link:
+          type: string
+          default: ''
+          maxLength: 500
       required:
       - start_at
     PublicIllnessCategory:

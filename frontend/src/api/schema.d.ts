@@ -4733,6 +4733,8 @@ export interface components {
             duration_minutes: number;
             /** @default  */
             note: string;
+            /** @default  */
+            meeting_link: string;
         };
         PublicIllnessCategory: {
             /** Format: uuid */

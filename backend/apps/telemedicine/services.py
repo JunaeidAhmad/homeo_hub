@@ -204,6 +204,7 @@ def propose(
     start_at: datetime,
     duration_minutes: int = 20,
     note: str = "",
+    meeting_link: str = "",
 ) -> VideoAppointment:
     expire_passed_for(consultation=consultation)
     locked_case = DoctorConsultation.objects.select_for_update().get(
@@ -219,6 +220,7 @@ def propose(
 
     end_at = _validate_slot(start_at, duration_minutes)
     clean_note = normalize_text(note).strip()[:500]
+    link, host = _validate_meeting_link(meeting_link) if meeting_link.strip() else ("", "")
     try:
         with transaction.atomic():
             appt = VideoAppointment.objects.create(
@@ -228,7 +230,11 @@ def propose(
                 duration_minutes=duration_minutes,
                 end_at=end_at,
                 status=Status.PROPOSED,
+                meeting_link=link,
+                meeting_host=host,
             )
+            if link:
+                get_video_provider().prepare(appt)
     except IntegrityError as exc:
         _raise_integrity_conflict(exc)
 
@@ -257,6 +263,7 @@ def repropose(
     start_at: datetime,
     duration_minutes: int = 20,
     note: str = "",
+    meeting_link: str = "",
 ) -> VideoAppointment:
     appointment = expire_if_passed(appointment)
     locked = (
@@ -269,6 +276,9 @@ def repropose(
 
     end_at = _validate_slot(start_at, duration_minutes)
     clean_note = normalize_text(note).strip()[:500]
+    if meeting_link.strip():
+        locked.meeting_link, locked.meeting_host = _validate_meeting_link(meeting_link)
+        get_video_provider().prepare(locked)
 
     locked.start_at = start_at
     locked.duration_minutes = duration_minutes
@@ -290,6 +300,8 @@ def repropose(
                     "patient_reminded_5_at",
                     "doctor_reminded_30_at",
                     "doctor_reminded_5_at",
+                    "meeting_link",
+                    "meeting_host",
                     "updated_at",
                 ]
             )
