@@ -4,8 +4,16 @@ import { OrderDetail } from "@/areas/patient/orders/OrderDetail";
 import { common } from "@/i18n/messages/common";
 import { getTranslator } from "@/i18n/server";
 
+type Params = PageProps<"/[lang]/orders/[id]">["params"];
+
+// The id is read under Suspense so a navigation here can show the loading state at once.
+async function Detail({ params }: { params: Params }) {
+  const { id } = await params;
+  return <OrderDetail orderId={id} />;
+}
+
 export default async function Page({ params }: PageProps<"/[lang]/orders/[id]">) {
-  const [{ id }, { t }] = await Promise.all([params, getTranslator(common)]);
+  const { t } = await getTranslator(common);
   return (
     <Suspense
       fallback={
@@ -14,7 +22,7 @@ export default async function Page({ params }: PageProps<"/[lang]/orders/[id]">)
         </p>
       }
     >
-      <OrderDetail orderId={id} />
+      <Detail params={params} />
     </Suspense>
   );
 }
