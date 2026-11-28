@@ -26,6 +26,7 @@ const CHIPS: Chip[] = [
   { key: "unassigned", unassigned: true },
   { key: "PENDING_PAYMENT", status: "PENDING_PAYMENT" },
   { key: "all", status: "" },
+  { key: "PENDING", status: "PENDING" },
   { key: "CONFIRMED", status: "CONFIRMED" },
   { key: "PROCESSING", status: "PROCESSING" },
   { key: "SHIPPED", status: "SHIPPED" },
@@ -35,6 +36,7 @@ const CHIPS: Chip[] = [
 ];
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
+  PENDING: "bg-amber-wash text-ink",
   PENDING_PAYMENT: "bg-amber-wash text-ink",
   CONFIRMED: "bg-mist text-ink",
   PAID: "bg-mist text-ink",

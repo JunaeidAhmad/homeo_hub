@@ -273,16 +273,20 @@ def test_cod_delivery_requires_amount_and_patient_status_follows_assignments(loc
     assert candidates[0]["area_match"] == "UPAZILA"
     assert candidates[1]["area_match"] == "OTHER"
 
-    fulfil.post(
+    assert order["status"] == "PENDING"
+    first = fulfil.post(
         f"{ADMIN_ORDERS}{order['id']}/items/{item_a['id']}/assign/",
         {"shop_remedy_id": str(sr1.id)},
         format="json",
-    )
+    ).json()
+    # One line still has no shop, so the order is not confirmed yet.
+    assert first["status"] == "PENDING"
     assigned = fulfil.post(
         f"{ADMIN_ORDERS}{order['id']}/items/{item_b['id']}/assign/",
         {"shop_remedy_id": str(sr2.id)},
         format="json",
     ).json()
+    assert assigned["status"] == "CONFIRMED"
     a1, a2 = assigned["assignments"]
 
     # Expected COD: first assignment includes delivery charge (6000), second does not.
@@ -342,6 +346,7 @@ def test_cod_delivery_requires_amount_and_patient_status_follows_assignments(loc
     assert patient_detail["status"] == "DELIVERED"
     assert_no_shop_keys(patient_detail)
     assert [t["status"] for t in patient_detail["timeline"]] == [
+        "PENDING",
         "CONFIRMED",
         "PROCESSING",
         "SHIPPED",

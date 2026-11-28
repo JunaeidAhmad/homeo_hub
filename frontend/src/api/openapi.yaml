@@ -10295,6 +10295,7 @@ components:
       - total_poisha
     OrderStatusEnum:
       enum:
+      - PENDING
       - PENDING_PAYMENT
       - CONFIRMED
       - PAID
@@ -10305,6 +10306,7 @@ components:
       - RETURNED
       type: string
       description: |-
+        * `PENDING` - Pending
         * `PENDING_PAYMENT` - Pending Payment
         * `CONFIRMED` - Confirmed
         * `PAID` - Paid

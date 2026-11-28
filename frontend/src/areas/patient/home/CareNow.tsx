@@ -24,9 +24,10 @@ const ORDER_LIMIT = 3;
 /** Delivery steps shown under an active order, and which step each status reaches. */
 const DELIVERY_STEPS = ["confirmed", "packing", "shipped", "delivered"] as const;
 const STEP_REACHED: Partial<Record<OrderStatus, number>> = {
+  PENDING: -1,
   PENDING_PAYMENT: -1,
+  PAID: -1,
   CONFIRMED: 0,
-  PAID: 0,
   PROCESSING: 1,
   SHIPPED: 2,
 };

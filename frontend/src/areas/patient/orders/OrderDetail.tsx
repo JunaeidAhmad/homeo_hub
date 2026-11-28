@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { components } from "@/api/schema";
-import { useApiClient } from "@/api/use-api-client";
 import { TaskScreen } from "@/areas/patient/TaskScreen";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -24,7 +23,7 @@ type OrderDetailData = components["schemas"]["PatientOrderDetail"];
 export function OrderDetail({ orderId }: { orderId: string }) {
   const { locale, t } = useMessages<CommonMessages & PatientMessages>();
   const session = useSession();
-  const api = useApiClient();
+  const { api } = session;
   const searchParams = useSearchParams();
   const justPlaced = searchParams.get("placed") === "1";
 

@@ -90,14 +90,14 @@ def test_checkout_totals_snapshots_empty_cart_and_idempotency(location, settings
     created = client.post(ORDERS, payload, format="json", headers={"Idempotency-Key": "key-1"})
     assert created.status_code == 201, created.content
     order = created.json()
-    assert order["status"] == "CONFIRMED"
+    assert order["status"] == "PENDING"
     assert order["subtotal_poisha"] == 24000
     assert order["delivery_charge_poisha"] == 6000
     assert order["total_poisha"] == 30000
     assert order["can_cancel"] is True
     assert order["code"].startswith("HH-ORD-")
     assert len(order["timeline"]) == 1
-    assert order["timeline"][0]["status"] == "CONFIRMED"
+    assert order["timeline"][0]["status"] == "PENDING"
 
     # Repeated Idempotency-Key returns the same order.
     replayed = client.post(ORDERS, payload, format="json", headers={"Idempotency-Key": "key-1"})
@@ -169,7 +169,7 @@ def test_cancel_while_confirmed_and_refused_once_processing(location):
     assert cancelled.status_code == 200
     assert cancelled.json()["status"] == "CANCELLED"
     assert cancelled.json()["can_cancel"] is False
-    assert [step["status"] for step in cancelled.json()["timeline"]] == ["CONFIRMED", "CANCELLED"]
+    assert [step["status"] for step in cancelled.json()["timeline"]] == ["PENDING", "CANCELLED"]
     assert_no_shop_keys(cancelled.json())
 
     # Second order set directly to PROCESSING cannot be cancelled by patient.

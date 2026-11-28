@@ -16,7 +16,11 @@ from .delivery import delivery_charge_for
 from .models import Cart, Order, OrderItem, OrderStatusHistory
 
 _BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-CANCELLABLE_STATUSES = {Order.Status.CONFIRMED, Order.Status.PENDING_PAYMENT}
+CANCELLABLE_STATUSES = {
+    Order.Status.PENDING,
+    Order.Status.CONFIRMED,
+    Order.Status.PENDING_PAYMENT,
+}
 
 
 class CartEmpty(ApiError):
@@ -119,7 +123,7 @@ def checkout(
     }
 
     initial_status = (
-        Order.Status.CONFIRMED
+        Order.Status.PENDING
         if payment_method == Order.PaymentMethod.COD
         else Order.Status.PENDING_PAYMENT
     )

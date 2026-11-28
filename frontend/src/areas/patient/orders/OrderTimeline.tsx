@@ -9,15 +9,19 @@ import type { OrderStatus } from "./status";
 
 type TimelineEntry = components["schemas"]["OrderTimelineEntry"];
 
-const STEPS: { key: "confirmed" | "packing" | "shipped" | "delivered"; statuses: OrderStatus[] }[] = [
-  { key: "confirmed", statuses: ["CONFIRMED", "PAID"] },
+const STEPS: {
+  key: "placed" | "confirmed" | "packing" | "shipped" | "delivered";
+  statuses: OrderStatus[];
+}[] = [
+  // Placed and waiting for an admin to confirm it (and paid, for an online order).
+  { key: "placed", statuses: ["PENDING", "PENDING_PAYMENT", "PAID"] },
+  { key: "confirmed", statuses: ["CONFIRMED"] },
   { key: "packing", statuses: ["PROCESSING"] },
   { key: "shipped", statuses: ["SHIPPED"] },
   { key: "delivered", statuses: ["DELIVERED"] },
 ];
 
 function stepIndexFor(status: OrderStatus): number {
-  if (status === "PENDING_PAYMENT") return 0;
   return STEPS.findIndex((step) => step.statuses.includes(status));
 }
 
@@ -45,12 +49,16 @@ export function OrderTimeline({
     return highest;
   })();
 
-  const steps = STEPS.map((step) => {
-    const entry = timeline.find((row) => step.statuses.includes(row.status));
+  const reachedCount = isTerminalStop ? completedCount : currentIdx + 1;
+  const steps = STEPS.map((step, index) => {
+    // The first history row is the order being placed, whatever status it started in.
+    const entry =
+      index === 0 ? timeline[0] : timeline.find((row) => step.statuses.includes(row.status));
     return {
       key: step.key,
       label: t(`patient.orders.step.${step.key}`),
-      timestamp: entry?.at ?? null,
+      // Only steps the order has reached get a time (older orders may carry other rows).
+      timestamp: index < reachedCount ? (entry?.at ?? null) : null,
     };
   });
 

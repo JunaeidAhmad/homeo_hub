@@ -3,7 +3,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
 import type { components } from "@/api/schema";
-import { useApiClient } from "@/api/use-api-client";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 
 export type Cart = components["schemas"]["Cart"];
@@ -38,7 +37,7 @@ async function extractErrorCode(response: Response): Promise<string> {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const session = useSession();
-  const api = useApiClient();
+  const { api } = session;
   const [loadedCart, setLoadedCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);

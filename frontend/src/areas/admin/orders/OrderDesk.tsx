@@ -206,7 +206,8 @@ export function OrderDesk({ orderId }: { orderId: string }) {
   const assignmentById = new Map(order.assignments.map((a) => [a.id, a]));
   const canAssignOrder =
     canManage &&
-    (order.status === "CONFIRMED" || order.status === "PAID" || order.status === "PROCESSING");
+    (order.status === "PENDING" ||
+      order.status === "CONFIRMED" || order.status === "PAID" || order.status === "PROCESSING");
 
   return (
     <section className="flex flex-col gap-5">

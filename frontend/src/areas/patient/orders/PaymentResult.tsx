@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { components } from "@/api/schema";
-import { useApiClient } from "@/api/use-api-client";
 import { ActionBar } from "@/areas/patient/ActionBar";
 import { TaskScreen } from "@/areas/patient/TaskScreen";
 import { useSession } from "@/areas/patient/session/SessionProvider";
@@ -25,7 +24,7 @@ const CLOCK_ICON = "M12 6v6l4 2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z";
 export function PaymentResult() {
   const { locale, t } = useMessages<CommonMessages & PatientMessages>();
   const session = useSession();
-  const api = useApiClient();
+  const { api } = session;
   const searchParams = useSearchParams();
   const tranId = searchParams.get("tran_id") ?? "";
 

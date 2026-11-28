@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
+import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
-import { useApiClient } from "@/api/use-api-client";
 import { ActionBar } from "@/areas/patient/ActionBar";
 import { TaskScreen } from "@/areas/patient/TaskScreen";
 import { useCart } from "@/areas/patient/cart/CartProvider";
@@ -29,7 +29,6 @@ export function CheckoutForm() {
   const { locale, t } = useMessages<CommonMessages & PatientMessages>();
   const session = useSession();
   const router = useRouter();
-  const api = useApiClient();
   const { cart, refresh } = useCart();
 
   const isGuest =
@@ -77,7 +76,7 @@ export function CheckoutForm() {
     );
   }
 
-  return <SignedInCheckout patient={session.patient} cart={cart} refresh={refresh} api={api} router={router} locale={locale} t={t} />;
+  return <SignedInCheckout patient={session.patient} cart={cart} refresh={refresh} api={session.api} router={router} locale={locale} t={t} />;
 }
 
 function SignedInCheckout({
@@ -92,7 +91,7 @@ function SignedInCheckout({
   patient: Patient;
   cart: NonNullable<ReturnType<typeof useCart>["cart"]>;
   refresh: () => Promise<void>;
-  api: ReturnType<typeof useApiClient>;
+  api: ApiClient;
   router: ReturnType<typeof useRouter>;
   locale: "en" | "bn";
   t: (key: keyof (CommonMessages & PatientMessages)) => string;

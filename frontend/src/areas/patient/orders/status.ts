@@ -7,6 +7,10 @@ export const ORDER_STATUS_META: Record<
   OrderStatus,
   { labelKey: keyof PatientMessages; badgeClass: string }
 > = {
+  PENDING: {
+    labelKey: "patient.orders.status.PENDING",
+    badgeClass: "bg-amber-wash text-ink",
+  },
   PENDING_PAYMENT: {
     labelKey: "patient.orders.status.PENDING_PAYMENT",
     badgeClass: "bg-amber-wash text-ink",
@@ -43,6 +47,7 @@ export const ORDER_STATUS_META: Record<
 
 /** Orders still on their way to the patient (not delivered, cancelled or returned). */
 export const ACTIVE_ORDER_STATUSES: OrderStatus[] = [
+  "PENDING",
   "PENDING_PAYMENT",
   "CONFIRMED",
   "PAID",

@@ -15,6 +15,7 @@ from common.errors import ApiError
 from .models import Order, OrderItem, OrderStatusHistory, ShopAssignment
 
 ASSIGNABLE_ORDER_STATUSES = {
+    Order.Status.PENDING,
     Order.Status.CONFIRMED,
     Order.Status.PAID,
     Order.Status.PROCESSING,
@@ -70,8 +71,15 @@ def next_statuses_for(assignment: ShopAssignment) -> list[str]:
     return list(ALLOWED_TRANSITIONS.get(assignment.status, ()))
 
 
+CANCELLABLE_ORDER_STATUSES = {
+    Order.Status.PENDING,
+    Order.Status.PENDING_PAYMENT,
+    Order.Status.CONFIRMED,
+}
+
+
 def can_cancel_order(order: Order) -> bool:
-    if order.status not in {Order.Status.PENDING_PAYMENT, Order.Status.CONFIRMED}:
+    if order.status not in CANCELLABLE_ORDER_STATUSES:
         return False
     return not any(a.status in LOCKED_ASSIGNMENT_STATUSES for a in order.assignments.all())
 
@@ -121,12 +129,15 @@ def sync_order_status(order: Order, actor: User | None = None) -> Order:
         target = Order.Status.SHIPPED
     elif any(a.status == ShopAssignment.Status.PROCESSING for a in assignments):
         target = Order.Status.PROCESSING
+    elif assignments and all_lines_assigned:
+        # The admin has given every line a shop: that is what confirms the order.
+        target = Order.Status.CONFIRMED
     else:
         has_paid_online = (
             order.payment_method == Order.PaymentMethod.ONLINE
             and order.payments.filter(status=Payment.Status.SUCCESS).exists()
         )
-        target = Order.Status.PAID if has_paid_online else Order.Status.CONFIRMED
+        target = Order.Status.PAID if has_paid_online else Order.Status.PENDING
 
     if target != order.status:
         prev = order.status
@@ -141,6 +152,7 @@ def sync_order_status(order: Order, actor: User | None = None) -> Order:
             by_patient=False,
         )
         _ORDER_STATUS_LABELS = {
+            Order.Status.PENDING: ("pending", "অপেক্ষমাণ"),
             Order.Status.PENDING_PAYMENT: ("awaiting payment", "পেমেন্টের অপেক্ষায়"),
             Order.Status.CONFIRMED: ("confirmed", "নিশ্চিত"),
             Order.Status.PAID: ("paid", "পরিশোধিত"),
@@ -380,7 +392,7 @@ def cancel_order(
     order: Order, actor: User | None, by_patient: bool = False, reason: str = ""
 ) -> Order:
     locked = Order.objects.select_for_update().get(pk=order.pk)
-    if locked.status not in {Order.Status.PENDING_PAYMENT, Order.Status.CONFIRMED}:
+    if locked.status not in CANCELLABLE_ORDER_STATUSES:
         raise OrderNotCancellableFulfilment()
 
     assignments = list(locked.assignments.select_for_update().order_by("pk"))

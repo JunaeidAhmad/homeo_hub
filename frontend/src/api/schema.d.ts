@@ -3932,7 +3932,8 @@ export interface components {
             total_poisha: number;
         };
         /**
-         * @description * `PENDING_PAYMENT` - Pending Payment
+         * @description * `PENDING` - Pending
+         *     * `PENDING_PAYMENT` - Pending Payment
          *     * `CONFIRMED` - Confirmed
          *     * `PAID` - Paid
          *     * `PROCESSING` - Processing
@@ -3942,7 +3943,7 @@ export interface components {
          *     * `RETURNED` - Returned
          * @enum {string}
          */
-        OrderStatusEnum: "PENDING_PAYMENT" | "CONFIRMED" | "PAID" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED";
+        OrderStatusEnum: "PENDING" | "PENDING_PAYMENT" | "CONFIRMED" | "PAID" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED";
         OrderTimelineEntry: {
             status: components["schemas"]["OrderStatusEnum"];
             /** Format: date-time */

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useCallback, useId, useState } from "react";
 
 import type { components } from "@/api/schema";
-import { useApiClient } from "@/api/use-api-client";
 import { useSession } from "@/areas/patient/session/SessionProvider";
 import { Pager } from "@/components/Pager";
 import { FormAlert } from "@/components/form/fields";
@@ -76,7 +75,7 @@ function SignedInOrderList({
   locale: Locale;
   t: (key: keyof (CommonMessages & PatientMessages)) => string;
 }) {
-  const api = useApiClient();
+  const { api } = useSession();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
   const searchId = useId();
   const activeStatusParam = FILTERS.find((item) => item.key === filter)?.statusParam ?? "";

@@ -87,6 +87,8 @@ class Order(models.Model):
         ONLINE = "ONLINE"
 
     class Status(models.TextChoices):
+        # Placed, waiting for an admin to confirm it by giving every line a shop.
+        PENDING = "PENDING"
         PENDING_PAYMENT = "PENDING_PAYMENT"
         CONFIRMED = "CONFIRMED"
         PAID = "PAID"
