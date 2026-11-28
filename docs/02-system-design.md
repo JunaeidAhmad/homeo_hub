@@ -761,7 +761,7 @@ Mobile also gets the same events as push notifications when the app is in the ba
 | Area | Screens |
 |---|---|
 | Onboarding | Language choice · Welcome · Sign up · Verify OTP · Sign in · Forgot password |
-| Home | Two big entry points: **"Find a remedy myself"** and **"Consult a doctor"**; search bar; upcoming appointment card; ongoing consultation card; recent orders |
+| Home | Two big entry points: **"Find a remedy"** and **"Consult a doctor"**; search bar; upcoming appointment card; ongoing consultation card; recent orders |
 | Self-consultancy | Illness list (search, categories) · Illness detail with ranked remedy cards (indication note, potency picker, add to cart) |
 | Remedy | Remedy detail (picture, description, variants) |
 | Consult a doctor | New consultation (3 concerns + attachments) · My doctor consultations · Doctor consultation detail (timeline, questions to answer, appointment card, prescription card, withdraw) · Answer questionnaire · Appointment detail (accept / reject / ask to reschedule) · Incoming call · Video call · Prescription (locked → pay → unlocked, "Add all to cart") |
