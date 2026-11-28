@@ -2412,6 +2412,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/locations/districts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The districts of one division. Their upazilas / thanas: ``/locations/?district=``. */
+        get: operations["locations_districts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/locations/divisions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every division, for the first step of choosing an area. */
+        get: operations["locations_divisions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/": {
         parameters: {
             query?: never;
@@ -3352,6 +3386,10 @@ export interface components {
          * @enum {string}
          */
         AreaMatchEnum: "UPAZILA" | "DISTRICT" | "DIVISION" | "OTHER";
+        /** @description A division or district, named in the client's language. */
+        AreaName: {
+            name: string;
+        };
         AssignableDoctor: {
             /** Format: uuid */
             readonly id: string;
@@ -3857,8 +3895,19 @@ export interface components {
             readonly division: string;
             readonly district: string;
             readonly upazila: string;
+            kind?: components["schemas"]["LocationKindEnum"];
             /** @description Upazila, district, division: one line for a picker to show. */
             readonly display_name: string;
+        };
+        /**
+         * @description * `UPAZILA` - Upazila
+         *     * `CITY_THANA` - City Thana
+         * @enum {string}
+         */
+        LocationKindEnum: "UPAZILA" | "CITY_THANA";
+        /** @description An area with its names in the language the client asked for. */
+        LocationRequest: {
+            kind?: components["schemas"]["LocationKindEnum"];
         };
         /** @description Strict locked view: never touches items, advice, or doctor_notes. */
         LockedPrescription: {
@@ -10933,6 +10982,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedLocationList"];
+                };
+            };
+        };
+    };
+    locations_districts_list: {
+        parameters: {
+            query: {
+                /** @description A division name, in Bangla or English. */
+                division: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaName"][];
+                };
+            };
+        };
+    };
+    locations_divisions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AreaName"][];
                 };
             };
         };

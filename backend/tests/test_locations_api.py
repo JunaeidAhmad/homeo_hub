@@ -35,8 +35,15 @@ def upazilas(data) -> list[str]:
 def test_anyone_can_list_areas_without_signing_in(client):
     data = fetch(client)
 
-    assert data["count"] == 495
-    assert set(data["results"][0]) == {"id", "division", "district", "upazila", "display_name"}
+    assert data["count"] == 602
+    assert set(data["results"][0]) == {
+        "id",
+        "division",
+        "district",
+        "upazila",
+        "kind",
+        "display_name",
+    }
 
 
 def test_names_come_back_in_the_requested_language(client):
@@ -70,7 +77,7 @@ def test_an_exact_district_ranks_all_its_areas_above_loose_matches(client):
     first_other = next(i for i, row in enumerate(rows) if row["district"] != "Gazipur")
 
     gazipur_rows = [i for i, row in enumerate(rows) if row["district"] == "Gazipur"]
-    assert len(gazipur_rows) == 5
+    assert len(gazipur_rows) == 13  # 5 upazilas and 8 city thanas
     assert max(gazipur_rows) < first_other
 
 
@@ -117,7 +124,7 @@ def test_text_that_matches_nothing_returns_an_empty_page(client):
 
 
 def test_a_blank_query_is_the_same_as_no_query(client):
-    assert fetch(client, q="   ")["count"] == 495
+    assert fetch(client, q="   ")["count"] == 602
 
 
 # --- pagination ----------------------------------------------------------------
@@ -127,7 +134,7 @@ def test_results_are_paginated_twenty_at_a_time_by_default(client):
     data = fetch(client)
 
     assert len(data["results"]) == 20
-    assert data["count"] == 495
+    assert data["count"] == 602
     assert data["next"] is not None
     assert data["previous"] is None
 
@@ -135,11 +142,11 @@ def test_results_are_paginated_twenty_at_a_time_by_default(client):
 def test_page_and_page_size_choose_the_slice(client):
     first = fetch(client, page_size=10, page=1)
     second = fetch(client, page_size=10, page=2)
-    last = fetch(client, page_size=10, page=50)
+    last = fetch(client, page_size=10, page=61)
 
     assert len(first["results"]) == len(second["results"]) == 10
     assert set(upazilas(first)).isdisjoint(upazilas(second))
-    assert len(last["results"]) == 5  # 495 = 49 pages of 10 + 5
+    assert len(last["results"]) == 2  # 602 = 60 pages of 10 + 2
     assert last["next"] is None
     assert second["previous"] is not None
 
@@ -175,13 +182,13 @@ def test_an_explicit_ordering_beats_search_ranking(client):
 def test_areas_can_be_filtered_by_division_and_district(client):
     data = fetch(client, division="Dhaka", district="Gazipur")
 
-    assert data["count"] == 5
+    assert data["count"] == 13  # 5 upazilas and 8 city thanas
     assert {row["district"] for row in data["results"]} == {"Gazipur"}
 
 
 def test_filters_accept_bangla_names_and_ignore_case(client):
-    assert fetch(client, division="ঢাকা", district="গাজীপুর")["count"] == 5
-    assert fetch(client, division="dhaka", district="GAZIPUR")["count"] == 5
+    assert fetch(client, division="ঢাকা", district="গাজীপুর")["count"] == 13
+    assert fetch(client, division="dhaka", district="GAZIPUR")["count"] == 13
 
 
 def test_filters_and_search_combine(client):
@@ -202,7 +209,7 @@ def test_searching_a_division_name_finds_that_division_and_nothing_loosely_simil
 ):
     data = fetch(client, language=language, q=query, page_size=100)
 
-    assert data["count"] == 41  # every area in Sylhet division, no look-alikes
+    assert data["count"] == 46  # every area in Sylhet division, no look-alikes
     assert {row["division"] for row in data["results"]} == {
         "Sylhet" if language == "en" else "সিলেট"
     }
@@ -280,3 +287,52 @@ def test_filters_accept_old_spellings(client, param, old, current):
 
     assert expected > 0
     assert fetch(client, **{param: old})["count"] == expected
+
+
+# --- division → district → upazila, one level at a time ----------------------
+
+
+def names(client: APIClient, path: str, language: str = "en", **params) -> list[str]:
+    response = client.get(f"{URL}{path}", params, headers={"Accept-Language": language})
+    assert response.status_code == 200, response.content
+    return [row["name"] for row in response.json()]
+
+
+def test_divisions_are_listed_once_each(client):
+    assert names(client, "divisions/") == [
+        "Barishal",
+        "Chattogram",
+        "Dhaka",
+        "Khulna",
+        "Mymensingh",
+        "Rajshahi",
+        "Rangpur",
+        "Sylhet",
+    ]
+    assert "রংপুর" in names(client, "divisions/", language="bn")
+
+
+def test_a_divisions_districts_are_found_by_its_english_or_bangla_name(client):
+    english = names(client, "districts/", division="Rangpur")
+    from_bangla = names(client, "districts/", division="রংপুর")
+
+    assert len(english) == 8 and "Dinajpur" in english
+    assert from_bangla == english
+    assert "দিনাজপুর" in names(client, "districts/", language="bn", division="Rangpur")
+    assert names(client, "districts/") == []
+
+
+def test_a_districts_upazilas_come_from_the_list_filter(client):
+    data = fetch(client, division="Rangpur", district="Dinajpur", page_size=100)
+
+    assert data["count"] == 13 and "Birganj" in upazilas(data)
+
+
+def test_city_thanas_sit_beside_the_upazilas_of_their_district(client):
+    data = fetch(client, division="Dhaka", district="Dhaka", page_size=100)
+    kinds = {row["upazila"]: row["kind"] for row in data["results"]}
+
+    assert data["count"] == 55  # 5 upazilas and the 50 Dhaka Metropolitan Police thanas
+    assert kinds["Savar"] == "UPAZILA"
+    assert kinds["Mirpur"] == kinds["Uttara West"] == "CITY_THANA"
+    assert "মিরপুর" in upazilas(fetch(client, language="bn", q="মিরপুর"))

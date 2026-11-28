@@ -1,48 +1,52 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useState } from "react";
 
 import type { ApiClient } from "@/api/client";
 import type { components } from "@/api/schema";
 import { useApiClient } from "@/api/use-api-client";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { fill } from "@/i18n/catalog";
 import type { CommonMessages } from "@/i18n/messages/common";
 import { useMessages } from "@/i18n/provider";
 
 type Location = components["schemas"]["Location"];
 
-const MAX_OPTIONS = 8;
-
-type Search = { query: string; areas: Location[] | null }; // areas: null = the request failed
-
-/** Search areas as you type. Returns what to show for `query` (empty = no search). */
-function useAreaSearch(client: ApiClient, query: string) {
-  const [result, setResult] = useState<Search>({ query: "", areas: [] });
-
-  useEffect(() => {
-    if (!query) return;
-    const controller = new AbortController();
-    client
-      .GET("/api/v1/locations/", {
-        params: { query: { q: query, page_size: MAX_OPTIONS } },
-        signal: controller.signal,
-      })
-      .then(({ data }) => setResult({ query, areas: data?.results ?? null }))
-      .catch(() => {
-        if (!controller.signal.aborted) setResult({ query, areas: null });
-      });
-    return () => controller.abort();
-  }, [client, query]);
-
-  if (!query) return { status: "idle" as const, areas: [] };
-  if (result.query !== query) return { status: "loading" as const, areas: [] };
-  if (!result.areas) return { status: "error" as const, areas: [] };
-  return { status: "ready" as const, areas: result.areas };
-}
+type Loaded<T> = { key: string; items: T[] | null }; // items: null = the request failed
 
 /**
- * Pick a Bangladesh area by typing any part of its name, in Bangla or English; typos
- * are forgiven. `value` is the chosen area; editing the text forgets it (`onChange(null)`).
+ * Load a list whenever `key` changes (empty key = nothing to load). Says whether what it
+ * holds belongs to the current key, so a slow answer for an earlier choice never shows.
+ */
+function useList<T>(key: string, load: (signal: AbortSignal) => Promise<T[] | undefined>) {
+  const [loaded, setLoaded] = useState<Loaded<T>>({ key: "", items: [] });
+
+  useEffect(() => {
+    if (!key) return;
+    const controller = new AbortController();
+    load(controller.signal)
+      .then((items) => setLoaded({ key, items: items ?? null }))
+      .catch(() => {
+        if (!controller.signal.aborted) setLoaded({ key, items: null });
+      });
+    return () => controller.abort();
+    // `load` is rebuilt every render; the key says when to load again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  if (!key) return { status: "idle" as const, items: [] as T[] };
+  if (loaded.key !== key) return { status: "loading" as const, items: [] as T[] };
+  if (!loaded.items) return { status: "error" as const, items: [] as T[] };
+  return { status: "ready" as const, items: loaded.items };
+}
+
+const SELECT =
+  "min-h-13 w-full rounded-control border bg-surface px-3 text-[17px] disabled:bg-mist disabled:text-ink-muted";
+
+/**
+ * Pick a Bangladesh area from the largest to the smallest: division, then one of its
+ * districts, then one of that district's upazilas or, in a city, its police thanas. Each list is fetched once the
+ * one above it is chosen. `value` is the chosen upazila; changing a level above it forgets
+ * it (`onChange(null)`).
  */
 export function LocationPicker({
   label,
@@ -59,163 +63,191 @@ export function LocationPicker({
   /** Defaults to a client in the page's language; tests pass their own. */
   client?: ApiClient;
 }) {
-  const { t } = useMessages<CommonMessages>();
+  const { t, locale } = useMessages<CommonMessages>();
   const defaultClient = useApiClient();
+  const api = client ?? defaultClient;
   const id = useId();
-  const listId = `${id}-list`;
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
+  const describedBy = error ? `${hintId} ${errorId}` : hintId;
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [text, setText] = useState(value?.display_name ?? "");
-  const [searching, setSearching] = useState(false); // the user is typing, not just showing a chosen area
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(-1);
+  const [attempt, setAttempt] = useState(0); // bumped by "Try again" to load failed lists anew
+  const [division, setDivision] = useState(value?.division ?? "");
+  const [district, setDistrict] = useState(value?.district ?? "");
 
-  // An area chosen from outside later (e.g. a profile that finished loading) shows up too.
+  // An area set from outside later (a profile that finished loading, a form emptied after
+  // sending) shows up too. What this picker itself reported is already on screen.
   const [shownValue, setShownValue] = useState(value);
+  const [reported, setReported] = useState<Location | null | undefined>(undefined);
   if (value !== shownValue) {
     setShownValue(value);
-    if (value) {
-      setText(value.display_name);
-      setSearching(false);
+    if (value !== reported) {
+      setDivision(value?.division ?? "");
+      setDistrict(value?.district ?? "");
     }
   }
 
-  const query = useDebouncedValue(searching ? text.trim() : "");
-  const { status, areas } = useAreaSearch(client ?? defaultClient, query);
-  const showPopup = open && searching && text.trim() !== "";
-  const listVisible = showPopup && status === "ready" && areas.length > 0;
-  // Results belong to the text only once typing has paused; until then keys do nothing.
-  const navigable = listVisible && query === text.trim();
-
-  function choose(area: Location) {
-    setText(area.display_name);
-    setSearching(false);
-    setOpen(false);
-    setActive(-1);
+  function report(area: Location | null) {
+    setReported(area);
     onChange(area);
   }
 
-  function edit(next: string) {
-    setText(next);
-    setSearching(true);
-    setOpen(true);
-    setActive(-1);
-    if (value) onChange(null);
+  const divisions = useList(`${attempt}`, async (signal) => {
+    const { data } = await api.GET("/api/v1/locations/divisions/", { signal });
+    return data?.map((row) => row.name);
+  });
+  const districts = useList(division && `${attempt}/${division}`, async (signal) => {
+    const { data } = await api.GET("/api/v1/locations/districts/", {
+      params: { query: { division } },
+      signal,
+    });
+    return data?.map((row) => row.name);
+  });
+  const areas = useList(district && `${attempt}/${division}/${district}`, async (signal) => {
+    const { data } = await api.GET("/api/v1/locations/", {
+      params: { query: { division, district, page_size: 100 } },
+      signal,
+    });
+    return data?.results;
+  });
+
+  const failed = [divisions, districts, areas].some((list) => list.status === "error");
+
+  // A city district has its metropolitan police thanas as well as upazilas: list them apart,
+  // each group in the page language's alphabetical order.
+  const byName = (a: Location, b: Location) => a.upazila.localeCompare(b.upazila, locale);
+  const cityThanas = areas.items.filter((area) => area.kind === "CITY_THANA").sort(byName);
+  const upazilas = areas.items.filter((area) => area.kind !== "CITY_THANA").sort(byName);
+  const options = (rows: Location[]) =>
+    rows.map((area) => (
+      <option key={area.id} value={area.id}>
+        {area.upazila}
+      </option>
+    ));
+
+  function chooseDivision(next: string) {
+    setDivision(next);
+    setDistrict("");
+    if (value) report(null);
   }
 
-  function clear() {
-    setText("");
-    setSearching(false);
-    setOpen(false);
-    onChange(null);
-    inputRef.current?.focus();
+  function chooseDistrict(next: string) {
+    setDistrict(next);
+    if (value) report(null);
   }
 
-  function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Escape") {
-      setOpen(false);
-      setActive(-1);
-    } else if (event.key === "ArrowDown" && searching && !open && areas.length > 0) {
-      event.preventDefault();
-      setOpen(true); // bring a closed list back
-    } else if (event.key === "ArrowDown" && navigable) {
-      event.preventDefault();
-      setActive((index) => Math.min(index + 1, areas.length - 1));
-    } else if (event.key === "ArrowUp" && navigable) {
-      event.preventDefault();
-      setActive((index) => Math.max(index - 1, 0));
-    } else if (event.key === "Enter" && navigable && active >= 0) {
-      event.preventDefault();
-      choose(areas[active]);
-    }
+  function chooseArea(areaId: string) {
+    report(areas.items.find((area) => area.id === areaId) ?? null);
+  }
+
+  /** The first, empty option: a prompt, or why there is nothing to choose yet. */
+  function placeholder(status: string, prompt: string) {
+    return status === "loading" ? t("location.loading") : prompt;
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-[15px] font-semibold">
-        {label ?? t("location.label")}
-      </label>
-      <div
-        className="relative"
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
-        }}
-      >
-        <input
-          id={id}
-          ref={inputRef}
-          type="text"
-          role="combobox"
-          aria-expanded={listVisible}
-          aria-controls={listVisible ? listId : undefined}
-          aria-autocomplete="list"
-          aria-describedby={error ? `${hintId} ${errorId}` : hintId}
-          aria-invalid={error ? true : undefined}
-          aria-activedescendant={listVisible && active >= 0 ? `${id}-option-${active}` : undefined}
-          autoComplete="off"
-          value={text}
-          onChange={(event) => edit(event.target.value)}
-          onKeyDown={onKeyDown}
-          className={`min-h-13 w-full rounded-control border bg-surface pr-12 pl-3.5 text-[17px] ${
-            error ? "border-danger" : "border-line-strong"
-          }`}
-        />
-        {text && (
-          <button
-            type="button"
-            aria-label={t("location.clear")}
-            onClick={clear}
-            className="absolute top-1 right-1 flex size-11 items-center justify-center rounded-control text-ink-muted"
+    <fieldset className="flex min-w-0 flex-col gap-2">
+      <legend className="mb-2 text-[15px] font-semibold">{label ?? t("location.label")}</legend>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <label htmlFor={`${id}-division`} className="text-sm text-ink-soft">
+            {t("location.division")}
+          </label>
+          <select
+            id={`${id}-division`}
+            value={division}
+            onChange={(event) => chooseDivision(event.target.value)}
+            disabled={divisions.status !== "ready"}
+            aria-invalid={error && !division ? true : undefined}
+            aria-describedby={describedBy}
+            className={`${SELECT} ${error && !division ? "border-danger" : "border-line-strong"}`}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        )}
+            <option value="">{placeholder(divisions.status, t("location.chooseDivision"))}</option>
+            {/* Keep a division given from outside visible while the list loads. */}
+            {division && !divisions.items.includes(division) && <option value={division}>{division}</option>}
+            {divisions.items.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {showPopup && (
-          <div
-            // Keep focus in the input while choosing with the mouse or a finger.
-            onMouseDown={(event) => event.preventDefault()}
-            className="absolute inset-x-0 top-full z-10 mt-1 max-h-[min(60dvh,24rem)] overflow-y-auto rounded-panel border border-line bg-surface shadow-lg"
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <label htmlFor={`${id}-district`} className="text-sm text-ink-soft">
+            {t("location.district")}
+          </label>
+          <select
+            id={`${id}-district`}
+            value={district}
+            onChange={(event) => chooseDistrict(event.target.value)}
+            disabled={!division || districts.status !== "ready"}
+            aria-invalid={error && division && !district ? true : undefined}
+            aria-describedby={describedBy}
+            className={`${SELECT} ${error && division && !district ? "border-danger" : "border-line-strong"}`}
           >
-            {status === "ready" && areas.length > 0 && (
-              <ul id={listId} role="listbox" aria-label={t("location.label")}>
-                {areas.map((area, index) => (
-                  <li
-                    key={area.id}
-                    id={`${id}-option-${index}`}
-                    role="option"
-                    aria-selected={index === active}
-                    onClick={() => choose(area)}
-                    className={`flex min-h-12 cursor-pointer items-center px-3.5 py-2 text-base ${
-                      index === active ? "bg-mist" : "hover:bg-mist/60"
-                    }`}
-                  >
-                    <span>
-                      <strong className="font-semibold">{area.upazila}</strong>
-                      {`, ${area.district}, ${area.division}`}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <option value="">
+              {placeholder(districts.status, division ? t("location.chooseDistrict") : t("location.divisionFirst"))}
+            </option>
+            {district && !districts.items.includes(district) && <option value={district}>{district}</option>}
+            {districts.items.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <label htmlFor={`${id}-area`} className="text-sm text-ink-soft">
+            {t("location.upazila")}
+          </label>
+          <select
+            id={`${id}-area`}
+            value={value?.id ?? ""}
+            onChange={(event) => chooseArea(event.target.value)}
+            disabled={!district || areas.status !== "ready"}
+            aria-invalid={error && district && !value ? true : undefined}
+            aria-describedby={describedBy}
+            className={`${SELECT} ${error && district && !value ? "border-danger" : "border-line-strong"}`}
+          >
+            <option value="">
+              {placeholder(areas.status, district ? t("location.chooseUpazila") : t("location.districtFirst"))}
+            </option>
+            {value && !areas.items.some((area) => area.id === value.id) && (
+              <option value={value.id}>{value.upazila}</option>
             )}
-            {status === "loading" && <p role="status" className="px-3.5 py-3 text-ink-muted">{t("location.loading")}</p>}
-            {status === "ready" && areas.length === 0 && <p role="status" className="px-3.5 py-3 text-ink-muted">{t("location.none")}</p>}
-            {status === "error" && <p role="alert" className="px-3.5 py-3 text-danger">{t("location.error")}</p>}
-          </div>
-        )}
+            {cityThanas.length > 0 ? (
+              <>
+                <optgroup label={fill(t("location.cityThanas"), { district })}>{options(cityThanas)}</optgroup>
+                <optgroup label={t("location.upazilas")}>{options(upazilas)}</optgroup>
+              </>
+            ) : (
+              options(upazilas)
+            )}
+          </select>
+        </div>
       </div>
       <p id={hintId} className="text-sm text-ink-muted">
         {t("location.hint")}
       </p>
+      {failed && (
+        <p role="alert" className="text-sm font-medium text-danger">
+          {t("location.error")}{" "}
+          <button
+            type="button"
+            onClick={() => setAttempt((n) => n + 1)}
+            className="inline-flex min-h-11 items-center font-semibold text-primary underline"
+          >
+            {t("location.retry")}
+          </button>
+        </p>
+      )}
       {error && (
         <p id={errorId} className="text-sm font-medium text-danger">
           {error}
         </p>
       )}
-    </div>
+    </fieldset>
   );
 }

@@ -34,6 +34,8 @@ function signedOutServer(extra: Routes = {}): Routes {
   return {
     "POST /api/v1/auth/refresh/": () => failure(401, "SESSION_EXPIRED"),
     "GET /api/v1/me/": () => ({ body: RAHIMA }),
+    "GET /api/v1/locations/divisions/": () => ({ body: [{ name: "Dhaka" }] }),
+    "GET /api/v1/locations/districts/": () => ({ body: [{ name: "Gazipur" }] }),
     "GET /api/v1/locations/": () => ({
       body: { count: 1, next: null, previous: null, results: [RAHIMA.location] },
     }),
@@ -57,13 +59,25 @@ const type = (label: string | RegExp, text: string) =>
   userEvent.type(screen.getByLabelText(label), text);
 const press = (name: string | RegExp) => userEvent.click(screen.getByRole("button", { name }));
 
+/** Pick division, district and upazila, each once its list has loaded. */
+async function chooseArea(division: string, district: string, upazila: string) {
+  for (const [label, option] of [
+    ["Division", division],
+    ["District", district],
+    ["Upazila / thana", upazila],
+  ]) {
+    const select = screen.getByRole("combobox", { name: label });
+    await waitFor(() => expect(select).toBeEnabled());
+    await userEvent.selectOptions(select, option);
+  }
+}
+
 async function fillSignUp() {
   await type("Full name", "Rahima Akhter");
   await type("Mobile number", "1712 345678");
   await type("Age", "৩৪"); // Bangla digits
   await userEvent.click(screen.getByRole("radio", { name: "Female" }));
-  await userEvent.type(screen.getByRole("combobox", { name: "Your area" }), "kap");
-  await userEvent.click(await screen.findByRole("option", { name: /Kapasia/ }));
+  await chooseArea("Dhaka", "Gazipur", "Kapasia");
   await type("Password", "river-lamp-42-orchid");
 }
 
@@ -169,7 +183,8 @@ describe("sign-up", () => {
     for (const label of ["Full name", "Mobile number", "Age", "Password"]) {
       expect(screen.getByLabelText(label), label).toHaveValue("");
     }
-    expect(screen.getByRole("combobox", { name: "Your area" })).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "Division" })).toHaveValue("");
+    expect(screen.getByRole("combobox", { name: "Upazila / thana" })).toHaveValue("");
     expect(screen.getByRole("radio", { name: "Female" })).not.toBeChecked();
   });
 

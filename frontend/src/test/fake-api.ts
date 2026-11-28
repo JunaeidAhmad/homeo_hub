@@ -4,8 +4,14 @@ import type { Locale } from "@/i18n/config";
 
 export type Location = components["schemas"]["Location"];
 
-export function area(upazila: string, district: string, division: string, id = upazila): Location {
-  return { id, upazila, district, division, display_name: `${upazila}, ${district}, ${division}` };
+export function area(
+  upazila: string,
+  district: string,
+  division: string,
+  id = upazila,
+  kind: Location["kind"] = "UPAZILA",
+): Location {
+  return { id, upazila, district, division, kind, display_name: `${upazila}, ${district}, ${division}` };
 }
 
 /**

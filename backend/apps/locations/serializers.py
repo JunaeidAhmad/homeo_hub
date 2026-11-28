@@ -16,10 +16,16 @@ class LocationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Location
-        fields = ["id", "division", "district", "upazila", "display_name"]
+        fields = ["id", "division", "district", "upazila", "kind", "display_name"]
 
     def get_display_name(self, obj: Location) -> str:
         """Upazila, district, division: one line for a picker to show."""
         return ", ".join(
             localized_text(obj, level) for level in ("upazila", "district", "division")
         )
+
+
+class AreaNameSerializer(serializers.Serializer):
+    """A division or district, named in the client's language."""
+
+    name = serializers.CharField()

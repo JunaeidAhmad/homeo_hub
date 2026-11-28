@@ -14,7 +14,10 @@ BANGLA = ["division_bn", "district_bn", "upazila_bn"]
 
 
 class Command(BaseCommand):
-    help = "Load the Bangladesh area list (division, district, upazila). Safe to run repeatedly."
+    help = (
+        "Load the Bangladesh area list (division, district, upazila or city thana). "
+        "Safe to run repeatedly."
+    )
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("--file", type=Path, default=DEFAULT_FILE, help="JSON file to load")
@@ -26,6 +29,8 @@ class Command(BaseCommand):
             {field: normalize_text(value) for field, value in row.items()}
             for row in json.loads(options["file"].read_text(encoding="utf-8"))
         ]
+        for row in rows:
+            row.setdefault("kind", Location.Kind.UPAZILA)
         self._give_codes_to_uncoded_areas(rows)
         Location.objects.bulk_create(
             [
@@ -34,7 +39,7 @@ class Command(BaseCommand):
             ],
             update_conflicts=True,
             unique_fields=["code"],
-            update_fields=[*ENGLISH, *BANGLA, "old_spellings"],
+            update_fields=[*ENGLISH, *BANGLA, "kind", "old_spellings"],
         )
         self.stdout.write(self.style.SUCCESS(f"{len(rows)} locations loaded."))
 

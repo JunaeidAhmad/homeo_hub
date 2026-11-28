@@ -6006,6 +6006,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedLocationList'
           description: ''
+  /api/v1/locations/districts/:
+    get:
+      operationId: locations_districts_list
+      description: 'The districts of one division. Their upazilas / thanas: ``/locations/?district=``.'
+      parameters:
+      - in: query
+        name: division
+        schema:
+          type: string
+        description: A division name, in Bangla or English.
+        required: true
+      tags:
+      - locations
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AreaName'
+          description: ''
+  /api/v1/locations/divisions/:
+    get:
+      operationId: locations_divisions_list
+      description: Every division, for the first step of choosing an area.
+      tags:
+      - locations
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AreaName'
+          description: ''
   /api/v1/me/:
     get:
       operationId: me
@@ -8660,6 +8701,14 @@ components:
         * `DISTRICT` - DISTRICT
         * `DIVISION` - DIVISION
         * `OTHER` - OTHER
+    AreaName:
+      type: object
+      description: A division or district, named in the client's language.
+      properties:
+        name:
+          type: string
+      required:
+      - name
     AssignableDoctor:
       type: object
       properties:
@@ -10126,6 +10175,8 @@ components:
         upazila:
           type: string
           readOnly: true
+        kind:
+          $ref: '#/components/schemas/LocationKindEnum'
         display_name:
           type: string
           description: 'Upazila, district, division: one line for a picker to show.'
@@ -10136,6 +10187,20 @@ components:
       - division
       - id
       - upazila
+    LocationKindEnum:
+      enum:
+      - UPAZILA
+      - CITY_THANA
+      type: string
+      description: |-
+        * `UPAZILA` - Upazila
+        * `CITY_THANA` - City Thana
+    LocationRequest:
+      type: object
+      description: An area with its names in the language the client asked for.
+      properties:
+        kind:
+          $ref: '#/components/schemas/LocationKindEnum'
     LockedPrescription:
       type: object
       description: 'Strict locked view: never touches items, advice, or doctor_notes.'

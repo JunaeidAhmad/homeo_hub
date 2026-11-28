@@ -11,12 +11,15 @@ from apps.locations.models import Location
 def test_seed_loads_the_whole_bangladesh_area_list():
     call_command("seed_locations")
 
-    assert Location.objects.count() == 495
+    assert Location.objects.count() == 602
     assert Location.objects.values("division_en").distinct().count() == 8
     assert Location.objects.values("division_en", "district_en").distinct().count() == 64
     assert Location.objects.filter(
         division_en="Dhaka", district_en="Gazipur", upazila_en="Kapasia"
     ).exists()
+    # 495 upazilas, plus 107 thanas of the eight metropolitan police areas.
+    assert Location.objects.filter(kind=Location.Kind.CITY_THANA).count() == 107
+    assert Location.objects.get(district_en="Dhaka", upazila_en="Dhanmondi").kind == "CITY_THANA"
 
 
 @pytest.mark.django_db
@@ -36,7 +39,7 @@ def test_seed_is_repeatable_and_restores_edited_names():
 
     call_command("seed_locations")
 
-    assert Location.objects.count() == 495
+    assert Location.objects.count() == 602
     restored = Location.objects.get(pk=first.pk)  # same row, not a duplicate
     # Stored in one canonical Unicode form (NFC): য় is য + nukta, never the single
     # code point U+09DF, so what people type always matches what is stored.
@@ -58,7 +61,7 @@ def test_the_bundled_area_file_has_no_duplicate_areas():
     rows = json.loads(DEFAULT_FILE.read_text(encoding="utf-8"))
     keys = [(r["division_en"], r["district_en"], r["upazila_en"]) for r in rows]
 
-    assert len(keys) == len(set(keys)) == 495
+    assert len(keys) == len(set(keys)) == 602
 
 
 def area_row(code: str, upazila: str, district: str = "Barisal") -> dict:
@@ -109,4 +112,4 @@ def test_every_bundled_area_has_its_own_code():
     codes = [row["code"] for row in json.loads(DEFAULT_FILE.read_text(encoding="utf-8"))]
 
     assert all(codes)
-    assert len(set(codes)) == 495
+    assert len(set(codes)) == 602
