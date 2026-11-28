@@ -255,7 +255,7 @@ function ShopStaffPanel({ shopId }: { shopId: string }) {
             >
               <div className="flex flex-wrap items-baseline gap-2">
                 <span className="font-semibold">{link.full_name}</span>
-                <span className="text-sm text-ink-muted">@{link.username}</span>
+                <span className="text-sm text-ink-muted">{link.phone}</span>
                 <span className="rounded-control bg-mist px-2 py-0.5 text-xs font-semibold">
                   {t(`admin.shop.staffRole.${link.role}`)}
                 </span>
@@ -303,7 +303,7 @@ function ShopStaffPanel({ shopId }: { shopId: string }) {
               ) : (
                 availableCandidates.map((c) => (
                   <option key={c.id} value={String(c.id)}>
-                    {c.full_name} (@{c.username})
+                    {c.full_name} ({c.phone})
                   </option>
                 ))
               )}

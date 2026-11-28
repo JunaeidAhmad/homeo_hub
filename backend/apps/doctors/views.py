@@ -10,11 +10,12 @@ from rest_framework.response import Response
 
 from apps.accounts.cookies import set_refresh_cookie
 from apps.accounts.serializers import (
+    LogInSerializer,
     SessionSerializer,
     VerificationSerializer,
     VerifyCodeSerializer,
 )
-from apps.accounts.throttles import CodeAddressThrottle, LoginAddressThrottle
+from apps.accounts.throttles import CodeAddressThrottle, LoginAddressThrottle, LoginPhoneThrottle
 from apps.accounts.views import CLIENT_HEADER, IsWebClient, PublicAuthView
 from apps.audit import services as audit
 from apps.staff.permissions import AdminView
@@ -33,7 +34,6 @@ from .serializers import (
     CertificateUploadSerializer,
     DoctorApplicationUpdateSerializer,
     DoctorCertificateSerializer,
-    DoctorLogInSerializer,
     DoctorMeSerializer,
     DoctorSignUpSerializer,
 )
@@ -88,13 +88,13 @@ class DoctorVerifyView(PublicAuthView):
 
 class DoctorLogInView(PublicAuthView):
     permission_classes = [IsWebClient]
-    throttle_classes = [LoginAddressThrottle]
+    throttle_classes = [LoginPhoneThrottle, LoginAddressThrottle]
 
     @extend_schema(
         operation_id="auth_doctor_login",
         tags=["auth"],
         parameters=[CLIENT_HEADER],
-        request=DoctorLogInSerializer,
+        request=LogInSerializer,
         responses={
             200: SessionSerializer,
             400: ErrorSerializer,
@@ -104,9 +104,9 @@ class DoctorLogInView(PublicAuthView):
         },
     )
     def post(self, request: Request) -> Response:
-        body = DoctorLogInSerializer(data=request.data)
+        body = LogInSerializer(data=request.data)
         body.is_valid(raise_exception=True)
-        session = services.log_in(body.validated_data["login"], body.validated_data["password"])
+        session = services.log_in(**body.validated_data)
         response = Response(SessionSerializer.describe(session))
         set_refresh_cookie(response, session)
         return response

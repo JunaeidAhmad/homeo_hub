@@ -4,6 +4,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -23,7 +24,6 @@ from apps.patients.permissions import PhoneNotVerified
 from apps.staff.roles import Perm
 from common.errors import ApiError
 from common.i18n import current_language
-from common.phone import InvalidPhone, normalize_phone
 from common.private_files import delete_private, store_private
 from common.search import normalize_text
 
@@ -174,24 +174,12 @@ def verify_sign_up(verification_id: UUID, code: str) -> tokens.Session:
     return _sign_in(doc)
 
 
-def log_in(login_input: str, password: str) -> tokens.Session:
-    raw = login_input.strip()
-    doctor: Doctor | None = None
-    if raw.upper().startswith("HH-DR-"):
-        doctor = Doctor.objects.filter(doctor_code__iexact=raw).first()
-    else:
-        try:
-            phone = normalize_phone(raw)
-        except InvalidPhone:
-            doctor = None
-        else:
-            doctor = Doctor.objects.filter(phone=phone).first()
-
-    if doctor is None or not doctor.check_password(password):
-        if doctor is None:
-            from django.contrib.auth.hashers import make_password
-
-            make_password(password)
+def log_in(phone: str, password: str) -> tokens.Session:
+    doctor = Doctor.objects.filter(phone=phone).first()
+    if doctor is None:
+        make_password(password)  # take as long as for a real account
+        raise InvalidCredentials()
+    if not doctor.check_password(password):
         raise InvalidCredentials()
 
     if doctor.status == Doctor.Status.SUSPENDED:

@@ -10,7 +10,7 @@ from apps.remedies.choices import RemedyForm
 from apps.remedies.models import Remedy
 from apps.staff import services as staff
 from apps.staff.roles import Role
-from tests.auth_helpers import PASSWORD, WEB, error_code
+from tests.auth_helpers import PASSWORD, WEB, error_code, staff_phone
 
 pytestmark = pytest.mark.django_db
 
@@ -22,11 +22,11 @@ ILLNESSES_PUBLIC = "/api/v1/illnesses/"
 
 def staff_client(role: Role) -> APIClient:
     staff.seed_roles()
-    staff.create_staff(username=role, full_name=role, password=PASSWORD, roles=[role])
+    staff.create_staff(phone=staff_phone(role), full_name=role, password=PASSWORD, roles=[role])
     client = APIClient()
     token = client.post(
         "/api/v1/auth/staff/login/",
-        {"username": role, "password": PASSWORD},
+        {"phone": staff_phone(role), "password": PASSWORD},
         format="json",
         headers=WEB,
     ).json()["access_token"]

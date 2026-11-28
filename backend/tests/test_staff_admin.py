@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 from apps.staff import services
 from apps.staff.permissions import AdminView
 from apps.staff.roles import ROLE_PERMISSIONS, Perm, Role
-from tests.auth_helpers import PASSWORD, WEB, error_code, verified_patient
+from tests.auth_helpers import PASSWORD, WEB, error_code, staff_phone, verified_patient
 
 pytestmark = pytest.mark.django_db
 
@@ -26,14 +26,17 @@ def roles(db):
 
 def make(username: str, *roles: Role) -> User:
     return services.create_staff(
-        username=username, full_name=username.title(), password=PASSWORD, roles=list(roles)
+        phone=staff_phone(username),
+        full_name=username.title(),
+        password=PASSWORD,
+        roles=list(roles),
     )
 
 
 def signed_in(user: User) -> APIClient:
     client = APIClient()
     response = client.post(
-        LOGIN, {"username": user.username, "password": PASSWORD}, format="json", headers=WEB
+        LOGIN, {"phone": user.username, "password": PASSWORD}, format="json", headers=WEB
     )
     assert response.status_code == 200, response.content
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.json()['access_token']}")
@@ -42,7 +45,7 @@ def signed_in(user: User) -> APIClient:
 
 def new_staff(**changes) -> dict:
     return {
-        "username": "nila",
+        "phone": staff_phone("nila"),
         "full_name": "Nila",
         "password": PASSWORD,
         "roles": ["finance"],
@@ -67,7 +70,7 @@ def test_a_role_without_the_permission_is_refused_by_the_api(role):
     ]
 
     assert [response.status_code for response in attempts] == [403] * 5
-    assert not User.objects.filter(username="nila").exists()
+    assert not User.objects.filter(username=staff_phone("nila")).exists()
     assert services.roles_of(User.objects.get(pk=target.pk)) == ["support"]
 
 
@@ -127,7 +130,7 @@ def test_a_super_admin_creates_staff_changes_roles_and_deactivates():
     created = boss.post(STAFF, new_staff(), format="json")
     assert created.status_code == 201
     url = f"{STAFF}{created.json()['id']}/"
-    nila = User.objects.get(username="nila")
+    nila = User.objects.get(username=staff_phone("nila"))
     nila_client = signed_in(nila)
     assert nila_client.get(STAFF).status_code == 403
 
@@ -138,7 +141,7 @@ def test_a_super_admin_creates_staff_changes_roles_and_deactivates():
     assert nila_client.get(ME).status_code == 401  # signed out everywhere
     assert nila_client.post(REFRESH, headers=WEB).status_code == 401
     again = APIClient().post(
-        LOGIN, {"username": "nila", "password": PASSWORD}, format="json", headers=WEB
+        LOGIN, {"phone": staff_phone("nila"), "password": PASSWORD}, format="json", headers=WEB
     )
     assert error_code(again) == "INVALID_CREDENTIALS"
 
@@ -152,12 +155,13 @@ def test_a_super_admin_cannot_lock_themselves_out(change):
     assert error_code(response) == "CANNOT_LOCK_YOURSELF_OUT"
 
 
-def test_a_username_can_be_used_once_whatever_its_case():
+def test_a_number_can_be_used_once_however_it_is_typed():
     boss = signed_in(make("boss", Role.SUPER_ADMIN))
 
-    response = boss.post(STAFF, new_staff(username="BOSS"), format="json")
+    local = "0" + staff_phone("boss").removeprefix("+880")
+    response = boss.post(STAFF, new_staff(phone=local), format="json")
 
-    assert error_code(response) == "USERNAME_TAKEN"
+    assert error_code(response) == "PHONE_TAKEN"
 
 
 # --- sessions ---------------------------------------------------------------------
@@ -186,6 +190,5 @@ def test_staff_and_patient_sessions_stay_apart(location):
     assert client.post("/api/v1/auth/refresh/", headers=WEB).status_code == 200
 
 
-def test_password_only_django_admin_is_not_mounted_outside_local_development():
-    # Its sign-in skips the staff TOTP step, so only DEBUG (local) settings may expose it.
+def test_django_admin_is_not_mounted_outside_local_development():
     assert APIClient().get("/django-admin/login/").status_code == 404

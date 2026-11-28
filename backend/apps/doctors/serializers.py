@@ -22,11 +22,6 @@ class DoctorSignUpSerializer(serializers.Serializer):
     requested_fee_poisha = serializers.IntegerField(min_value=1, max_value=10_000_000)
 
 
-class DoctorLogInSerializer(serializers.Serializer):
-    login = serializers.CharField(max_length=80)
-    password = serializers.CharField(max_length=128, trim_whitespace=False, write_only=True)
-
-
 class DoctorCertificateSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 

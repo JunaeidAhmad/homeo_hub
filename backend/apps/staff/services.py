@@ -1,12 +1,9 @@
-"""Staff accounts: sign-in, TOTP 2FA, roles, and anti-lockout rules."""
+"""Staff accounts: sign-in, roles, and the rules that stop the admin locking itself out."""
 
-import secrets
-
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
@@ -14,28 +11,17 @@ from rest_framework.exceptions import ErrorDetail, ValidationError
 from apps.accounts import tokens
 from apps.accounts.errors import InvalidCredentials
 from common.errors import ApiError
+from common.phone import normalize_phone
 
-from .models import StaffRecoveryCode, StaffTotp
 from .roles import ROLE_PERMISSIONS, Perm, Role
-from .totp import (
-    decrypt_secret,
-    encrypt_secret,
-    generate_secret,
-    otpauth_uri_for,
-    render_qr_svg,
-    verify_totp,
-)
 
 USER_TYPE = "staff"
-_TOTP_SIGNER_SALT = "homeohub.staff-totp"
-_TOTP_CHALLENGE_TTL_SECONDS = 300
-_RECOVERY_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
-class UsernameTaken(ApiError):
+class PhoneTaken(ApiError):
     status_code = 409
-    error_code = "USERNAME_TAKEN"
-    default_detail = "That username is already used."
+    error_code = "PHONE_TAKEN"
+    default_detail = "There is already a staff account with this number."
 
 
 class CannotLockYourselfOut(ApiError):
@@ -56,174 +42,22 @@ class DeveloperAccount(ApiError):
     default_detail = "This account can only be changed by a developer."
 
 
-class TotpChallengeInvalid(ApiError):
-    status_code = 401
-    error_code = "TOTP_CHALLENGE_INVALID"
-    default_detail = "Your sign-in step expired. Enter your password again."
-
-
-class TotpAlreadyConfigured(ApiError):
-    status_code = 409
-    error_code = "TOTP_ALREADY_CONFIGURED"
-    default_detail = "Two-factor sign-in is already set up for this account."
-
-
-class TotpInvalid(ApiError):
-    status_code = 401
-    error_code = "TOTP_INVALID"
-    default_detail = "That code is not right. Check your authenticator app and try again."
-
-
 def load_principal(subject_id: str) -> User | None:
     if not subject_id.isdigit():
         return None
     return User.objects.filter(pk=int(subject_id), is_active=True, is_staff=True).first()
 
 
-def check_credentials(username: str, password: str) -> User:
-    user = User.objects.filter(username__iexact=username, is_staff=True).first()
+def log_in(phone: str, password: str) -> tokens.Session:
+    user = User.objects.filter(username=phone, is_staff=True).first()
     if user is None:
         make_password(password)  # take as long as for a real account
         raise InvalidCredentials()
     if not user.check_password(password) or not user.is_active:
         raise InvalidCredentials()
-    return user
-
-
-def open_staff_session(user: User) -> tokens.Session:
     user.last_login = timezone.now()
     user.save(update_fields=["last_login"])
     return tokens.open_session(USER_TYPE, str(user.pk))
-
-
-def log_in(username: str, password: str) -> tokens.Session:
-    user = check_credentials(username, password)
-    return open_staff_session(user)
-
-
-def issue_totp_challenge(user: User) -> tuple[str, bool]:
-    signer = TimestampSigner(salt=_TOTP_SIGNER_SALT)
-    challenge_id = signer.sign(str(user.pk))
-    confirmed = StaffTotp.objects.filter(user=user, confirmed_at__isnull=False).exists()
-    return challenge_id, not confirmed
-
-
-def resolve_totp_challenge(challenge_id: str) -> User:
-    signer = TimestampSigner(salt=_TOTP_SIGNER_SALT)
-    try:
-        raw_pk = signer.unsign(challenge_id, max_age=_TOTP_CHALLENGE_TTL_SECONDS)
-    except (BadSignature, SignatureExpired) as err:
-        raise TotpChallengeInvalid() from err
-    if not raw_pk.isdigit():
-        raise TotpChallengeInvalid()
-    user = User.objects.filter(pk=int(raw_pk), is_active=True, is_staff=True).first()
-    if user is None:
-        raise TotpChallengeInvalid()
-    return user
-
-
-@transaction.atomic
-def begin_totp_setup(challenge_id: str) -> tuple[str, str, str]:
-    user = resolve_totp_challenge(challenge_id)
-    locked_user = User.objects.select_for_update().get(pk=user.pk)
-    existing = StaffTotp.objects.select_for_update().filter(user=locked_user).first()
-    if existing is not None and existing.confirmed_at is not None:
-        raise TotpAlreadyConfigured()
-
-    if existing is not None:
-        secret = decrypt_secret(existing.encrypted_secret)
-    else:
-        secret = generate_secret()
-        StaffTotp.objects.create(
-            user=locked_user,
-            encrypted_secret=encrypt_secret(secret),
-        )
-
-    uri = otpauth_uri_for(locked_user.username, secret)
-    return secret, uri, render_qr_svg(uri)
-
-
-def _normalize_recovery(raw: str) -> str:
-    return "".join(ch for ch in raw.upper() if ch.isalnum())
-
-
-def _generate_recovery_codes(user: User) -> list[str]:
-    StaffRecoveryCode.objects.filter(user=user).delete()
-    plain: list[str] = []
-    rows: list[StaffRecoveryCode] = []
-    for _ in range(8):
-        part1 = "".join(secrets.choice(_RECOVERY_ALPHABET) for _ in range(4))
-        part2 = "".join(secrets.choice(_RECOVERY_ALPHABET) for _ in range(4))
-        display = f"{part1}-{part2}"
-        plain.append(display)
-        rows.append(
-            StaffRecoveryCode(
-                user=user,
-                code_hash=make_password(_normalize_recovery(display)),
-            )
-        )
-    StaffRecoveryCode.objects.bulk_create(rows)
-    return plain
-
-
-@transaction.atomic
-def verify_totp_challenge(
-    challenge_id: str,
-    *,
-    code: str = "",
-    recovery_code: str = "",
-) -> tuple[tokens.Session, list[str] | None]:
-    user = resolve_totp_challenge(challenge_id)
-    locked_user = User.objects.select_for_update().get(pk=user.pk)
-    totp = StaffTotp.objects.select_for_update().filter(user=locked_user).first()
-
-    plain_recovery: list[str] | None = None
-    clean_code = code.strip()
-    clean_recovery = _normalize_recovery(recovery_code)
-
-    if clean_code:
-        if totp is None:
-            raise TotpInvalid()
-        secret = decrypt_secret(totp.encrypted_secret)
-        matched_step = verify_totp(secret, clean_code)
-        if matched_step is None:
-            raise TotpInvalid()
-        if totp.last_used_step is not None and matched_step <= totp.last_used_step:
-            raise TotpInvalid()
-        totp.last_used_step = matched_step
-        if totp.confirmed_at is None:
-            totp.confirmed_at = timezone.now()
-            plain_recovery = _generate_recovery_codes(locked_user)
-        totp.save(update_fields=["last_used_step", "confirmed_at"])
-    elif clean_recovery:
-        if totp is None or totp.confirmed_at is None:
-            raise TotpInvalid()
-        unused = list(
-            StaffRecoveryCode.objects.select_for_update().filter(
-                user=locked_user, used_at__isnull=True
-            )
-        )
-        matched = next(
-            (row for row in unused if check_password(clean_recovery, row.code_hash)),
-            None,
-        )
-        if matched is None:
-            raise TotpInvalid()
-        matched.used_at = timezone.now()
-        matched.save(update_fields=["used_at"])
-    else:
-        raise TotpInvalid()
-
-    session = open_staff_session(locked_user)
-    return session, plain_recovery
-
-
-@transaction.atomic
-def reset_2fa(actor: User, user: User) -> None:
-    if user.is_superuser and not actor.is_superuser:
-        raise DeveloperAccount()
-    StaffTotp.objects.filter(user=user).delete()
-    StaffRecoveryCode.objects.filter(user=user).delete()
 
 
 def roles_of(user: User) -> list[str]:
@@ -254,8 +88,9 @@ def _set_roles(user: User, roles: list[str]) -> None:
     user.groups.set(groups)
 
 
-def create_staff(*, username: str, full_name: str, password: str, roles: list[str]) -> User:
-    user = User(username=username.lower(), first_name=full_name, is_staff=True)
+def create_staff(*, phone: str, full_name: str, password: str, roles: list[str]) -> User:
+    """A staff member's mobile number is stored as Django's ``username``."""
+    user = User(username=normalize_phone(phone), first_name=full_name, is_staff=True)
     try:
         validate_password(password, user=user)
     except DjangoValidationError as error:
@@ -264,12 +99,12 @@ def create_staff(*, username: str, full_name: str, password: str, roles: list[st
     user.set_password(password)
     try:
         with transaction.atomic():
-            if User.objects.filter(username__iexact=user.username).exists():
-                raise UsernameTaken()
+            if User.objects.filter(username=user.username).exists():
+                raise PhoneTaken()
             user.save()
             _set_roles(user, roles)
     except IntegrityError as error:
-        raise UsernameTaken() from error
+        raise PhoneTaken() from error
     return user
 
 

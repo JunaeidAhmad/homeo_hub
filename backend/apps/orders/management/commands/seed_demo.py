@@ -185,7 +185,7 @@ class Command(BaseCommand):
 
         password = secrets.token_urlsafe(12)
         owner = staff.create_staff(
-            username="demo_shop_owner",
+            phone="01710000003",
             full_name="Demo Shop Owner",
             password=password,
             roles=[Role.SHOP_OWNER],
@@ -193,6 +193,6 @@ class Command(BaseCommand):
         shops.link_staff(shop1, owner, ShopStaff.Role.OWNER)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seeded demo data. Shop owner login: username=demo_shop_owner password={password}"
+                f"Seeded demo data. Shop owner sign-in: phone=01710000003 password={password}"
             )
         )

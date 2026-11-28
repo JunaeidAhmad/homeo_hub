@@ -213,7 +213,6 @@ REST_FRAMEWORK = {
         "public_read": env.str("THROTTLE_PUBLIC_READ", default="300/min"),
         "login_phone": "5/min",
         "login_ip": "30/min",
-        "login_username": "5/min",
         "otp_ip": "20/hour",
     },
     # How many reverse proxies sit in front of the API: only the addresses they add to
@@ -250,7 +249,6 @@ WEB_APP_URL = env.str("WEB_APP_URL", default="http://localhost:3000")
 WEBPUSH_VAPID_PUBLIC_KEY = env.str("WEBPUSH_VAPID_PUBLIC_KEY", default="")
 WEBPUSH_VAPID_PRIVATE_KEY = env.str("WEBPUSH_VAPID_PRIVATE_KEY", default="")
 WEBPUSH_SUBJECT = env.str("WEBPUSH_SUBJECT", default="")
-STAFF_TOTP_REQUIRED = env.bool("STAFF_TOTP_REQUIRED", default=True)
 VIDEO_PROVIDER = env.str("VIDEO_PROVIDER", default="apps.telemedicine.video.PastedLinkProvider")
 
 SPECTACULAR_SETTINGS = {

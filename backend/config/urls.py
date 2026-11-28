@@ -9,8 +9,8 @@ urlpatterns = [
     path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema"),
 ]
 
-# Developer-only Django admin; the product admin lives at /admin on the web app. Its sign-in
-# is password-only (no TOTP), so it is never mounted outside local development.
+# Developer-only Django admin; the product admin lives at /admin on the web app. It is never
+# mounted outside local development.
 if settings.DEBUG:
     urlpatterns.append(path("django-admin/", admin.site.urls))
 

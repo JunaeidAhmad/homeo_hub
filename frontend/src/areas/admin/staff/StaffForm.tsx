@@ -30,7 +30,7 @@ export function StaffForm({
   const { api } = useStaffSession();
   const { pending, problems, setProblems, submit } = useAdminSubmit();
   const [fullName, setFullName] = useState(member?.full_name ?? "");
-  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [chosen, setChosen] = useState<RoleName[]>(member?.roles ?? []);
   const [active, setActive] = useState(member?.is_active ?? true);
@@ -56,7 +56,7 @@ export function StaffForm({
     const required = t("admin.error.required");
     const missing: Record<string, string> = {};
     if (!fullName.trim()) missing.full_name = required;
-    if (!member && !username.trim()) missing.username = required;
+    if (!member && !phone.trim()) missing.phone = required;
     if (!member && !password) missing.password = required;
     if (chosen.length === 0) missing.roles = t("admin.error.roles");
     if (Object.keys(missing).length > 0) {
@@ -72,7 +72,7 @@ export function StaffForm({
               body: { full_name, roles: chosen, is_active: active },
             })
           : api.POST("/api/v1/admin/staff/", {
-              body: { username: username.trim(), full_name, password, roles: chosen },
+              body: { phone: phone.trim(), full_name, password, roles: chosen },
             }),
       onSaved,
     );
@@ -101,15 +101,13 @@ export function StaffForm({
       {!member && (
         <>
           <TextField
-            label={t("admin.staff.username")}
-            hint={t("admin.staff.usernameHint")}
-            error={problems.fields.username}
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            maxLength={30}
+            label={t("admin.phone")}
+            prefix="+880"
+            error={problems.fields.phone}
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            type="tel"
             autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
           />
           <TextField
             label={t("admin.password")}

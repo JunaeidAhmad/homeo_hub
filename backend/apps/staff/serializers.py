@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from common.fields import PhoneField
+
 from .roles import Perm, Role
 from .services import permissions_of, roles_of
 
@@ -13,63 +15,20 @@ def _roles_field(**kwargs) -> serializers.ListField:
     return serializers.ListField(child=serializers.ChoiceField(choices=ROLE_CHOICES), **kwargs)
 
 
-class StaffLogInSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    password = serializers.CharField(max_length=128, trim_whitespace=False, write_only=True)
-
-
-class StaffTotpChallengeSerializer(serializers.Serializer):
-    totp_required = serializers.BooleanField(default=True)
-    setup_required = serializers.BooleanField()
-    challenge_id = serializers.CharField()
-
-
-class StaffTotpSetupRequestSerializer(serializers.Serializer):
-    challenge_id = serializers.CharField(max_length=200)
-
-
-class StaffTotpSetupResponseSerializer(serializers.Serializer):
-    secret = serializers.CharField()
-    otpauth_uri = serializers.CharField()
-    qr_svg = serializers.CharField()
-
-
-class StaffTotpVerifyRequestSerializer(serializers.Serializer):
-    challenge_id = serializers.CharField(max_length=200)
-    code = serializers.CharField(max_length=16, required=False, allow_blank=True, default="")
-    recovery_code = serializers.CharField(
-        max_length=32, required=False, allow_blank=True, default=""
-    )
-
-
-class StaffTotpSessionSerializer(serializers.Serializer):
-    access_token = serializers.CharField()
-    expires_in = serializers.IntegerField()
-    user_type = serializers.CharField()
-    recovery_codes = serializers.ListField(
-        child=serializers.CharField(), required=False, allow_null=True
-    )
-
-
 class StaffSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source="username", read_only=True)
     full_name = serializers.CharField(source="first_name", read_only=True)
     roles = serializers.SerializerMethodField()
-    totp_enabled = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "full_name", "is_active", "roles", "totp_enabled", "last_login"]
+        fields = ["id", "phone", "full_name", "is_active", "roles", "last_login"]
         read_only_fields = fields
 
     @staticmethod
     @extend_schema_field(_roles_field())
     def get_roles(user: User) -> list[str]:
         return roles_of(user)
-
-    @staticmethod
-    def get_totp_enabled(user: User) -> bool:
-        totp = getattr(user, "totp", None)
-        return bool(totp and totp.confirmed_at is not None)
 
 
 class AdminMeShopSerializer(serializers.Serializer):
@@ -103,7 +62,7 @@ class AdminMeSerializer(StaffSerializer):
 
 
 class StaffCreateSerializer(serializers.Serializer):
-    username = serializers.RegexField(r"^[A-Za-z0-9._-]{3,30}$", max_length=30)
+    phone = PhoneField()
     full_name = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=128, trim_whitespace=False, write_only=True)
     roles = _roles_field(allow_empty=False)

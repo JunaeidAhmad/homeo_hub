@@ -1,6 +1,7 @@
 """Shared steps for the patient auth tests: all through the public HTTP API."""
 
 import re
+import zlib
 
 from rest_framework.test import APIClient
 
@@ -78,3 +79,8 @@ def me(client: APIClient, access_token: str):
 
 def error_code(response) -> str:
     return response.json()["error"]["code"]
+
+
+def staff_phone(name: str) -> str:
+    """A valid number that is always the same for the staff account called ``name``."""
+    return f"+88017{zlib.crc32(name.encode()) % 100_000_000:08d}"

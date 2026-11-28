@@ -6,14 +6,15 @@ from rest_framework.exceptions import ValidationError
 from apps.staff import services
 from apps.staff.roles import Role
 from common.errors import ApiError
+from common.phone import InvalidPhone
 
 
 class Command(BaseCommand):
     help = "Create a staff account, e.g. the first super admin. Asks for the password."
 
     def add_arguments(self, parser: CommandParser) -> None:
-        parser.add_argument("username")
-        parser.add_argument("--name", default="", help="Full name (default: the username)")
+        parser.add_argument("phone", help="Mobile number they sign in with")
+        parser.add_argument("--name", default="", help="Full name (default: the number)")
         parser.add_argument(
             "--role",
             action="append",
@@ -28,11 +29,13 @@ class Command(BaseCommand):
         services.seed_roles()
         try:
             user = services.create_staff(
-                username=options["username"],
-                full_name=options["name"] or options["username"],
+                phone=options["phone"],
+                full_name=options["name"] or options["phone"],
                 password=password,
                 roles=options["role"] or [Role.SUPER_ADMIN.value],
             )
+        except InvalidPhone as error:
+            raise CommandError("Enter a Bangladeshi mobile number.") from error
         except ValidationError as error:
             problems = [str(p) for found in error.detail.values() for p in found]  # type: ignore[union-attr]
             raise CommandError(" ".join(problems)) from error

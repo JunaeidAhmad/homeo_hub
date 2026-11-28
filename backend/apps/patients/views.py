@@ -8,7 +8,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.cookies import set_refresh_cookie
-from apps.accounts.serializers import SessionSerializer, VerificationSerializer
+from apps.accounts.serializers import (
+    LogInSerializer,
+    SessionSerializer,
+    VerificationSerializer,
+)
 from apps.accounts.throttles import CodeAddressThrottle, LoginAddressThrottle, LoginPhoneThrottle
 from apps.accounts.tokens import Session
 from apps.accounts.views import CLIENT_HEADER, IsWebClient, PublicAuthView
@@ -19,7 +23,6 @@ from .models import Patient
 from .permissions import IsPatient
 from .serializers import (
     ForgotPasswordSerializer,
-    LogInSerializer,
     PatientProfileBasicUpdateSerializer,
     PatientProfilePictureUploadSerializer,
     PatientProfileSectionUpdateSerializer,

@@ -1322,10 +1322,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Staff accounts, searchable by name or username. */
+        /** @description Staff accounts, searchable by name or mobile number. */
         get: operations["admin_staff_list"];
         put?: never;
-        /** @description Staff accounts, searchable by name or username. */
+        /** @description Staff accounts, searchable by name or mobile number. */
         post: operations["admin_staff_create"];
         delete?: never;
         options?: never;
@@ -1365,31 +1365,6 @@ export interface paths {
          *     (any one of them grants access), or ``ANY_STAFF``.
          */
         patch: operations["admin_staff_update"];
-        trace?: never;
-    };
-    "/api/v1/admin/staff/{id}/reset-2fa/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
-         *
-         *     class RemedyList(AdminView, ListCreateAPIView):
-         *         required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
-         *
-         *     A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
-         *     (any one of them grants access), or ``ANY_STAFF``.
-         */
-        post: operations["admin_staff_reset_2fa"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/appointments/{id}/accept/": {
@@ -1754,40 +1729,6 @@ export interface paths {
         put?: never;
         /** @description Acts on one kind of user's refresh cookie. */
         post: operations["auth_staff_refresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/staff/totp/setup/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Base for endpoints used before signing in. */
-        post: operations["auth_staff_totp_setup"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/staff/totp/verify/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Base for endpoints used before signing in. */
-        post: operations["auth_staff_totp_verify"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3044,8 +2985,7 @@ export interface components {
         /** @description The signed-in staff member, with what they are allowed to do. */
         AdminMe: {
             readonly id: number;
-            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
-            readonly username: string;
+            readonly phone: string;
             readonly full_name: string;
             /**
              * Active
@@ -3053,7 +2993,6 @@ export interface components {
              */
             readonly is_active: boolean;
             readonly roles: components["schemas"]["RoleEnum"][];
-            readonly totp_enabled: boolean;
             /** Format: date-time */
             readonly last_login: string | null;
             readonly permissions: components["schemas"]["PermissionEnum"][];
@@ -3329,7 +3268,7 @@ export interface components {
             /** Format: uuid */
             readonly id: string;
             readonly user_id: number;
-            readonly username: string;
+            readonly phone: string;
             readonly full_name: string;
             readonly role: components["schemas"]["ShopStaffRoleEnum"];
             /** Format: date-time */
@@ -3337,8 +3276,7 @@ export interface components {
         };
         AdminShopStaffCandidate: {
             readonly id: number;
-            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
-            readonly username: string;
+            readonly phone: string;
             readonly full_name: string;
         };
         AdminShopStaffInputRequest: {
@@ -3719,10 +3657,6 @@ export interface components {
             /** Format: date-time */
             readonly submitted_at: string;
         };
-        DoctorLogInRequest: {
-            login: string;
-            password: string;
-        };
         DoctorMe: {
             /** Format: uuid */
             readonly id: string;
@@ -3939,6 +3873,7 @@ export interface components {
             issued_at: string;
             remedy_count: number;
         };
+        /** @description Everyone signs in the same way: mobile number and password. */
         LogInRequest: {
             phone: string;
             password: string;
@@ -5013,8 +4948,7 @@ export interface components {
         };
         Staff: {
             readonly id: number;
-            /** @description Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only. */
-            readonly username: string;
+            readonly phone: string;
             readonly full_name: string;
             /**
              * Active
@@ -5022,47 +4956,14 @@ export interface components {
              */
             readonly is_active: boolean;
             readonly roles: components["schemas"]["RoleEnum"][];
-            readonly totp_enabled: boolean;
             /** Format: date-time */
             readonly last_login: string | null;
         };
         StaffCreateRequest: {
-            username: string;
+            phone: string;
             full_name: string;
             password: string;
             roles: components["schemas"]["RoleEnum"][];
-        };
-        StaffLogInRequest: {
-            username: string;
-            password: string;
-        };
-        StaffLogInResponse: components["schemas"]["Session"] | components["schemas"]["StaffTotpChallenge"];
-        StaffTotpChallenge: {
-            /** @default true */
-            totp_required: boolean;
-            setup_required: boolean;
-            challenge_id: string;
-        };
-        StaffTotpSession: {
-            access_token: string;
-            expires_in: number;
-            user_type: string;
-            recovery_codes?: string[] | null;
-        };
-        StaffTotpSetupRequestRequest: {
-            challenge_id: string;
-        };
-        StaffTotpSetupResponse: {
-            secret: string;
-            otpauth_uri: string;
-            qr_svg: string;
-        };
-        StaffTotpVerifyRequestRequest: {
-            challenge_id: string;
-            /** @default  */
-            code: string;
-            /** @default  */
-            recovery_code: string;
         };
         /**
          * @description * `CHILLY` - Chilly
@@ -8171,51 +8072,6 @@ export interface operations {
             };
         };
     };
-    admin_staff_reset_2fa: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Staff"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
     appointments_accept: {
         parameters: {
             query?: never;
@@ -8521,7 +8377,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DoctorLogInRequest"];
+                "application/json": components["schemas"]["LogInRequest"];
             };
         };
         responses: {
@@ -9025,7 +8881,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["StaffLogInRequest"];
+                "application/json": components["schemas"]["LogInRequest"];
             };
         };
         responses: {
@@ -9034,7 +8890,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StaffLogInResponse"];
+                    "application/json": components["schemas"]["Session"];
                 };
             };
             400: {
@@ -9103,112 +8959,6 @@ export interface operations {
                 };
             };
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    auth_staff_totp_setup: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Client": "web";
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StaffTotpSetupRequestRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StaffTotpSetupResponse"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    auth_staff_totp_verify: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-Client": "web";
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StaffTotpVerifyRequestRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StaffTotpSession"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            429: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -9,7 +9,7 @@ from apps.remedies.models import Remedy, RemedyPrice
 from apps.remedies.selectors import patient_price
 from apps.staff import services as staff
 from apps.staff.roles import Role
-from tests.auth_helpers import PASSWORD, WEB
+from tests.auth_helpers import PASSWORD, WEB, staff_phone
 
 pytestmark = pytest.mark.django_db
 
@@ -25,7 +25,7 @@ PRICE_KEYS = {"form", "price_poisha"}
 def editor() -> APIClient:
     staff.seed_roles()
     staff.create_staff(
-        username="remedy_mgr",
+        phone=staff_phone("remedy_mgr"),
         full_name="Remedy Manager",
         password=PASSWORD,
         roles=[Role.REMEDY_MANAGER],
@@ -33,7 +33,7 @@ def editor() -> APIClient:
     client = APIClient()
     token = client.post(
         "/api/v1/auth/staff/login/",
-        {"username": "remedy_mgr", "password": PASSWORD},
+        {"phone": staff_phone("remedy_mgr"), "password": PASSWORD},
         format="json",
         headers=WEB,
     ).json()["access_token"]
@@ -150,7 +150,7 @@ def test_patient_price_selector_respects_active_flags(editor):
 def test_non_remedy_manager_cannot_set_prices(editor):
     remedy = create_remedy(editor)
     staff.create_staff(
-        username="support_user",
+        phone=staff_phone("support_user"),
         full_name="Support",
         password=PASSWORD,
         roles=[Role.SUPPORT],
@@ -158,7 +158,7 @@ def test_non_remedy_manager_cannot_set_prices(editor):
     support = APIClient()
     token = support.post(
         "/api/v1/auth/staff/login/",
-        {"username": "support_user", "password": PASSWORD},
+        {"phone": staff_phone("support_user"), "password": PASSWORD},
         format="json",
         headers=WEB,
     ).json()["access_token"]

@@ -1,8 +1,17 @@
 from rest_framework import serializers
 
+from common.fields import PhoneField
+
 from .models import OtpChallenge
 from .otp import CODE_LIFETIME, RESEND_AFTER_SECONDS
 from .tokens import Session
+
+
+class LogInSerializer(serializers.Serializer):
+    """Everyone signs in the same way: mobile number and password."""
+
+    phone = PhoneField()
+    password = serializers.CharField(max_length=128, trim_whitespace=False, write_only=True)
 
 
 class VerificationSerializer(serializers.Serializer):

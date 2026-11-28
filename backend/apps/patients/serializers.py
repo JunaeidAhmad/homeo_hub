@@ -30,11 +30,6 @@ class VerifySerializer(serializers.Serializer):
     code = serializers.CharField(max_length=12)
 
 
-class LogInSerializer(serializers.Serializer):
-    phone = PhoneField()
-    password = _password_field()
-
-
 class ForgotPasswordSerializer(serializers.Serializer):
     phone = PhoneField()
 

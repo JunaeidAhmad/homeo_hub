@@ -39,12 +39,12 @@ class AdminShopSerializer(serializers.ModelSerializer):
 
 class AdminShopStaffSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
-    username = serializers.CharField(source="user.username", read_only=True)
+    phone = serializers.CharField(source="user.username", read_only=True)
     full_name = serializers.CharField(source="user.first_name", read_only=True)
 
     class Meta:
         model = ShopStaff
-        fields = ["id", "user_id", "username", "full_name", "role", "created_at"]
+        fields = ["id", "user_id", "phone", "full_name", "role", "created_at"]
         read_only_fields = fields
 
 
@@ -54,11 +54,12 @@ class AdminShopStaffInputSerializer(serializers.Serializer):
 
 
 class AdminShopStaffCandidateSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(source="username", read_only=True)
     full_name = serializers.CharField(source="first_name", read_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "username", "full_name"]
+        fields = ["id", "phone", "full_name"]
         read_only_fields = fields
 
 

@@ -38,7 +38,7 @@ Every patient-facing requirement applies to both the web app and the mobile app.
 |---|---|
 | D-01 | Sign up: name, phone, password, qualifications, registration number, specialities, certificate uploads, proposed fee |
 | D-02 | See application status (pending / approved / rejected with reason); resubmit after rejection |
-| D-03 | After approval: sign in with doctor ID + password |
+| D-03 | After approval: sign in with mobile number + password |
 | D-04 | Dashboard: my queue by status, today's appointments, follow-ups due |
 | D-05 | Open a consultation: concerns, patient profile, full past history with HomeoHub |
 | D-06 | Send a questionnaire built from concern-based templates + custom questions |
@@ -53,7 +53,7 @@ Every patient-facing requirement applies to both the web app and the mobile app.
 
 | ID | Requirement |
 |---|---|
-| A-01 | Sign in with username + password + 2FA |
+| A-01 | Sign in with mobile number + password |
 | A-02 | Doctor approvals queue: review application and documents → approve (doctor ID issued, fee confirmed) or reject with reason; suspend / reactivate doctors |
 | A-03 | Assignment queue: unassigned doctor consultations → assign or reassign an approved doctor (sees each doctor's current load) |
 | A-04 | Manage patients (view, block/unblock) |
@@ -119,7 +119,7 @@ sequenceDiagram
         M->>A: POST /api/v1/admin/doctor-applications/{id}/approve/ {fee}
         A->>A: issue doctor ID HH-DR-0007, status APPROVED, add DOCTOR role
         A-->>D: SMS: approved, your doctor ID is HH-DR-0007
-        D->>W: sign in with doctor ID, full doctor area
+        D->>W: sign in with mobile number, full doctor area
     else rejected
         M->>A: POST /api/v1/admin/doctor-applications/{id}/reject/ {reason}
         A-->>D: SMS: not approved, reason, can resubmit
@@ -614,8 +614,8 @@ All paths below are shown in full, under `/api/v1/`.
 | POST | `/api/v1/auth/doctor/signup/` | public |
 | POST | `/api/v1/auth/otp/verify/` · `/api/v1/auth/otp/resend/` | public |
 | POST | `/api/v1/auth/patient/login/` | public |
-| POST | `/api/v1/auth/doctor/login/` (doctor ID, or phone while pending) | public |
-| POST | `/api/v1/auth/staff/login/` · `/api/v1/auth/staff/2fa/` | public |
+| POST | `/api/v1/auth/doctor/login/` (mobile number + password) | public |
+| POST | `/api/v1/auth/staff/login/` | public |
 | POST | `/api/v1/auth/refresh/` · `/api/v1/auth/logout/` | any |
 | POST | `/api/v1/auth/password/forgot/` · `/api/v1/auth/password/reset/` · `/api/v1/auth/password/change/` | any |
 | GET/PATCH | `/api/v1/me/` (incl. preferred language) | any |

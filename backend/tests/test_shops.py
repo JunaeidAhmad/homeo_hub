@@ -12,7 +12,7 @@ from apps.remedies.models import Remedy
 from apps.shops.models import ShopRemedy
 from apps.staff import services as staff
 from apps.staff.roles import Role
-from tests.auth_helpers import PASSWORD, WEB, error_code, verified_patient
+from tests.auth_helpers import PASSWORD, WEB, error_code, staff_phone, verified_patient
 
 pytestmark = pytest.mark.django_db
 
@@ -24,12 +24,12 @@ CANDIDATES = "/api/v1/admin/shop-staff-candidates/"
 def staff_client(username: str, role: Role) -> tuple[APIClient, Any]:
     staff.seed_roles()
     user = staff.create_staff(
-        username=username, full_name=username, password=PASSWORD, roles=[role]
+        phone=staff_phone(username), full_name=username, password=PASSWORD, roles=[role]
     )
     client = APIClient()
     token = client.post(
         "/api/v1/auth/staff/login/",
-        {"username": username, "password": PASSWORD},
+        {"phone": staff_phone(username), "password": PASSWORD},
         format="json",
         headers=WEB,
     ).json()["access_token"]
@@ -121,7 +121,7 @@ def test_shop_owner_sees_only_own_shop_and_cannot_create_or_verify(location):
     )
 
     candidates = admin_client.get(CANDIDATES).json()
-    assert {c["username"] for c in candidates} == {"owner_a", "owner_b"}
+    assert {c["phone"] for c in candidates} == {staff_phone("owner_a"), staff_phone("owner_b")}
 
     remedy = make_remedy()
     listing_b = owner_b_client.post(

@@ -13,7 +13,7 @@ from apps.remedies.models import Remedy
 from apps.shops import services as shops
 from apps.staff import services as staff
 from apps.staff.roles import Role
-from tests.auth_helpers import PASSWORD, WEB, error_code, verified_patient
+from tests.auth_helpers import PASSWORD, WEB, error_code, staff_phone, verified_patient
 
 pytestmark = pytest.mark.django_db
 
@@ -22,11 +22,13 @@ ADMIN_ORDERS = "/api/v1/admin/orders/"
 
 def staff_client(username: str, role: Role) -> APIClient:
     staff.seed_roles()
-    staff.create_staff(username=username, full_name=username, password=PASSWORD, roles=[role])
+    staff.create_staff(
+        phone=staff_phone(username), full_name=username, password=PASSWORD, roles=[role]
+    )
     client = APIClient()
     token = client.post(
         "/api/v1/auth/staff/login/",
-        {"username": username, "password": PASSWORD},
+        {"phone": staff_phone(username), "password": PASSWORD},
         format="json",
         headers=WEB,
     ).json()["access_token"]

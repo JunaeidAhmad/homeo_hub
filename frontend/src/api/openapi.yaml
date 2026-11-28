@@ -3301,7 +3301,7 @@ paths:
   /api/v1/admin/staff/:
     get:
       operationId: admin_staff_list
-      description: Staff accounts, searchable by name or username.
+      description: Staff accounts, searchable by name or mobile number.
       parameters:
       - name: ordering
         required: false
@@ -3340,7 +3340,7 @@ paths:
           description: ''
     post:
       operationId: admin_staff_create
-      description: Staff accounts, searchable by name or username.
+      description: Staff accounts, searchable by name or mobile number.
       tags:
       - admin
       requestBody:
@@ -3473,52 +3473,6 @@ paths:
                 $ref: '#/components/schemas/Error'
           description: ''
         '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/v1/admin/staff/{id}/reset-2fa/:
-    post:
-      operationId: admin_staff_reset_2fa
-      description: |-
-        The base of every view under ``/api/v1/admin/`` (list it before a generic view)::
-
-        class RemedyList(AdminView, ListCreateAPIView):
-            required_permissions = {"GET": Perm.MANAGE_REMEDIES, "POST": Perm.MANAGE_REMEDIES}
-
-        A value in ``required_permissions`` may be a single ``Perm``, a ``tuple[Perm, ...]``
-        (any one of them grants access), or ``ANY_STAFF``.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - admin
-      security:
-      - accessToken: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Staff'
-          description: ''
-        '404':
           content:
             application/json:
               schema:
@@ -3800,7 +3754,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DoctorLogInRequest'
+              $ref: '#/components/schemas/LogInRequest'
         required: true
       responses:
         '200':
@@ -4241,14 +4195,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StaffLogInRequest'
+              $ref: '#/components/schemas/LogInRequest'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StaffLogInResponse'
+                $ref: '#/components/schemas/Session'
           description: ''
         '400':
           content:
@@ -4307,102 +4261,6 @@ paths:
                 $ref: '#/components/schemas/Session'
           description: ''
         '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/v1/auth/staff/totp/setup/:
-    post:
-      operationId: auth_staff_totp_setup
-      description: Base for endpoints used before signing in.
-      parameters:
-      - in: header
-        name: X-Client
-        schema:
-          type: string
-          enum:
-          - web
-        required: true
-      tags:
-      - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StaffTotpSetupRequestRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StaffTotpSetupResponse'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-  /api/v1/auth/staff/totp/verify/:
-    post:
-      operationId: auth_staff_totp_verify
-      description: Base for endpoints used before signing in.
-      parameters:
-      - in: header
-        name: X-Client
-        schema:
-          type: string
-          enum:
-          - web
-        required: true
-      tags:
-      - auth
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StaffTotpVerifyRequestRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StaffTotpSession'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: ''
-        '429':
           content:
             application/json:
               schema:
@@ -7693,11 +7551,9 @@ components:
         id:
           type: integer
           readOnly: true
-        username:
+        phone:
           type: string
           readOnly: true
-          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-            only.
         full_name:
           type: string
           readOnly: true
@@ -7711,9 +7567,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RoleEnum'
-          readOnly: true
-        totp_enabled:
-          type: boolean
           readOnly: true
         last_login:
           type: string
@@ -7736,10 +7589,9 @@ components:
       - is_active
       - last_login
       - permissions
+      - phone
       - roles
       - shops
-      - totp_enabled
-      - username
     AdminMeShop:
       type: object
       properties:
@@ -8616,7 +8468,7 @@ components:
         user_id:
           type: integer
           readOnly: true
-        username:
+        phone:
           type: string
           readOnly: true
         full_name:
@@ -8634,27 +8486,25 @@ components:
       - created_at
       - full_name
       - id
+      - phone
       - role
       - user_id
-      - username
     AdminShopStaffCandidate:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        username:
+        phone:
           type: string
           readOnly: true
-          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-            only.
         full_name:
           type: string
           readOnly: true
       required:
       - full_name
       - id
-      - username
+      - phone
     AdminShopStaffInputRequest:
       type: object
       properties:
@@ -9687,21 +9537,6 @@ components:
       - id
       - status
       - submitted_at
-    DoctorLogInRequest:
-      type: object
-      properties:
-        login:
-          type: string
-          minLength: 1
-          maxLength: 80
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          maxLength: 128
-      required:
-      - login
-      - password
     DoctorMe:
       type: object
       properties:
@@ -10331,6 +10166,7 @@ components:
       - remedy_count
     LogInRequest:
       type: object
+      description: 'Everyone signs in the same way: mobile number and password.'
       properties:
         phone:
           type: string
@@ -12990,11 +12826,9 @@ components:
         id:
           type: integer
           readOnly: true
-        username:
+        phone:
           type: string
           readOnly: true
-          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-            only.
         full_name:
           type: string
           readOnly: true
@@ -13009,9 +12843,6 @@ components:
           items:
             $ref: '#/components/schemas/RoleEnum'
           readOnly: true
-        totp_enabled:
-          type: boolean
-          readOnly: true
         last_login:
           type: string
           format: date-time
@@ -13022,17 +12853,15 @@ components:
       - id
       - is_active
       - last_login
+      - phone
       - roles
-      - totp_enabled
-      - username
     StaffCreateRequest:
       type: object
       properties:
-        username:
+        phone:
           type: string
           minLength: 1
           maxLength: 30
-          pattern: ^[A-Za-z0-9._-]{3,30}$
         full_name:
           type: string
           minLength: 1
@@ -13049,97 +12878,8 @@ components:
       required:
       - full_name
       - password
+      - phone
       - roles
-      - username
-    StaffLogInRequest:
-      type: object
-      properties:
-        username:
-          type: string
-          minLength: 1
-          maxLength: 150
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-          maxLength: 128
-      required:
-      - password
-      - username
-    StaffLogInResponse:
-      oneOf:
-      - $ref: '#/components/schemas/Session'
-      - $ref: '#/components/schemas/StaffTotpChallenge'
-    StaffTotpChallenge:
-      type: object
-      properties:
-        totp_required:
-          type: boolean
-          default: true
-        setup_required:
-          type: boolean
-        challenge_id:
-          type: string
-      required:
-      - challenge_id
-      - setup_required
-    StaffTotpSession:
-      type: object
-      properties:
-        access_token:
-          type: string
-        expires_in:
-          type: integer
-        user_type:
-          type: string
-        recovery_codes:
-          type: array
-          items:
-            type: string
-          nullable: true
-      required:
-      - access_token
-      - expires_in
-      - user_type
-    StaffTotpSetupRequestRequest:
-      type: object
-      properties:
-        challenge_id:
-          type: string
-          minLength: 1
-          maxLength: 200
-      required:
-      - challenge_id
-    StaffTotpSetupResponse:
-      type: object
-      properties:
-        secret:
-          type: string
-        otpauth_uri:
-          type: string
-        qr_svg:
-          type: string
-      required:
-      - otpauth_uri
-      - qr_svg
-      - secret
-    StaffTotpVerifyRequestRequest:
-      type: object
-      properties:
-        challenge_id:
-          type: string
-          minLength: 1
-          maxLength: 200
-        code:
-          type: string
-          default: ''
-          maxLength: 16
-        recovery_code:
-          type: string
-          default: ''
-          maxLength: 32
-      required:
-      - challenge_id
     ThermalPreferenceEnum:
       enum:
       - CHILLY

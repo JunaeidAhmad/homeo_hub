@@ -32,8 +32,8 @@ HomeoHub is a homeopathy care platform with two care paths for patients:
 |---|---|---|
 | **Guest** | Web / mobile | — (can browse illnesses and remedies) |
 | **Patient** | Web (`/`) and mobile app | Phone + password |
-| **Doctor** | Web (`/doctor`) | Doctor ID + password. Doctors sign up themselves; they can only use the doctor area **after an admin approves them**, at which point the doctor ID is issued |
-| **Staff** (admin, case manager, remedy manager, illness manager, fulfilment, finance, support) | Web (`/admin`) | Username + password + 2FA |
+| **Doctor** | Web (`/doctor`) | Mobile number + password. Doctors sign up themselves; they can only use the doctor area **after an admin approves them**, at which point the doctor ID is issued |
+| **Staff** (admin, case manager, remedy manager, illness manager, fulfilment, finance, support) | Web (`/admin`) | Mobile number + password |
 | **Payment gateway** (Mock → SSLCommerz) | External | Server-to-server |
 | **SMS gateway** | External | Server-to-server |
 | **Push service** (Firebase Cloud Messaging) | External | Server-to-server |
@@ -230,7 +230,7 @@ flowchart LR
 |---|---|---|
 | Backend | **Python 3.12, Django 5.2 LTS + Django REST Framework** | Team already ships doctors-hub on it; built-in auth, groups/permissions (RBAC), migrations, admin tooling; reuse of proven code |
 | API docs / contract | **drf-spectacular** (OpenAPI 3) → generated TypeScript client (web) and Dart client (mobile) | One contract, two typed front-ends |
-| Auth | **djangorestframework-simplejwt** (rotation + blacklist), Argon2 password hasher, `django-otp` for staff TOTP | Same as doctors-hub, plus stronger hashing and 2FA |
+| Auth | **djangorestframework-simplejwt** (rotation + blacklist), Argon2 password hasher | Same as doctors-hub, plus stronger hashing |
 | Filtering / search | **django-filter** + `django.contrib.postgres` (`SearchVector`, `TrigramSimilarity`) | Keyword search on every list without a separate engine |
 | Background jobs | **Celery 5 + Celery Beat**, Redis broker | Retries, scheduled reminders, reconciliation |
 | Realtime | **Django Channels** + `channels-redis` | Notifications, appointment and call events |
@@ -255,8 +255,8 @@ flowchart LR
 | User type | Identifier | Factors | Notes |
 |---|---|---|---|
 | Patient | Phone number (E.164, `+8801XXXXXXXXX`) | Password; OTP at sign-up and password reset | Phone must be verified before checkout or consulting |
-| Doctor | Doctor ID (e.g. `HH-DR-0007`) | Password; 2FA recommended | Signs up with phone + password + credentials; can sign in only after approval; doctor ID sent by SMS on approval |
-| Staff | Username | Password + TOTP 2FA (required) | Created by Super Admin |
+| Doctor | Mobile number | Password | Signs up with phone + password + credentials; can sign in only after approval; doctor ID sent by SMS on approval |
+| Staff | Mobile number | Password | Created by Super Admin |
 
 - Access token: JWT, 15 min, carries `user_id`, `user_type`, `perm_version`.
 - Refresh token: 30 days (patients) / 12 h (doctor, staff), rotated on every use, old ones blacklisted.

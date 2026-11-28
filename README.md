@@ -84,20 +84,21 @@ CI (`api-client` workflow) fails if the committed client is out of date.
 
 ## Staff accounts and roles
 
-Staff sign in at `/admin` with a username and password. Create the first super admin from the API's machine
+Staff sign in at `/admin` with a mobile number and password. Create the first super admin from the API's machine
 (it asks for the password); prefix with `USE_NEON=true` to create it in Neon:
 
 ```bash
-cd backend && .venv/bin/python manage.py create_staff yourname --name "Your Name"
+cd backend && .venv/bin/python manage.py create_staff 01712345678 --name "Your Name"
 ```
 
+- Patients, doctors and staff all sign in with a mobile number and password. For a staff account made before that,
+  give it a number with `manage.py set_staff_phone <old sign-in name> <mobile number>`.
 - Roles are Django groups; what each may do is the table in `backend/apps/staff/roles.py`.
   `manage.py seed_roles` applies it (setup and every deploy run it). A super admin creates staff, changes
   roles and deactivates accounts at `/admin/staff`.
 - Every view under `/api/v1/admin/` extends `AdminView` and declares `required_permissions` per method; anything
   undeclared is refused. The admin menu hides sections from roles without them, but the API is what enforces it.
-- A staff session ends 12 hours after sign-in. Staff and patients have separate cookies. Staff also enter a
-  code from an authenticator app (`STAFF_TOTP_REQUIRED`).
+- A staff session ends 12 hours after sign-in. Staff and patients have separate cookies.
 
 ## Remedies and pictures
 
@@ -202,7 +203,7 @@ the Blueprint:
 | Environment | `PYTHON_VERSION` (`3.12.8`), `SECRET_KEY` (32+ random characters), `DATABASE_URL`, `REDIS_URL` (as above), `ALLOWED_HOSTS` (the service's host), `CORS_ALLOWED_ORIGINS`, `PROXY_SHARED_SECRET` |
 
 Create the first staff account from your machine:
-`cd backend && USE_NEON=true .venv/bin/python manage.py create_staff yourname --name "Your Name"`.
+`cd backend && USE_NEON=true .venv/bin/python manage.py create_staff 01712345678 --name "Your Name"`.
 
 ### 2. Web app on Vercel
 
