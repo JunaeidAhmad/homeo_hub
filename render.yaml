@@ -44,7 +44,10 @@ services:
         generateValue: true
       - key: NUM_PROXIES
         value: "1"
-      # S3-compatible bucket for uploaded pictures; uploads are refused until set.
+      # Uploads: without a bucket they go to this service's own disk and the API serves
+      # them. On the free plan that disk is wiped on every deploy and restart. With a
+      # persistent disk (paid plan), set MEDIA_ROOT and PRIVATE_MEDIA_ROOT to folders on it.
+      # Optional S3-compatible bucket for uploaded files:
       - key: STORAGE_BUCKET
         sync: false
       - key: STORAGE_ENDPOINT_URL

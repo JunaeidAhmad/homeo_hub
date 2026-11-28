@@ -11,11 +11,13 @@ import { useMessages } from "@/i18n/provider";
 
 import { useStaffSession } from "../session";
 import { useAdminSubmit } from "../use-admin-submit";
-import { PictureField } from "./PictureField";
+import { NewPictureField, PictureField, uploadPicture } from "./PictureField";
 import { PriceField } from "./PriceField";
 
 export type Remedy = components["schemas"]["AdminRemedy"];
 export type RemedyStatus = components["schemas"]["RemedyStatusEnum"];
+/** What happened to the picture chosen while creating a remedy. */
+export type NewPicture = "none" | "added" | "failed";
 export const STATUSES: RemedyStatus[] = ["DRAFT", "ACTIVE", "ARCHIVED"];
 
 /** The long texts, each written in English and (optionally) Bangla. */
@@ -55,7 +57,7 @@ export function RemedyEditor({
   onClose,
 }: {
   remedy?: Remedy;
-  onSaved: (saved: Remedy) => void;
+  onSaved: (saved: Remedy, picture: NewPicture) => void;
   onPictureChanged: (remedy: Remedy) => void;
   onPricesSaved: (remedy: Remedy) => void;
   onClose: () => void;
@@ -64,6 +66,7 @@ export function RemedyEditor({
   const { api } = useStaffSession();
   const { pending, problems, setProblems, submit } = useAdminSubmit();
   const [values, setValues] = useState(() => startingValues(remedy));
+  const [newPicture, setNewPicture] = useState<File | null>(null);
   const statusId = useId();
 
   const bind = (name: Exclude<keyof Values, "status">) => ({
@@ -93,9 +96,18 @@ export function RemedyEditor({
               body: values,
             })
           : api.POST("/api/v1/admin/remedies/", { body: values }),
-      (saved) => {
+      async (saved) => {
         setValues(startingValues(saved));
-        onSaved(saved);
+        if (remedy || !newPicture) return onSaved(saved, "none");
+        // The remedy exists now, so its picture can be sent. If that fails the remedy
+        // stays saved and the picture can be tried again from the editor.
+        try {
+          const { data, response } = await uploadPicture(api, saved.id, newPicture);
+          if (response.ok && data) return onSaved(data, "added");
+        } catch {
+          // reported below
+        }
+        onSaved(saved, "failed");
       },
     );
   }
@@ -129,6 +141,12 @@ export function RemedyEditor({
           <div className="rounded-panel border border-line bg-surface p-4 desktop:p-6">
             <PriceField remedy={remedy} onChanged={onPricesSaved} />
           </div>
+        </div>
+      )}
+
+      {!remedy && (
+        <div className="rounded-panel border border-line bg-surface p-4 desktop:p-6">
+          <NewPictureField file={newPicture} onChange={setNewPicture} disabled={pending} />
         </div>
       )}
 
@@ -211,7 +229,9 @@ export function RemedyEditor({
           disabled={pending}
           className="min-h-13 rounded-control bg-primary px-6 font-bold text-surface disabled:opacity-60 desktop:self-start"
         >
-          {t(remedy ? "admin.staff.save" : "admin.remedy.create")}
+          {pending && newPicture && !remedy
+            ? t("admin.remedy.pictureBusy")
+            : t(remedy ? "admin.staff.save" : "admin.remedy.create")}
         </button>
       </form>
     </div>

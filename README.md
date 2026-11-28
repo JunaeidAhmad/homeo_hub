@@ -107,9 +107,12 @@ Staff with the *remedy manager* role (or admin) maintain remedies at `/admin/rem
 at `/remedies` and `/remedies/<address>`.
 
 Pictures (JPEG, PNG or WebP, up to 5 MB) are checked by content, resized to at most 1200 px and stored as WebP.
-In development they go to `backend/media/`. Deployed, they go to an S3-compatible bucket: set `STORAGE_BUCKET`
-and the other `STORAGE_*` variables in [`backend/.env.example`](backend/.env.example). Until a bucket is set,
-a deployed server refuses uploads (its disk is wiped on every deploy).
+Without a bucket, uploads stay on the API server's own disk (`backend/media/` for pictures, served by the API at
+`/media/...`; `backend/private_media/` for certificates and consultation photos, only through signed links). This
+is how the Render deploy works for now. On Render's free plan that disk is wiped on every deploy and restart, so
+uploads made there don't last: attach a persistent disk (paid plan) and point `MEDIA_ROOT` / `PRIVATE_MEDIA_ROOT`
+at it, or move to a dedicated server. For an S3-compatible bucket, set `STORAGE_BUCKET` and the other
+`STORAGE_*` variables in [`backend/.env.example`](backend/.env.example).
 
 ## Lists and keyword search
 

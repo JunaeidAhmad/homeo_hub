@@ -46,6 +46,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 STORAGES["staticfiles"] = {  # noqa: F405
     "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
 }
-# A server's own disk is wiped on every deploy: without a bucket, refuse uploads
-# rather than lose them.
-UPLOADS_ENABLED = bool(STORAGE_BUCKET)  # noqa: F405
+# Without a bucket, uploads go to the server's own disk (fine while in development). On
+# Render that disk is wiped on every deploy and restart unless a persistent disk is mounted
+# and MEDIA_ROOT / PRIVATE_MEDIA_ROOT point at it.

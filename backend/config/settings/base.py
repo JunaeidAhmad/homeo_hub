@@ -147,16 +147,19 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # Uploaded files. An S3-compatible bucket (AWS S3, Cloudflare R2, ...) when
-# STORAGE_BUCKET is set; otherwise the local media folder.
+# STORAGE_BUCKET is set; otherwise folders on the server's own disk, which this API then
+# serves itself (MEDIA_ROOT / PRIVATE_MEDIA_ROOT can point them at a mounted disk).
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = env.path("MEDIA_ROOT", default=BASE_DIR / "media")
+PRIVATE_MEDIA_ROOT = env.path("PRIVATE_MEDIA_ROOT", default=BASE_DIR / "private_media")
 STORAGE_BUCKET = env.str("STORAGE_BUCKET", default="")
+SERVE_MEDIA = not STORAGE_BUCKET
 UPLOADS_ENABLED = True
 STORAGES: dict[str, dict] = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "private": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
-        "OPTIONS": {"location": BASE_DIR / "private_media"},
+        "OPTIONS": {"location": PRIVATE_MEDIA_ROOT},
     },
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }

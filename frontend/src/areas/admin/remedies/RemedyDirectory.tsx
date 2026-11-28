@@ -136,8 +136,14 @@ export function RemedyDirectory() {
             setEditing({ remedy });
             list.retry();
           }}
-          onSaved={(saved) => {
-            const message = editing.remedy ? "admin.remedy.saved" : "admin.remedy.created";
+          onSaved={(saved, picture) => {
+            const message = editing.remedy
+              ? "admin.remedy.saved"
+              : picture === "added"
+                ? "admin.remedy.createdWithPicture"
+                : picture === "failed"
+                  ? "admin.remedy.createdPictureFailed"
+                  : "admin.remedy.created";
             setNotice(fill(t(message), { name: saved.name }));
             setEditing({ remedy: saved }); // stay, so a picture can be added
             list.retry();
